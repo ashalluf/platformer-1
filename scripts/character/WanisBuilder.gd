@@ -135,7 +135,7 @@ static func materials(outfit: Outfit) -> Dictionary:
 	var hair := MaterialLab.cloth(p["hair"], 0.74)
 	hair.rim = 0.28
 	hair.rim_tint = 0.10
-	hair.specular = 0.12
+	hair.metallic_specular = 0.12
 	hair.cull_mode = BaseMaterial3D.CULL_DISABLED
 	return {
 		"skin": MaterialLab.skin(p["skin"]),

@@ -26,7 +26,10 @@ project owner wants strict CC0, the alternative is drawing Arabic letterforms as
 geometry by hand, which is worse in every respect.
 - Anything that does not match the art direction gets modified or replaced.
 - Everything currently in the project is generated in code: procedural meshes,
-  procedural materials, code-driven animation, procedural sky.
+  procedural materials, code-driven animation, procedural sky, and **all audio**
+  — every sound is synthesised as PCM at runtime by `scripts/audio/SfxForge.gd`.
+  `docs/audio_demo.wav` is a rendered preview of that synthesis, not a source
+  asset.
 
 ## Toolchain
 | Tool | Version | Notes |

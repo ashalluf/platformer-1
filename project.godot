@@ -20,6 +20,7 @@ Gx="*res://scripts/autoload/Gx.gd"
 InputDirector="*res://scripts/autoload/InputDirector.gd"
 GraphicsDirector="*res://scripts/autoload/GraphicsDirector.gd"
 FX="*res://scripts/autoload/FXDirector.gd"
+Audio="*res://scripts/autoload/AudioDirector.gd"
 CaptureRunner="*res://scripts/autoload/CaptureRunner.gd"
 
 [debug]

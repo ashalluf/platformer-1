@@ -1,4 +1,4 @@
-class_name Sriracha extends Node3D
+class_name Sriracha extends Collectible
 ## The Sriracha bottle — the game's signature collectible.
 ##
 ## Original design: no real brand's label, logo or bird. A squat pressed-glass
@@ -23,7 +23,12 @@ var _light: OmniLight3D
 
 
 func _ready() -> void:
-	_build()
+	burst_color = palette()["sauce"]
+	burst_count = 10 if variant == Variant.NORMAL else 26
+	hitstop = 0.0 if variant == Variant.NORMAL else 0.05
+	shake = 0.0 if variant == Variant.NORMAL else 0.28
+	magnet_radius = 2.1
+	super._ready()
 	# Desync bob/spin by world position, so a trail never pulses in lockstep.
 	_t = fposmod(global_position.x * 0.7 + global_position.y * 0.3, TAU)
 
@@ -42,6 +47,22 @@ func palette() -> Dictionary:
 			return {"sauce": Color(0.86, 0.10, 0.06), "cap": Color(0.14, 0.42, 0.20),
 				"band": Color(0.96, 0.93, 0.86), "mark": Color(0.72, 0.10, 0.08),
 				"glass": Color(0.90, 0.40, 0.28)}
+
+
+func _build_visual() -> Node3D:
+	_build()
+	return _mesh
+
+
+func _on_collected(_by: Node3D) -> void:
+	match variant:
+		Variant.ICE:
+			Gx.add_ice_sriracha(1)
+		Variant.ICED_OUT:
+			Gx.find_iced_out()
+		_:
+			Gx.add_sriracha(1)
+	Audio.play_collect(global_position)
 
 
 func _build() -> void:
@@ -151,6 +172,8 @@ func _build() -> void:
 
 
 func _process(delta: float) -> void:
+	if _mesh == null:
+		return
 	_t += delta
 	_mesh.rotation.y = _t * spin_speed
 	_mesh.position.y = sin(_t * bob_speed) * bob_height

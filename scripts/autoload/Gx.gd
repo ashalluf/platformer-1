@@ -10,6 +10,8 @@ signal heat_changed(heat: float)
 signal heat_full()
 signal lives_changed(lives: int)
 signal chain_awarded(level_id: String, total: int)
+signal ice_sriracha_changed(count: int, needed: int)
+signal iced_out_found_signal(level_id: String)
 signal setting_changed(key: String)
 
 const SAVE_PATH := "user://libyan_gangstas.save"
@@ -26,6 +28,10 @@ var sriracha: int = 0
 var lives: int = 3
 var heat: float = 0.0
 var run_sriracha_since_life: int = 0
+## Ice bonus level progress. 100 of these awards a chain.
+var ice_sriracha: int = 0
+const ICE_SRIRACHA_TARGET := 100
+var current_level_id := ""
 
 # --- Persistent progression ---
 var chains: Dictionary = {}          ## level_id -> true once the chain is earned
@@ -66,6 +72,26 @@ func add_sriracha(amount: int = 1) -> void:
 	while run_sriracha_since_life >= SRIRACHA_PER_LIFE:
 		run_sriracha_since_life -= SRIRACHA_PER_LIFE
 		add_life(1)
+
+
+func add_ice_sriracha(amount: int = 1) -> void:
+	ice_sriracha = mini(ice_sriracha + amount, ICE_SRIRACHA_TARGET)
+	ice_sriracha_changed.emit(ice_sriracha, ICE_SRIRACHA_TARGET)
+	if ice_sriracha >= ICE_SRIRACHA_TARGET and current_level_id != "":
+		award_chain(current_level_id)
+
+
+func reset_ice_run() -> void:
+	ice_sriracha = 0
+	ice_sriracha_changed.emit(ice_sriracha, ICE_SRIRACHA_TARGET)
+
+
+func find_iced_out() -> void:
+	if current_level_id == "":
+		return
+	iced_out_found[current_level_id] = true
+	iced_out_found_signal.emit(current_level_id)
+	save_game()
 
 
 func spend_heat(amount: float) -> bool:

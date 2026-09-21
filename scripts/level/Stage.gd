@@ -10,6 +10,7 @@ signal checkpoint_reached(index: int)
 signal level_complete()
 
 const PLAYER_SCENE := preload("res://scenes/player/Player.tscn")
+const HUD_SCENE := preload("res://scenes/ui/HUD.tscn")
 
 @export var level_id := "greybox"
 @export var level_title := "GREYBOX"
@@ -20,6 +21,7 @@ const PLAYER_SCENE := preload("res://scenes/player/Player.tscn")
 @export var use_camera_bounds := false
 ## 0 = street, 1 = prison. Level 1 opens in prison and changes mid-level.
 @export var player_outfit := 0
+@export var show_hud := true
 
 var player: PlayerController
 var camera: GameCamera
@@ -36,10 +38,16 @@ func _ready() -> void:
 	geometry.name = "Geometry"
 	add_child(geometry)
 
+	Gx.current_level_id = level_id
 	world_env = LightingRig.build(self, _mood())
 	_build_level()
 	_spawn_camera()
 	_spawn_player(_current_spawn())
+	if show_hud:
+		var layer := CanvasLayer.new()
+		layer.name = "HUDLayer"
+		add_child(layer)
+		layer.add_child(HUD_SCENE.instantiate())
 	GraphicsDirector.apply_all()
 
 

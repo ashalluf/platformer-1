@@ -112,6 +112,31 @@ And GPU-particle tracers emitted from a marker buried under a scaled skeleton
 produced garbage transforms that rendered as bars pinned to the sky; tracers are
 now an explicit pool that owns its own placement.
 
+**Collectibles, trails and HUD.** `Collectible` separates the rule from the
+feedback: a magnet pull, a pop, a spark burst, optional hit-stop and camera
+nudge, identical for everything and escalating only in scale. Sriracha feeds the
+count and the HEAT gauge; the tuna sandwich — split baguette, tuna, harissa
+stripe, olives, egg — gives a life. `TrailBuilder` places lines, real ballistic
+jump arcs computed from the controller's own constants, shaped curves, reward
+clusters and pointing columns. The HUD is drawn, not assembled from engine
+widgets: bottle, sandwich and chain glyphs are polygons, and the HEAT gauge only
+asserts itself as it fills.
+
+**Audio exists.** `SfxForge` synthesises every sound as PCM on first use — no
+audio files ship. Footsteps are surface-aware (the collider names its own
+material by group), the Heat Dash is a darbuka hit under a noise whoosh, and
+collect sounds walk up a Hijaz scale so a Sriracha trail plays a phrase instead
+of repeating one click forty times. `AudioDirector` owns the buses, pools 24
+positional and 8 non-positional players, and drives volumes from the settings.
+`tools/audio_demo.gd` renders the whole palette to `docs/audio_demo.wav` so
+audio can be reviewed the way screenshots are.
+
+**Two more silent bugs fixed.** `StandardMaterial3D.specular` is a Godot 3
+property name — every specular tweak in the project was a no-op that also
+spammed the log. And collect bursts were rendering as large red squares. The
+engine log is now completely clean: zero errors, zero warnings, on a full
+autopilot run at high quality.
+
 **docs/ART_DIRECTION.md** is canon for World 1: visual pillars, a per-level
 colour script, shape and material rules, the depth-layer recipe, Godot settings
 with a pitfall list, and the benchmark build order.
@@ -135,16 +160,21 @@ with a pitfall list, and the benchmark build order.
 4. **The rifle has nothing to shoot.** Tracers fly and vanish; there is no
    impact, no decal, no enemy, no damage. Recoil movement tech is implemented
    but untested against real level geometry.
-5. **No audio.** Not one sound. The audio architecture does not exist.
-6. **No collectible gameplay.** The Sriracha bottle has a mesh and a glow but no
-   pickup, no HUD, no count, no trail authoring tool.
-7. **No enemies, hazards, checkpoints in a real level, or UI.**
-8. **Corner correction is implemented but untested** — the lab has the lip, but
-   no capture has driven a jump into it at the right angle.
-9. **Ice/chain/bonus systems are data-modelled in `Gx` but have no scenes.**
-10. **Performance is unprofiled** on real hardware. Software-renderer timings say
+5. **No music.** SFX and an ambience bed exist; there is no score. The Libyan /
+   North African musical identity in DESIGN.md is unbuilt.
+6. **No enemies, no hazards, no damage.** Nothing can hurt him and nothing can
+   be hurt. The rifle fires into empty air.
+7. **No menus.** No title screen, no pause, no settings, no World 1 map, no
+   chain collection screen. The HUD is the only UI.
+8. **Checkpoints are a data structure with no scene.** `Stage` tracks them;
+   nothing places or triggers them.
+9. **The Iced Out warp and ice bonus levels do not exist** beyond `Gx` counters
+   and a bottle variant.
+10. **Corner correction is implemented but untested** — the lab has the lip, but
+    no capture has driven a jump into it at the right angle.
+11. **Performance is unprofiled** on real hardware. Software-renderer timings say
     nothing about the 60 fps at 1080p target, and the benchmark scene is heavy.
-11. **Depth of field is off.** Godot's near-blur radius swallows the whole
+12. **Depth of field is off.** Godot's near-blur radius swallows the whole
     gameplay plane; foreground separation is currently done with value alone.
 
 ### Known bugs

@@ -242,6 +242,8 @@ func _update_weapon(delta: float) -> void:
 		if not grounded and velocity.y < 2.0:
 			velocity.y += recoil_lift
 		FX.shake(0.10 if grounded else 0.14, Vector2(-facing * 0.9, 0.25))
+		Audio.play_shot(rifle.muzzle.global_position)
+		Audio.play("shell", global_position, -14.0, randf_range(0.9, 1.15))
 		fired.emit()
 
 
@@ -353,6 +355,7 @@ func _try_air_jump() -> void:
 		velocity.x += move_input * jump_horizontal_kick
 		velocity.x = clampf(velocity.x, -max_run_speed * 1.45, max_run_speed * 1.45)
 	state = State.RISE
+	Audio.play("air_jump", global_position, -4.0, randf_range(0.98, 1.04))
 	air_jumped.emit(air_jumps - _air_jumps_left)
 
 
@@ -374,6 +377,7 @@ func _try_consume_jump(on_floor: bool) -> void:
 		velocity.x += move_input * jump_horizontal_kick
 		velocity.x = clampf(velocity.x, -max_run_speed * 1.45, max_run_speed * 1.45)
 	state = State.RISE
+	Audio.play("jump", global_position, -4.0, randf_range(0.97, 1.05))
 	jumped.emit(from_coyote)
 
 
@@ -417,6 +421,7 @@ func _try_dash() -> void:
 	if not is_on_floor():
 		_air_dash_used = true
 	state = State.DASH
+	Audio.play("dash_charged" if _dash_charged else "dash", global_position, -2.0)
 	dash_started.emit(_dash_charged)
 
 
@@ -457,6 +462,7 @@ func _on_land() -> void:
 	_jump_cut_armed = false
 	_set_gliding(false)
 	_glide_blend = 0.0
+	Audio.play_land(global_position, impact)
 	landed.emit(impact)
 	if impact > 0.45:
 		FX.hitstop(lerpf(0.0, 0.055, inverse_lerp(0.45, 1.0, impact)))
@@ -498,6 +504,7 @@ func _accumulate_steps(delta: float) -> void:
 	_step_distance += speed * delta
 	if _step_distance >= 1.55:
 		_step_distance = 0.0
+		Audio.play_footstep(global_position, surface_under_foot(), speed / max_run_speed)
 		footstep.emit(speed / max_run_speed)
 
 
@@ -508,10 +515,25 @@ func kill() -> void:
 		return
 	state = State.DEAD
 	velocity = Vector3.ZERO
+	Audio.play("hurt", global_position, -1.0)
+	Audio.reset_combo()
 	died.emit()
 
 
 # --- Queries used by camera, rig, HUD ---------------------------------------
+
+## Surface-aware footsteps: the collider under his feet names its own material
+## via a group, so a level can change how the ground sounds by tagging it.
+func surface_under_foot() -> String:
+	if get_slide_collision_count() == 0:
+		return "concrete"
+	var col := get_slide_collision(0).get_collider()
+	if col is Node:
+		for s: String in ["sand", "metal", "wood"]:
+			if (col as Node).is_in_group("surface_" + s):
+				return s
+	return "concrete"
+
 
 func speed_ratio() -> float:
 	return clampf(absf(velocity.x) / max_run_speed, 0.0, 1.0)

@@ -38,6 +38,7 @@ func _build_level() -> void:
 	_section_corner_and_slopes()
 	_section_dash_gap()
 	_backdrop()
+	_trails()
 
 
 ## 0. Run-up: enough flat ground to reach and read top speed.
@@ -92,6 +93,33 @@ func _section_dash_gap() -> void:
 	# Pit between them — falling here exercises the respawn path.
 	LevelKit.prop(geometry, Vector3(77.0, GROUND_Y - 8.0, -3.0), Vector3(13.0, 0.4, 4.0),
 		_pal["marker"], "PitFloorMarker")
+
+
+## Collectible trails. The lab is also where trail shapes get checked against
+## the controller: if a jump arc's bottles are not all collectable in one jump,
+## the arc maths and the physics have drifted apart.
+func _trails() -> void:
+	# Run-up: a straight line at chest height teaches "hold right".
+	TrailBuilder.line(geometry, Vector3(-30.0, GROUND_Y + 1.1, 0.0),
+		Vector3(-14.0, GROUND_Y + 1.1, 0.0), 9)
+
+	# The real jump arc, computed from the controller's own constants.
+	TrailBuilder.jump_arc(geometry, Vector3(-6.4, GROUND_Y + 1.2, 0.0), 1.0, 1.0, 9)
+
+	# Over the 5-unit gap, shaped so following it is the jump that clears it.
+	TrailBuilder.curve(geometry, Vector3(19.6, GROUND_Y + 4.2, 0.0),
+		Vector3(24.2, GROUND_Y + 4.2, 0.0), 1.7, 7)
+
+	# Reward cluster above the ramp top, off the direct line.
+	TrailBuilder.cluster(geometry, Vector3(57.0, GROUND_Y + 9.2, 0.0), 0.8, 8)
+
+	# A tuna sandwich for the dash gap — a reward for a risk, never on the path.
+	var sandwich := TunaSandwich.new()
+	geometry.add_child(sandwich)
+	sandwich.position = Vector3(77.0, GROUND_Y + 4.6, 0.0)
+
+	# And the column that points at it.
+	TrailBuilder.column(geometry, Vector3(77.0, GROUND_Y + 2.2, 0.0), 1.9, 4)
 
 
 ## Simple parallax slabs so the frame is not empty behind the gameplay layer.

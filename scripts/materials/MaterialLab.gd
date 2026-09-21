@@ -189,7 +189,7 @@ static func skin(tint := Color(0.78, 0.56, 0.38)) -> StandardMaterial3D:
 	m.rim_enabled = true
 	m.rim = 0.45
 	m.rim_tint = 0.3
-	m.specular = 0.4
+	m.metallic_specular = 0.4
 	return m
 
 
@@ -202,7 +202,7 @@ static func cloth(tint := Color(0.78, 0.22, 0.14), rough := 0.78) -> StandardMat
 	m.rim_enabled = true
 	m.rim = 0.35
 	m.rim_tint = 0.55
-	m.specular = 0.25
+	m.metallic_specular = 0.25
 	return m
 
 
