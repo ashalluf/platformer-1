@@ -57,15 +57,13 @@ func _build_visual() -> Node3D:
 
 	var fill := MeshInstance3D.new()
 	fill.name = "Filling"
-	var fill_mesh := BoxMesh.new()
-	fill_mesh.size = Vector3(LENGTH * 0.86, 0.040, 0.086)
+	var fill_mesh := LevelKit.chamfer_mesh(Vector3(LENGTH * 0.86, 0.040, 0.086))
 	fill.mesh = fill_mesh
 	fill.material_override = tuna
 	fill.position = Vector3(0.0, 0.040, 0.0)
 	root.add_child(fill)
 
-	var crumb_mesh := BoxMesh.new()
-	crumb_mesh.size = Vector3(LENGTH * 0.90, 0.018, 0.072)
+	var crumb_mesh := LevelKit.chamfer_mesh(Vector3(LENGTH * 0.90, 0.018, 0.072))
 	var cr := MeshInstance3D.new()
 	cr.name = "Crumb"
 	cr.mesh = crumb_mesh
@@ -74,8 +72,7 @@ func _build_visual() -> Node3D:
 	root.add_child(cr)
 
 	# Harissa stripe — the emissive line that makes it read at distance.
-	var stripe := BoxMesh.new()
-	stripe.size = Vector3(LENGTH * 0.80, 0.012, 0.030)
+	var stripe := LevelKit.chamfer_mesh(Vector3(LENGTH * 0.80, 0.012, 0.030))
 	var st := MeshInstance3D.new()
 	st.name = "Harissa"
 	st.mesh = stripe

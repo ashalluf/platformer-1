@@ -57,8 +57,7 @@ func _build_chart() -> void:
 		s.position = Vector3(x, 3.4, 0.0)
 		add_child(s)
 
-		var box := BoxMesh.new()
-		box.size = Vector3(2.1, 2.1, 2.1)
+		var box := LevelKit.chamfer_mesh(Vector3(2.1, 2.1, 2.1))
 		var b := MeshInstance3D.new()
 		b.name = "Box_" + label
 		b.mesh = box
@@ -68,8 +67,7 @@ func _build_chart() -> void:
 		add_child(b)
 
 	# Ground plane so the weathering has a datum to run up from.
-	var ground := BoxMesh.new()
-	ground.size = Vector3(40.0, 0.4, 14.0)
+	var ground := LevelKit.chamfer_mesh(Vector3(40.0, 0.4, 14.0))
 	var g := MeshInstance3D.new()
 	g.name = "Ground"
 	g.mesh = ground
@@ -78,8 +76,7 @@ func _build_chart() -> void:
 	add_child(g)
 
 	# Backwall catches the rim light and gives the spheres something to sit against.
-	var wall := BoxMesh.new()
-	wall.size = Vector3(40.0, 16.0, 0.6)
+	var wall := LevelKit.chamfer_mesh(Vector3(40.0, 16.0, 0.6))
 	var wl := MeshInstance3D.new()
 	wl.name = "BackWall"
 	wl.mesh = wall

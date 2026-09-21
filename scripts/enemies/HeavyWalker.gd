@@ -68,8 +68,7 @@ func _build() -> Node3D:
 		_legs.append(leg)
 
 		var thigh := MeshInstance3D.new()
-		var tm := BoxMesh.new()
-		tm.size = Vector3(0.34, 0.66, 0.32)
+		var tm := LevelKit.chamfer_mesh(Vector3(0.34, 0.66, 0.32))
 		thigh.mesh = tm
 		thigh.material_override = joint
 		thigh.position = Vector3(0, -0.33, 0)
@@ -82,16 +81,14 @@ func _build() -> Node3D:
 		_shins.append(shin)
 
 		var shin_mesh := MeshInstance3D.new()
-		var sm := BoxMesh.new()
-		sm.size = Vector3(0.28, 0.58, 0.26)
+		var sm := LevelKit.chamfer_mesh(Vector3(0.28, 0.58, 0.26))
 		shin_mesh.mesh = sm
 		shin_mesh.material_override = joint
 		shin_mesh.position = Vector3(0, -0.29, 0)
 		shin.add_child(shin_mesh)
 
 		var foot := MeshInstance3D.new()
-		var fm := BoxMesh.new()
-		fm.size = Vector3(0.66, 0.20, 0.38)
+		var fm := LevelKit.chamfer_mesh(Vector3(0.66, 0.20, 0.38))
 		foot.mesh = fm
 		foot.material_override = plate
 		foot.position = Vector3(0.07, -0.62, 0)
@@ -104,24 +101,21 @@ func _build() -> Node3D:
 
 	# A hip block, so the legs hang off something instead of out of a box.
 	var hips := MeshInstance3D.new()
-	var hpm := BoxMesh.new()
-	hpm.size = Vector3(0.70, 0.34, 1.16)
+	var hpm := LevelKit.chamfer_mesh(Vector3(0.70, 0.34, 1.16))
 	hips.mesh = hpm
 	hips.material_override = joint
 	hips.position = Vector3(0.0, -0.46, 0.0)
 	_chassis.add_child(hips)
 
 	var hull := MeshInstance3D.new()
-	var hm := BoxMesh.new()
-	hm.size = Vector3(1.22, 0.78, 1.00)
+	var hm := LevelKit.chamfer_mesh(Vector3(1.22, 0.78, 1.00))
 	hull.mesh = hm
 	hull.material_override = plate
 	_chassis.add_child(hull)
 
 	# A hazard chevron band along the top, the only saturated thing on it.
 	var band := MeshInstance3D.new()
-	var bm := BoxMesh.new()
-	bm.size = Vector3(1.10, 0.14, 1.02)
+	var bm := LevelKit.chamfer_mesh(Vector3(1.10, 0.14, 1.02))
 	band.mesh = bm
 	band.material_override = hazard
 	band.position = Vector3(0, 0.40, 0)
@@ -134,16 +128,14 @@ func _build() -> Node3D:
 	_shield.position = Vector3(-0.66, -0.06, 0)
 	_chassis.add_child(_shield)
 	var sp := MeshInstance3D.new()
-	var spm := BoxMesh.new()
-	spm.size = Vector3(0.18, 1.26, 1.10)
+	var spm := LevelKit.chamfer_mesh(Vector3(0.18, 1.26, 1.10))
 	sp.mesh = spm
 	sp.material_override = plate
 	sp.rotation_degrees = Vector3(0, 0, -15.0)
 	_shield.add_child(sp)
 	for i in 3:
 		var rib := MeshInstance3D.new()
-		var rm := BoxMesh.new()
-		rm.size = Vector3(0.07, 1.18, 0.09)
+		var rm := LevelKit.chamfer_mesh(Vector3(0.07, 1.18, 0.09))
 		rib.mesh = rm
 		rib.material_override = joint
 		rib.position = Vector3(-0.11, 0.0, -0.36 + i * 0.36)
@@ -153,16 +145,14 @@ func _build() -> Node3D:
 	# Sensor head on the back of the hull — the unarmoured part, and the part
 	# that tells you what it is about to do.
 	var mast := MeshInstance3D.new()
-	var mm := BoxMesh.new()
-	mm.size = Vector3(0.14, 0.34, 0.14)
+	var mm := LevelKit.chamfer_mesh(Vector3(0.14, 0.34, 0.14))
 	mast.mesh = mm
 	mast.material_override = joint
 	mast.position = Vector3(0.44, 0.38, 0)
 	_chassis.add_child(mast)
 
 	var head := MeshInstance3D.new()
-	var hd := BoxMesh.new()
-	hd.size = Vector3(0.40, 0.30, 0.46)
+	var hd := LevelKit.chamfer_mesh(Vector3(0.40, 0.30, 0.46))
 	head.mesh = hd
 	head.material_override = joint
 	head.position = Vector3(0.44, 0.62, 0)

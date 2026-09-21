@@ -54,10 +54,10 @@ static func _mi(parent: Node3D, name_: String, mesh: Mesh, mat: Material,
 	return mi
 
 
-static func _box(size: Vector3) -> BoxMesh:
-	var m := BoxMesh.new()
-	m.size = size
-	return m
+## Chamfered, like everything else. A hard ninety-degree edge is the loudest
+## blockout signal there is, and PropKit builds most of the world.
+static func _box(size: Vector3) -> Mesh:
+	return LevelKit.chamfer_mesh(size)
 
 
 static func _cyl(radius: float, height: float, sides := 24, top_radius := -1.0) -> CylinderMesh:

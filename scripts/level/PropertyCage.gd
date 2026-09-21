@@ -58,8 +58,7 @@ func _build() -> void:
 		bm.position = Vector3(0.22 + i * 0.49, 1.7, 0.0)
 		_door.add_child(bm)
 	for i in 2:
-		var rail := BoxMesh.new()
-		rail.size = Vector3(3.9, 0.10, 0.10)
+		var rail := LevelKit.chamfer_mesh(Vector3(3.9, 0.10, 0.10))
 		var rm := MeshInstance3D.new()
 		rm.mesh = rail
 		rm.material_override = bars

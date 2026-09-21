@@ -91,8 +91,7 @@ func _build() -> Node3D:
 	# the thing that says "machine, and it means it".
 	for i in 8:
 		var a := TAU * float(i) / 8.0
-		var tick := BoxMesh.new()
-		tick.size = Vector3(0.05, 0.085, 0.085)
+		var tick := LevelKit.chamfer_mesh(Vector3(0.05, 0.085, 0.085))
 		var tm := MeshInstance3D.new()
 		tm.mesh = tick
 		tm.material_override = shell
@@ -107,8 +106,7 @@ func _build() -> Node3D:
 	root.add_child(_rotor)
 	for i in 4:
 		var a := TAU * float(i) / 4.0
-		var blade := BoxMesh.new()
-		blade.size = Vector3(0.40, 0.014, 0.07)
+		var blade := LevelKit.chamfer_mesh(Vector3(0.40, 0.014, 0.07))
 		var bl := MeshInstance3D.new()
 		bl.mesh = blade
 		bl.material_override = shell

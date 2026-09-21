@@ -10,7 +10,10 @@ signal transition_covered()
 signal bonus_finished(earned_chain: bool)
 
 const WIPE_SHADER := preload("res://shaders/frost_wipe.gdshader")
-const ICE_LEVELS := ["res://levels/ice/IceBonus01.tscn"]
+const ICE_LEVELS := [
+	"res://levels/ice/IceBonus01.tscn",
+	"res://levels/ice/IceBonus02.tscn",
+]
 
 var _rect: ColorRect
 var _mat: ShaderMaterial

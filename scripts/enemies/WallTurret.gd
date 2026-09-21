@@ -57,8 +57,7 @@ func _build() -> Node3D:
 	# Wall bracket: it has to look bolted to something.
 	var plate := MeshInstance3D.new()
 	plate.name = "Bracket"
-	var pb := BoxMesh.new()
-	pb.size = Vector3(0.22, 0.78, 0.78)
+	var pb := LevelKit.chamfer_mesh(Vector3(0.22, 0.78, 0.78))
 	plate.mesh = pb
 	plate.material_override = housing
 	plate.position = Vector3(0.30, 0.0, 0.0)
