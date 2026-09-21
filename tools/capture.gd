@@ -28,6 +28,8 @@ class_name CaptureSession extends Node
 ##   --camera=x,y,z    lock the camera to a fixed point (beauty shots)
 ##   --look=x,y,z      point a locked camera at a target
 ##   --fov=F           override camera FOV
+##   --finish-at=N     emit the stage's level_complete at frame N, so the
+##                     result card can be shot without playing the level
 ##   --pause-at=N      stop simulating input after frame N (hold the pose)
 ##   --cheat=ice       award the remaining ICE SRIRACHAS at frame 120, to shoot
 ##                     and verify the chain reward without a perfect run
@@ -44,6 +46,7 @@ const DEFAULTS := {
 	"quality": 2,
 	"out": "captures/run",
 	"pause-at": -1,
+	"finish-at": -1,
 	"fov": -1.0,
 }
 
@@ -190,6 +193,10 @@ func _run(stage: Node) -> void:
 		if player:
 			player.accept_player_input = false
 			player.set_scripted_input(axis, jump_held)
+
+		if int(opts.get("finish-at", -1)) == frame and stage.has_signal("level_complete"):
+			print("  finish: emitting level_complete at frame %d" % frame)
+			stage.level_complete.emit()
 
 		if frame == 120 and str(opts.get("cheat", "")) == "ice":
 			Gx.add_ice_sriracha(Gx.ICE_SRIRACHA_TARGET - Gx.ice_sriracha)

@@ -14,7 +14,7 @@ signal collected(by: Node3D)
 @export var hitstop := 0.0
 @export var shake := 0.0
 @export var burst_color := Color(1.0, 0.36, 0.20)
-@export var burst_count := 14
+@export var burst_count := 10
 @export var pop_scale := 1.55
 
 var _taken := false
@@ -99,7 +99,7 @@ func _pop_and_free() -> void:
 func _burst() -> void:
 	var p := GPUParticles3D.new()
 	p.amount = burst_count
-	p.lifetime = 0.34
+	p.lifetime = 0.26
 	p.one_shot = true
 	p.explosiveness = 1.0
 	p.local_coords = false
@@ -110,8 +110,11 @@ func _burst() -> void:
 	pm.emission_sphere_radius = 0.08
 	pm.direction = Vector3(0, 1, 0)
 	pm.spread = 180.0
-	pm.initial_velocity_min = 3.0
-	pm.initial_velocity_max = 7.5
+	# The old 3–7.5 threw the sparks half a metre in every direction, and
+	# additive sparks on an expanding shell pile up at its rim: the burst read
+	# as a white ring with a hole in it, which is not a spark burst.
+	pm.initial_velocity_min = 1.5
+	pm.initial_velocity_max = 3.4
 	pm.gravity = Vector3(0, -7.0, 0)
 	pm.damping_min = 8.0
 	pm.damping_max = 16.0
@@ -126,11 +129,7 @@ func _burst() -> void:
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-	mat.albedo_color = Color(burst_color.r, burst_color.g, burst_color.b, 0.85)
-	# Stretched along travel so a spark reads as a streak, not a confetto.
-	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
-	mat.particles_anim_h_frames = 1
-	mat.particles_anim_v_frames = 1
+	mat.albedo_color = Color(burst_color.r, burst_color.g, burst_color.b, 0.55)
 	mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
 	mat.disable_receive_shadows = true
 	quad.material = mat

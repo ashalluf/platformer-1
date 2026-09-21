@@ -174,9 +174,12 @@ func _build() -> void:
 	_light = OmniLight3D.new()
 	_light.name = "Glow"
 	_light.light_color = p["sauce"]
-	_light.light_energy = 1.6 if variant == Variant.NORMAL else 2.4
+	_light.light_energy = 1.1 if variant == Variant.NORMAL else 1.8
 	_light.omni_range = 2.2
-	_light.light_volumetric_fog_energy = 2.0
+	# The level went a stop and a half darker in the colour-script pass, so
+	# every accent light in it is now relatively brighter. This was blowing a
+	# glowing ball around each bottle.
+	_light.light_volumetric_fog_energy = 0.7
 	_light.shadow_enabled = false
 	_light.position = Vector3(0, 0.16, 0)
 	add_child(_light)

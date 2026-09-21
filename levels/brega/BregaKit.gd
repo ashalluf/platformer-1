@@ -21,14 +21,14 @@ static func palette() -> Dictionary:
 		"rail": MaterialLab.rusted_metal(Color(0.40, 0.235, 0.145), 0.75),
 		"rebar": MaterialLab.rusted_metal(Color(0.757, 0.396, 0.165), 1.0),
 		"rust": MaterialLab.rusted_metal(Color(0.243, 0.133, 0.090), 1.0),
-		"tank": MaterialLab.plaster(Color(0.415, 0.398, 0.366), 1.0),
+		"tank": MaterialLab.plaster(Color(0.330, 0.316, 0.292), 1.0),
 		"tank_burnt": MaterialLab.concrete(Color(0.125, 0.098, 0.086), 1.0),
 		"bund": MaterialLab.concrete(Color(0.245, 0.233, 0.210), 1.0),
 		"tower": MaterialLab.concrete(Color(0.300, 0.290, 0.274), 1.0),
 		"steel": MaterialLab.painted_metal(Color(0.055, 0.055, 0.062), 0.9),
-		"sabkha": MaterialLab.sand(Color(0.576, 0.553, 0.502)),
-		"mud": MaterialLab.concrete(Color(0.271, 0.231, 0.180), 1.0),
-		"sand": MaterialLab.sand(Color(0.867, 0.796, 0.651)),
+		"sabkha": MaterialLab.sand(Color(0.352, 0.330, 0.292)),
+		"mud": MaterialLab.concrete(Color(0.190, 0.162, 0.126), 1.0),
+		"sand": MaterialLab.sand(Color(0.560, 0.512, 0.420)),
 		"trunk": MaterialLab.plaster(Color(0.208, 0.200, 0.184), 1.0),
 		"leaf": PropKit.foliage_material(Color(0.212, 0.243, 0.180), YARD_Y, 9.0, 0.42),
 		"door": MaterialLab.painted_metal(Color(0.184, 0.365, 0.275), 0.7),
@@ -70,8 +70,11 @@ static func mood() -> LightingRig.Mood:
 	m.rim_energy = 8.0
 	m.rim_cull_mask = 2
 
-	m.hero_fill_energy = 2.5
-	m.hero_fill_color = Color(0.72, 0.78, 0.94)
+	# 2.5 of a cold light on a white robe turns him blue. He is meant to read
+	# as warm white against a cool shadow world, not as the one cold thing in
+	# a warm one.
+	m.hero_fill_energy = 1.45
+	m.hero_fill_color = Color(0.82, 0.83, 0.90)
 	m.hero_fill_angles = Vector2(-14.0, -30.0)
 
 	m.sky_top = Color(0.169, 0.227, 0.333)
@@ -193,8 +196,27 @@ static func mid_layers(parent: Node3D, mats: Dictionary, x_from: float, x_to: fl
 			"hole_mat": mats["wall"], "depth": 6.0, "open_holes": 0,
 		})
 
-	LevelKit.prop(parent, Vector3(mid, YARD_Y + 2.25, -16.0),
-		Vector3(span + 90.0, 4.5, 0.9), mats["wall"], "PerimeterWall")
+	PropKit.perimeter_wall(parent, x_from - 45.0, YARD_Y, span + 90.0, 4.5, -16.0,
+		mats["wall"], mats["joint"])
+
+	# The pole line: the same one that walks out of the benchmark frame, run
+	# the length of the level so every section has something between the yard
+	# and the horizon.
+	var tops: Array[Vector3] = []
+	for i in int(span / 13.0) + 2:
+		var px := x_from - 10.0 + i * 13.0
+		var ph := 7.2 + sin(float(i) * 1.7) * 0.5
+		LevelKit.prop(parent, Vector3(px, YARD_Y + ph * 0.5, -13.0),
+			Vector3(0.22, ph, 0.22), mats["steel"], "Pole%d" % i)
+		LevelKit.prop(parent, Vector3(px, YARD_Y + ph - 0.55, -13.0),
+			Vector3(2.3, 0.14, 0.14), mats["steel"], "Crossarm%d" % i)
+		tops.append(Vector3(px, YARD_Y + ph - 0.55, -13.0))
+	for i in tops.size() - 1:
+		for lane in 3:
+			var lift := -0.02 - lane * 0.02
+			PropKit.cable(parent, tops[i] + Vector3(-0.9 + lane * 0.9, lift, 0.0),
+				tops[i + 1] + Vector3(-0.9 + lane * 0.9, lift, 0.0),
+				0.95 + lane * 0.12, mats["dark"], 10, 0.055)
 	PropKit.razor_coil(parent, Vector3(x_from - 20.0, YARD_Y + 4.7, -16.0),
 		Vector3(x_to + 30.0, YARD_Y + 4.7, -16.0), 0.20,
 		mats["rust"], int(span / 3.0) + 10)
@@ -202,4 +224,4 @@ static func mid_layers(parent: Node3D, mats: Dictionary, x_from: float, x_to: fl
 	for i in int(span / 9.0) + 1:
 		PropKit.eucalyptus(parent, Vector3(x_from + i * 9.0 + fmod(float(i) * 3.1, 2.0),
 			YARD_Y, -21.0 - fmod(float(i) * 1.7, 3.0)),
-			8.6 + fmod(float(i) * 2.7, 3.0), mats["trunk"], mats["leaf"], i % 4 == 1, i)
+			8.6 + fmod(float(i) * 2.7, 3.0), mats["trunk"], mats["leaf"], i % 2 == 1, i)

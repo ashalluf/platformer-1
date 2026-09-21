@@ -576,6 +576,61 @@ static func lit_window(parent: Node3D, pos: Vector3, size: Vector2,
 	return root
 
 
+## A precast perimeter wall: panels between piers, a coping band along the top,
+## salt fretting at the base and dirt running off the coping. A plain box of
+## one colour is the fastest way to make the middle distance look unfinished,
+## and this is the shape that band of every frame in World 1 is made of.
+static func perimeter_wall(parent: Node3D, left_x: float, base_y: float,
+		width: float, height: float, z: float, panel_mat: Material,
+		pier_mat: Material) -> Node3D:
+	var root := Node3D.new()
+	root.name = "PerimeterWall"
+	parent.add_child(root)
+
+	_mi(root, "Panels", _box(Vector3(width, height, 0.7)), panel_mat,
+		Vector3(left_x + width * 0.5, base_y + height * 0.5, z))
+	# Coping: the lip along the top that every runoff streak starts from.
+	_mi(root, "Coping", _box(Vector3(width, 0.22, 1.0)), pier_mat,
+		Vector3(left_x + width * 0.5, base_y + height + 0.05, z))
+
+	var pitch := 4.2
+	var piers := maxi(2, int(width / pitch))
+	var pier_mm := _joint_multimesh(_box(Vector3(0.45, height + 0.3, 1.0)))
+	var pier_xf: Array[Transform3D] = []
+	for i in piers + 1:
+		pier_xf.append(Transform3D(Basis.IDENTITY,
+			Vector3(left_x + width * float(i) / float(piers),
+				base_y + (height + 0.3) * 0.5, z)))
+	_fill_multimesh(pier_mm, pier_xf)
+	_mm_node(root, "Piers", pier_mm, pier_mat)
+
+	# Runoff off the coping, one or two per bay.
+	var rng := RandomNumberGenerator.new()
+	rng.seed = int(absf(left_x) * 613.0 + width)
+	var streaks: Array[Transform3D] = []
+	for i in piers:
+		for _k in rng.randi_range(1, 2):
+			var sx := left_x + width * (float(i) + rng.randf_range(0.2, 0.8)) / float(piers)
+			var sh := rng.randf_range(height * 0.35, height * 0.85)
+			streaks.append(Transform3D(
+				Basis.IDENTITY.scaled(Vector3(rng.randf_range(0.18, 0.5), sh, 1.0)),
+				Vector3(sx, base_y + height - sh * 0.5, z + 0.36)))
+	var sm := _joint_multimesh(_unit_quad())
+	_fill_multimesh(sm, streaks)
+	_mm_node(root, "WallStreaks", sm,
+		gradient_decal(Color(0.085, 0.068, 0.055), 0.55, "streak"))
+
+	var salt := MeshInstance3D.new()
+	salt.name = "WallSalt"
+	var sq := QuadMesh.new()
+	sq.size = Vector2(width, height * 0.55)
+	salt.mesh = sq
+	salt.material_override = gradient_decal(Color(0.78, 0.755, 0.695), 0.46, "band")
+	salt.position = Vector3(left_x + width * 0.5, base_y + height * 0.275, z + 0.37)
+	root.add_child(salt)
+	return root
+
+
 ## Deep-set window with a bent louvred shutter. Placed on a rhythm by the caller.
 static func window(parent: Node3D, pos: Vector3, size: Vector2, reveal: float,
 		frame_mat: Material, dark_mat: Material, shutter_mat: Material,
@@ -818,12 +873,13 @@ static func eucalyptus(parent: Node3D, base: Vector3, height: float,
 
 		if not alive:
 			continue
-		# Two hanging strands per branch, squashed flat in Z so they read as
-		# foliage from the side rather than as beads.
-		for k in 2:
+		# Four hanging strands per branch, squashed flat in Z so they read as
+		# foliage from the side rather than as beads. Two was too few: the
+		# canopy came out as a handful of separate dark ellipses on a stick.
+		for k in 4:
 			var hang := SphereMesh.new()
-			hang.radius = height * rng.randf_range(0.030, 0.046)
-			hang.height = hang.radius * rng.randf_range(3.4, 5.2)
+			hang.radius = height * rng.randf_range(0.022, 0.036)
+			hang.height = hang.radius * rng.randf_range(3.8, 6.0)
 			hang.radial_segments = 7
 			hang.rings = 4
 			var f := _mi(root, "Strand%d_%d" % [i, k], hang, foliage_mat,
@@ -834,15 +890,19 @@ static func eucalyptus(parent: Node3D, base: Vector3, height: float,
 			f.scale = Vector3(1.0, 1.0, 0.55)
 
 	if alive:
-		# A crown mass, also elongated, sitting over the top branches.
-		var crown := SphereMesh.new()
-		crown.radius = height * 0.085
-		crown.height = height * 0.30
-		crown.radial_segments = 9
-		crown.rings = 5
-		var cm := _mi(root, "Crown", crown, foliage_mat,
-			Vector3(rng.randf_range(-0.2, 0.2), height * 0.96, 0.0))
-		cm.scale = Vector3(1.0, 1.0, 0.6)
+		# Three overlapping crown masses rather than one. A single ellipsoid on
+		# top of a stick is a lollipop; three that interpenetrate are a canopy.
+		for c in 3:
+			var crown := SphereMesh.new()
+			crown.radius = height * rng.randf_range(0.055, 0.080)
+			crown.height = crown.radius * rng.randf_range(2.6, 3.8)
+			crown.radial_segments = 9
+			crown.rings = 5
+			var cm := _mi(root, "Crown%d" % c, crown, foliage_mat,
+				Vector3(rng.randf_range(-0.5, 0.5),
+					height * rng.randf_range(0.84, 0.99),
+					rng.randf_range(-0.3, 0.3)))
+			cm.scale = Vector3(1.0, 1.0, 0.6)
 	return root
 
 

@@ -33,6 +33,10 @@ var checkpoints: Array[Vector3] = []
 var active_checkpoint := -1
 
 var _respawning := false
+## Wall-clock time in the level, for the result card. Stops when it is shown.
+var elapsed := 0.0
+var _result: ResultScreen
+var _result_layer: CanvasLayer
 
 
 func _ready() -> void:
@@ -54,6 +58,7 @@ func _ready() -> void:
 		add_child(layer)
 		layer.add_child(HUD_SCENE.instantiate())
 	GraphicsDirector.apply_all()
+	level_complete.connect(_on_level_complete)
 
 
 ## Override: the level's lighting identity.
@@ -124,17 +129,69 @@ func reach_checkpoint(index: int) -> void:
 	checkpoint_reached.emit(index)
 
 
+func _process(delta: float) -> void:
+	if show_hud and _result == null:
+		elapsed += delta
+
+
 func _on_player_died() -> void:
-	if _respawning:
+	if _respawning or _result != null:
 		return
 	_respawning = true
 	FX.hitstop(0.08)
 	await get_tree().create_timer(0.75, true, false, true).timeout
 	if Gx.lives <= 0:
-		# Out of lives: back to the start of the level with a clean run.
+		_show_result(ResultScreen.Kind.GAME_OVER)
+		return
+	respawn()
+
+
+# --- Result card ------------------------------------------------------------
+
+func _on_level_complete() -> void:
+	if _result != null:
+		return
+	# Let the hit-stop and the zoom punch land before the card arrives.
+	await get_tree().create_timer(0.55, true, false, true).timeout
+	_show_result(ResultScreen.Kind.CLEARED)
+
+
+func _show_result(kind: ResultScreen.Kind) -> void:
+	if _result != null:
+		return
+	if is_instance_valid(_pause_menu):
+		_pause_menu.queue_free()
+	_result_layer = CanvasLayer.new()
+	_result_layer.name = "ResultLayer"
+	_result_layer.layer = 95
+	add_child(_result_layer)
+
+	_result = ResultScreen.new()
+	_result.kind = kind
+	_result.entry = World.entry(level_id)
+	_result.sriracha = Gx.sriracha
+	_result.iced_out = Gx.iced_out_found.has(level_id)
+	_result.chain = Gx.chains.has(level_id)
+	_result.elapsed = elapsed
+	_result.dismissed.connect(_on_result_dismissed)
+	_result_layer.add_child(_result)
+	get_tree().paused = true
+
+
+func _on_result_dismissed(action: String) -> void:
+	get_tree().paused = false
+	if action == "retry":
+		# Out of lives: a clean run from the top of the level, not the map. The
+		# level is the unit of failure in this game.
 		Gx.reset_run()
 		active_checkpoint = -1
-	respawn()
+		_result_layer.queue_free()
+		_result = null
+		_result_layer = null
+		_respawning = false
+		respawn()
+		return
+	SceneFlow.change_scene("res://levels/menu/WorldMap.tscn")
 
 
 func respawn() -> void:
