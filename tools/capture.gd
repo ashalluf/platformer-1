@@ -288,10 +288,8 @@ func _ray(space: PhysicsDirectSpaceState3D, from: Vector3, to: Vector3,
 
 
 func _find_player(stage: Node) -> PlayerController:
-	if stage.has_method("get") and stage.get("player") != null:
-		var p: Variant = stage.get("player")
-		if is_instance_valid(p):
-			return p
+	if "player" in stage and stage.player != null and is_instance_valid(stage.player):
+		return stage.player
 	return get_tree().get_first_node_in_group("player") as PlayerController
 
 
@@ -313,8 +311,8 @@ func _apply_camera_override(stage: Node) -> void:
 
 
 func _stage_camera(stage: Node) -> Camera3D:
-	if stage.get("camera") != null and is_instance_valid(stage.get("camera")):
-		return stage.get("camera")
+	if "camera" in stage and stage.camera != null and is_instance_valid(stage.camera):
+		return stage.camera
 	return get_tree().root.get_camera_3d()
 
 
