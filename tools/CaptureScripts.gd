@@ -5,6 +5,7 @@ class_name CaptureScripts
 ##   right | left | stop      set the movement axis
 ##   jump  | jumprelease      press / release jump (variable height lives here)
 ##   dash                     tap dash
+##   fire | firestop          hold / release the trigger (full auto)
 ##   hold_jump                keep jump held (max height)
 ## Timelines are the project's automated playtest: if the controller regresses,
 ## the run through the movement lab stops reaching the same platforms.
@@ -54,6 +55,20 @@ const TIMELINES := {
 		[3.9, "jump"],
 		[6.4, "jumprelease"],
 		[7.4, "stop"],
+	],
+
+	# Rifle: slung, raised, run-and-gun, then a burst mid-air where recoil
+	# actually does something to the arc.
+	"rifle": [
+		[0.8, "fire"],
+		[2.0, "firestop"],
+		[2.4, "right"],
+		[3.2, "fire"],
+		[4.4, "firestop"],
+		[5.0, "jump"], [5.35, "jumprelease"],
+		[5.5, "fire"],
+		[6.6, "firestop"],
+		[7.2, "stop"],
 	],
 
 	"dash": [

@@ -16,6 +16,8 @@ var squash: Node3D
 var skel: Skeleton3D
 var body: MeshInstance3D
 var chain_pivot: BoneAttachment3D
+var weapon_mount: BoneAttachment3D
+var rifle: Rifle
 
 var _mats: Dictionary = {}
 var _thobe_mat: ShaderMaterial
@@ -34,6 +36,9 @@ var _head_turn := 0.0
 var _billow := 0.0
 var _hip_y := 0.0
 var _spin := 0.0        ## air-jump flourish
+var _weapon_blend := 0.0
+var _recoil := 0.0
+var _recoil_vel := 0.0
 
 
 func _ready() -> void:
@@ -49,6 +54,8 @@ func bind(c: PlayerController) -> void:
 	c.jumped.connect(_on_jumped)
 	c.air_jumped.connect(_on_air_jumped)
 	c.dash_started.connect(_on_dash_started)
+	c.fired.connect(_on_fired)
+	c.rifle = rifle
 
 
 # --- Construction -----------------------------------------------------------
@@ -66,6 +73,7 @@ func _build() -> void:
 	squash.add_child(skel)
 
 	_rebuild_body()
+	_build_rifle()
 
 	# Gold chain, hung off the chest. Not skinned — it is rigid and it swings
 	# with the bone it rides.
@@ -86,6 +94,31 @@ func _build() -> void:
 	chain.position = Vector3(0.0, -0.030, 0.222)
 	chain.rotation_degrees = Vector3(74.0, 0.0, 0.0)
 	chain_pivot.add_child(chain)
+
+
+## The rifle rides a chest attachment and slides between two poses: slung
+## across the back, and up in both hands. No IK — in a side-on game the arms
+## are posed to the rifle rather than the rifle solved to the arms.
+## Slung: muzzle down and back over the shoulder, lying in the plane the camera
+## can actually see. A rifle slung across the back is invisible in a side view.
+const SLUNG_POS := Vector3(0.0, -0.16, -0.22)
+const SLUNG_ROT := Vector3(2.04, 0.0, 0.0)     ## 117 degrees about X
+## Ready: shouldered, muzzle forward along his facing.
+const READY_POS := Vector3(0.05, -0.17, 0.17)
+const READY_ROT := Vector3(0.0, 0.0, 0.0)
+
+
+func _build_rifle() -> void:
+	weapon_mount = BoneAttachment3D.new()
+	weapon_mount.name = "WeaponMount"
+	skel.add_child(weapon_mount)
+	weapon_mount.bone_name = "Chest"
+
+	rifle = Rifle.new()
+	rifle.name = "Rifle"
+	weapon_mount.add_child(rifle)
+	rifle.position = SLUNG_POS
+	rifle.rotation = SLUNG_ROT
 
 
 func _rebuild_body() -> void:
@@ -133,6 +166,7 @@ func set_outfit(o: WanisBuilder.Outfit) -> void:
 		return
 	outfit = o
 	_rebuild_body()
+	_build_rifle()
 
 
 # --- Bone helpers -----------------------------------------------------------
@@ -162,6 +196,13 @@ func _process(delta: float) -> void:
 	_drive_facing(delta)
 	_drive_squash(delta)
 	_drive_billow(delta)
+	_drive_rifle(delta)
+
+	if _weapon_blend > 0.25 and controller.state != PlayerController.State.DASH:
+		_pose_rifle(delta)
+		_drive_torso(delta, vx, accel, grounded)
+		skel.position.y = _hip_y
+		return
 
 	match controller.state:
 		PlayerController.State.DASH:
@@ -229,6 +270,67 @@ func _drive_billow(delta: float) -> void:
 		m.set_shader_parameter("billow", _billow)
 		m.set_shader_parameter("trail_dir", local_dir)
 		m.set_shader_parameter("trail_amount", trail)
+
+
+func _drive_rifle(delta: float) -> void:
+	_weapon_blend = lerpf(_weapon_blend, controller.weapon_blend(),
+		_ease(delta, 16.0))
+	# Recoil is a spring on the rifle itself, not on the whole body.
+	_recoil_vel += (-_recoil * 900.0 - _recoil_vel * 42.0) * delta
+	_recoil += _recoil_vel * delta
+
+	var t := _weapon_blend
+	rifle.position = SLUNG_POS.lerp(READY_POS, t) + Vector3(0.0, 0.0, -_recoil * 0.18)
+	rifle.rotation = SLUNG_ROT.lerp(READY_ROT, t) + Vector3(-_recoil * 0.9, 0.0, 0.0)
+
+
+## Rifle up: both hands on it, shoulders squared, head over the sights. The
+## legs keep whatever the locomotion state was doing, so he runs and guns.
+func _pose_rifle(delta: float) -> void:
+	var k := _ease(delta, 18.0)
+	var speed := controller.speed_ratio()
+	var grounded := controller.is_on_floor()
+
+	_pose(B.ARM_R, Vector3(-1.35 - _recoil * 0.5, 0.0, -0.30), k)
+	_pose(B.FOREARM_R, Vector3(-0.62, 0.0, 0.0), k)
+	_pose(B.ARM_L, Vector3(-1.05 - _recoil * 0.3, 0.0, 0.46), k)
+	_pose(B.FOREARM_L, Vector3(-0.78, 0.0, 0.0), k)
+	_pose(B.SHOULDER_R, Vector3(0.0, 0.0, -0.22 - _recoil * 0.3), k)
+	_pose(B.SHOULDER_L, Vector3(0.0, 0.0, 0.26), k)
+
+	_pose(B.SPINE, Vector3(-0.10 - _recoil * 0.35, 0.0, 0.0), k)
+	_pose(B.CHEST, Vector3(-0.05, 0.0, 0.0), k)
+	_pose(B.NECK, Vector3(0.10 + _recoil * 0.4, 0.0, 0.0), k)
+	_pose(B.HEAD, Vector3(0.05, 0.0, 0.0), k)
+
+	if grounded and speed > 0.08:
+		_cycle += delta * lerpf(6.2, 13.0, speed)
+		var amp := lerpf(0.30, 0.78, speed)
+		var sn := sin(_cycle)
+		_pose(B.THIGH_L, Vector3(-sn * amp, 0.0, 0.0), k)
+		_pose(B.THIGH_R, Vector3(sn * amp, 0.0, 0.0), k)
+		_pose(B.SHIN_L, Vector3(maxf(sn, 0.0) * amp * 1.2, 0.0, 0.0), k)
+		_pose(B.SHIN_R, Vector3(maxf(-sn, 0.0) * amp * 1.2, 0.0, 0.0), k)
+		_hip_y = lerpf(_hip_y, -absf(sn) * lerpf(0.016, 0.060, speed), _ease(delta, 18.0))
+	elif grounded:
+		# Braced: feet apart, weight back.
+		_pose(B.THIGH_L, Vector3(-0.22, 0.0, 0.0), k)
+		_pose(B.THIGH_R, Vector3(0.20, 0.0, 0.0), k)
+		_pose(B.SHIN_L, Vector3(0.26, 0.0, 0.0), k)
+		_pose(B.SHIN_R, Vector3(0.12, 0.0, 0.0), k)
+		_hip_y = lerpf(_hip_y, -0.035, k)
+	else:
+		_pose(B.THIGH_L, Vector3(-0.30, 0.0, 0.0), k)
+		_pose(B.THIGH_R, Vector3(0.18, 0.0, 0.0), k)
+		_pose(B.SHIN_L, Vector3(0.44, 0.0, 0.0), k)
+		_pose(B.SHIN_R, Vector3(0.30, 0.0, 0.0), k)
+		_hip_y = lerpf(_hip_y, 0.0, k)
+
+
+func _on_fired() -> void:
+	_recoil = 1.0
+	_recoil_vel = 0.0
+	_squash = maxf(_squash, 0.04)
 
 
 func _drive_torso(delta: float, vx: float, accel: float, grounded: bool) -> void:

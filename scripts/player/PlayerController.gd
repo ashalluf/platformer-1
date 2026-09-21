@@ -12,6 +12,8 @@ class_name PlayerController extends CharacterBody3D
 signal jumped(from_coyote: bool)
 signal landed(impact: float)      ## 0..1, how hard the landing was
 signal air_jumped(index: int)
+signal fired()
+signal weapon_ready_changed(ready: bool)
 signal glide_changed(active: bool)
 signal dash_started(charged: bool)
 signal dash_ended()
@@ -75,6 +77,17 @@ enum State { IDLE, RUN, RISE, FALL, GLIDE, DASH, HURT, DEAD }
 ## Sriracha spent from the HEAT gauge for a Blaze Dash.
 @export var charged_dash_cost := 30.0
 
+@export_group("Rifle")
+## Recoil is deliberately a movement tool: fired airborne it pushes him back
+## hard enough to extend a jump backwards or stall a fall.
+@export var recoil_air := 1.05
+@export var recoil_ground := 0.20
+@export var recoil_lift := 0.55
+@export var weapon_raise_time := 0.14
+## He keeps the rifle up for a moment after the trigger, so tapping does not
+## strobe the pose.
+@export var weapon_hold_time := 0.55
+
 @export_group("World")
 @export var plane_z := 0.0
 @export var terminal_fall_y := -40.0
@@ -104,6 +117,9 @@ var _was_on_floor := true
 var _fall_peak_speed := 0.0
 var _step_distance := 0.0
 var _control_locked := 0.0
+var _firing := false
+var _weapon_up := 0.0
+var rifle: Rifle
 
 ## Set false by cutscenes and the capture harness's scripted-input mode.
 var accept_player_input := true
@@ -141,6 +157,7 @@ func _gather_input() -> void:
 		_jump_cut_armed = true
 	if Input.is_action_just_pressed("dash"):
 		_try_dash()
+	_firing = Input.is_action_pressed("attack")
 
 
 func _apply_deadzone(raw: float) -> float:
@@ -170,6 +187,10 @@ func scripted_dash() -> void:
 	_try_dash()
 
 
+func set_scripted_fire(held: bool) -> void:
+	_firing = held
+
+
 # --- Physics ----------------------------------------------------------------
 
 func _physics_process(delta: float) -> void:
@@ -192,11 +213,36 @@ func _physics_process(delta: float) -> void:
 		_:
 			_physics_normal(delta, on_floor)
 
+	_update_weapon(delta)
 	_was_on_floor = on_floor
 	_apply_plane_lock()
 	move_and_slide()
 	_apply_plane_lock()
 	_post_move(delta)
+
+
+func _update_weapon(delta: float) -> void:
+	if rifle == null:
+		return
+	var want := _firing and state != State.DEAD
+	var before := _weapon_up > 0.0
+	if want:
+		_weapon_up = weapon_hold_time
+	else:
+		_weapon_up = maxf(_weapon_up - delta, 0.0)
+	if before != (_weapon_up > 0.0):
+		weapon_ready_changed.emit(_weapon_up > 0.0)
+
+	if not want:
+		return
+	var grounded := is_on_floor()
+	if rifle.try_fire(facing, grounded):
+		var kick: float = recoil_ground if grounded else recoil_air
+		velocity.x -= facing * kick
+		if not grounded and velocity.y < 2.0:
+			velocity.y += recoil_lift
+		FX.shake(0.10 if grounded else 0.14, Vector2(-facing * 0.9, 0.25))
+		fired.emit()
 
 
 func _tick_timers(delta: float) -> void:
@@ -477,6 +523,15 @@ func is_dashing() -> bool:
 
 func is_airborne() -> bool:
 	return state == State.RISE or state == State.FALL or state == State.GLIDE
+
+
+## 0..1 — how far the rifle is up. Drives the arm pose and the HUD.
+func weapon_blend() -> float:
+	return clampf(_weapon_up / maxf(weapon_hold_time, 0.001), 0.0, 1.0)
+
+
+func is_firing() -> bool:
+	return _firing
 
 
 func is_gliding() -> bool:

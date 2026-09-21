@@ -172,6 +172,10 @@ func _run(stage: Node) -> void:
 								player.velocity.y *= player.jump_cut_mult
 					"dash":
 						if player: player.scripted_dash()
+					"fire":
+						if player: player.set_scripted_fire(true)
+					"firestop":
+						if player: player.set_scripted_fire(false)
 					_:
 						push_warning("capture: unknown command " + cmd)
 				next_event += 1

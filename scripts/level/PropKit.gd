@@ -10,6 +10,7 @@ class_name PropKit
 ## the level builder's business.
 
 const CHAINLINK_SHADER := preload("res://shaders/chainlink.gdshader")
+const FOLIAGE_SHADER := preload("res://shaders/foliage_wind.gdshader")
 
 const FONT_NASKH := "res://assets/fonts/NotoNaskhArabic-Regular.ttf"
 const FONT_NASKH_BOLD := "res://assets/fonts/NotoNaskhArabic-Bold.ttf"
@@ -263,6 +264,20 @@ static func flare_stack(parent: Node3D, base: Vector3, height: float, width: flo
 
 # --- Fences, wire, windbreaks ----------------------------------------------
 
+## Wind-driven foliage. `base_y` and `anchor_height` tell the shader where the
+## plant is rooted, so trunks stay planted while canopies travel.
+static func foliage_material(tint: Color, base_y: float, anchor_height: float,
+		strength := 0.35) -> ShaderMaterial:
+	var m := ShaderMaterial.new()
+	m.shader = FOLIAGE_SHADER
+	m.set_shader_parameter("albedo", tint)
+	m.set_shader_parameter("base_y", base_y)
+	m.set_shader_parameter("anchor_height", anchor_height)
+	m.set_shader_parameter("wind_strength", strength)
+	m.set_shader_parameter("detail", NoiseBank.grain(19))
+	return m
+
+
 static func chainlink_material(rust := 0.35, cells := 26.0) -> ShaderMaterial:
 	var m := ShaderMaterial.new()
 	m.shader = CHAINLINK_SHADER
@@ -323,6 +338,8 @@ static func razor_coil(parent: Node3D, from: Vector3, to: Vector3, radius: float
 
 ## Dead or dying eucalyptus. The windbreak rows are planted dead straight, and
 ## that straightness is what says "someone put these here" rather than "desert".
+## `foliage_mat` is expected to be a wind material from `foliage_material()`
+## configured for this plant's base height.
 static func eucalyptus(parent: Node3D, base: Vector3, height: float,
 		trunk_mat: Material, foliage_mat: Material, alive := false,
 		seed_ := 0) -> Node3D:

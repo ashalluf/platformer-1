@@ -40,6 +40,8 @@ class Mood extends RefCounted:
 	## How fast the horizon colour gives way to the zenith colour. Low values
 	## keep the warm band tight to the horizon instead of flooding the sky.
 	var sky_curve := 0.15
+	## Angular size of the sun disc the sky paints, in degrees.
+	var sun_disc_size := 3.5
 	var ground_curve := 0.2
 	var volumetric_density := 0.0025
 
@@ -97,7 +99,7 @@ static func build(parent: Node3D, mood: Mood) -> WorldEnvironment:
 	sky_mat.ground_horizon_color = mood.ground_horizon
 	sky_mat.ground_bottom_color = mood.ground_bottom
 	sky_mat.sky_energy_multiplier = mood.sky_energy
-	sky_mat.sun_angle_max = 12.0
+	sky_mat.sun_angle_max = mood.sun_disc_size
 	sky_mat.sun_curve = 0.18
 	sky_mat.sky_curve = mood.sky_curve
 	sky_mat.ground_curve = mood.ground_curve
@@ -164,7 +166,7 @@ static func build(parent: Node3D, mood: Mood) -> WorldEnvironment:
 	env.volumetric_fog_gi_inject = 1.0
 	env.volumetric_fog_length = 90.0
 	env.volumetric_fog_detail_spread = 2.0
-	# The 0.2 default means no god ray will ever form.
+	# The 0.2 default means no sun shaft will ever form.
 	env.volumetric_fog_anisotropy = mood.fog_anisotropy
 	env.volumetric_fog_temporal_reprojection_amount = 0.68
 
@@ -220,6 +222,9 @@ static func _light(parent: Node3D, name_: String, angles: Vector2, color: Color,
 	l.light_angular_distance = angular
 	if not shadows:
 		l.light_volumetric_fog_energy = 0.0
+		# ProceduralSkyMaterial draws a disc for EVERY directional light. Fill
+		# and rim lights are shaping tools, not suns, and must not paint one.
+		l.sky_mode = DirectionalLight3D.SKY_MODE_LIGHT_ONLY
 	if shadows:
 		l.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
 		l.directional_shadow_max_distance = 160.0

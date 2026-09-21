@@ -92,6 +92,26 @@ Exercise Yard". Nine depth layers, a back-lit 3.5° key, a hero-only fill and ri
 on a dedicated render layer, volumetric haze, a ground-mist FogVolume, a negative
 light under the walkway, three practicals, and the first two Sriracha bottles.
 
+**The rifle.** `WeaponForge` builds a stamped-receiver 7.62 pattern rifle —
+wood furniture, gas tube above the barrel, and the curved magazine that carries
+the silhouette. `Rifle` is full-automatic at 9.5 rounds per second with muzzle
+flash, an ejection port, a pooled tracer system and recoil bloom. Recoil is
+deliberately a movement tool: fired airborne it pushes him back hard enough to
+extend a jump backwards or stall a fall, so the rifle is part of the traversal
+kit rather than a separate system. He runs and guns; the legs keep whatever the
+locomotion state was doing while the upper body holds the weapon.
+
+**Environmental motion.** `shaders/foliage_wind.gdshader` drives canopies with
+two scales of motion phase-offset by world position, anchored by height above
+each plant's base. `Sway` gives rigid hanging things the same treatment.
+
+**Two real rendering bugs found by capture and fixed.** Every directional light
+was painting its own sun disc into the procedural sky, so fill and rim lights
+were each drawing a second and third sun — fill and rim are now `SKY_MODE_LIGHT_ONLY`.
+And GPU-particle tracers emitted from a marker buried under a scaled skeleton
+produced garbage transforms that rendered as bars pinned to the sky; tracers are
+now an explicit pool that owns its own placement.
+
 **docs/ART_DIRECTION.md** is canon for World 1: visual pillars, a per-level
 colour script, shape and material rules, the depth-layer recipe, Godot settings
 with a pitfall list, and the benchmark build order.
@@ -101,19 +121,20 @@ with a pitfall list, and the benchmark build order.
 1. **The benchmark does not pass its own quality gate yet.** It splits into
    "dark building on the left, bright haze on the right" without enough
    transition between them. It is atmospheric and it is not yet a marketing
-   frame. Specific failures: the god-ray shafts the brief calls for are not
+   frame. Specific failures: the sun shafts the brief calls for are not
    forming; the material detail is invisible at the distances the camera
    actually uses, so surfaces read as flat colour; the panel joint grid is
    mechanical; the crane holes read as polka dots; the awning cluster at lower
    left is awkwardly placed.
-2. **Nothing moves.** Dust particles exist but are nearly invisible; the snagged
-   bags do not move; there is no wind on anything. The brief requires at least
-   three independent things in motion and there are zero.
+2. **Motion is implemented but barely visible.** Wind, sway and dust all exist
+   now; at the distances the benchmark camera uses, none of them read. Needs
+   bigger amplitudes and more contrast against their backgrounds.
 3. **Wanis stands in the default idle.** The benchmark calls for authored
    contrapposto with a hand on the broken rail post and the head turned 12°
    past the shoulders. Levels cannot pose the character yet.
-4. **No AK-47.** Canon, designed, not built. It is part of the silhouette and
-   the primary ranged attack.
+4. **The rifle has nothing to shoot.** Tracers fly and vanish; there is no
+   impact, no decal, no enemy, no damage. Recoil movement tech is implemented
+   but untested against real level geometry.
 5. **No audio.** Not one sound. The audio architecture does not exist.
 6. **No collectible gameplay.** The Sriracha bottle has a mesh and a glow but no
    pickup, no HUD, no count, no trail authoring tool.

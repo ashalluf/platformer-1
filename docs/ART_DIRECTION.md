@@ -131,7 +131,7 @@ the prettiest level in World 1 and it is allowed to know it.*
 | **Key** | energy 1.50, `angular_distance` 1.4 (large, soft, low sun), `shadow_opacity` 0.78 |
 | **Fill** | Deep viaduct shade is lit by sky alone. Ambient `#6E86A8` at 0.85 — the coolest fill in the game. Maximum warm-key / cool-shade split; this is the level that proves the lighting model. |
 | **Rim** | energy 2.4, `#FFC98A` |
-| **Fog** | `#E2B98A`, volumetric density 0.028, anisotropy **0.86**. This is the god-ray level: shafts through every gap between blocks, every viaduct arch, every brise-soleil fin. `use_filter = 0` here for hard shaft edges. |
+| **Fog** | `#E2B98A`, volumetric density 0.028, anisotropy **0.86**. This is the sun shaft level: shafts through every gap between blocks, every viaduct arch, every brise-soleil fin. `use_filter = 0` here for hard shaft edges. |
 | **Level-unique colour** | **THE GOLD DOME `#C9A227`** on the central administration block, plus its bounce — the only warm-metal ambient term anywhere in World 1. It is visible from most of the level and it is the level's landmark. |
 
 Supporting palette: board-marked raw concrete `#A8A296` warm / `#8C8C88` shade, bush-hammered
@@ -683,7 +683,7 @@ directional_shadow_max_distance = 50           # NOT 100. Near-doubles texel den
 directional_shadow_split_1/2/3  = 0.06 / 0.15 / 0.35
 directional_shadow_blend_splits = true
 light_indirect_energy           = 1.3
-light_volumetric_fog_energy     = 2.0 – 3.5    # god rays live here
+light_volumetric_fog_energy     = 2.0 – 3.5    # sun shafts live here
 ```
 
 Fill lights get `light_volumetric_fog_energy = 0.0`. If fills feed the fog, the fog turns
@@ -706,7 +706,7 @@ volumetric_fog_enabled  = true
 volumetric_fog_density  = per level, 0.006 – 0.055
 volumetric_fog_albedo   = Color(1.00, 0.93, 0.82)   # tint to the dust, never pure white
 volumetric_fog_emission = Color(0.06, 0.045, 0.035) # lifts fog out of black in shadow
-volumetric_fog_anisotropy = 0.55 – 0.86             # ★ THE GOD-RAY KNOB. The 0.2 default
+volumetric_fog_anisotropy = 0.55 – 0.86             # ★ THE SUN-SHAFT KNOB. The 0.2 default
                                                     # means no shaft will ever form.
 volumetric_fog_length   = 95
 volumetric_fog_detail_spread = 1.6
@@ -719,7 +719,7 @@ volumetric_fog_temporal_reprojection_amount = 0.68  ; ★ SIDE-SCROLLER CRITICAL
                                                     ; when the world slides sideways.
 ```
 
-Project `environment/volumetric_fog/use_filter`: **0 on Level 4** (hard god-ray shafts),
+Project `environment/volumetric_fog/use_filter`: **0 on Level 4** (hard sun shafts),
 1 everywhere else (soft ambient dust). Volumetric fog has finite range, so always pair it
 with non-volumetric depth fog for the far layers.
 
@@ -926,7 +926,7 @@ at runtime, which is the only collision option available to a headless pipeline 
 8. `glow_bloom > 0.0` — guaranteed washout.
 9. `glow_levels/1` and `/2` carrying energy — the cheap-bloom halo.
 10. `ssil_radius = 5.0` default bleeds the background onto the hero.
-11. `volumetric_fog_anisotropy = 0.2` default — no god ray will ever form.
+11. `volumetric_fog_anisotropy = 0.2` default — no sun shaft will ever form.
 12. `volumetric_fog_temporal_reprojection_amount = 0.9` — smeared fog trails under
     horizontal scroll.
 13. `GPUParticles3D.visibility_aabb` 8-unit default — particles vanish mid-effect.
@@ -1126,10 +1126,18 @@ The shot is done when all seven are true:
 2. Content is present in **at least seven of the nine depth layers**.
 3. No pixel in the frame is pure black or pure white. Shadow sits in the `#6B5F55`
    family at its darkest.
-4. The god-ray shafts through the pipe rack are visible without being pointed out.
+4. The sun shafts through the pipe rack are visible without being pointed out.
 5. His feet are unambiguously on the deck — contact shadow reads at 100% zoom.
 6. At least three independent things are in motion: bags, dust, and the ground mist.
 7. A stranger shown the frame with no context says "somewhere on the North African coast,"
    not "a desert" and not "a ruin."
 
 Anything less and it goes back. This frame sets the bar for four more levels and a boss.
+
+---
+
+## Terminology
+
+Volumetric light shafts are called **sun shafts** or **light shafts** in this
+project. Never the other term. This applies to code, comments, commit messages,
+documentation and conversation.

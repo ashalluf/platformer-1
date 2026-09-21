@@ -29,7 +29,7 @@ Before building full levels, create one "beauty shot" scene: a single screen of 
 ### Rendering stack (use all of it, tuned by eye)
 - Forward+ renderer at max practical quality
 - Global illumination: SDFGI for dynamic scenes, LightmapGI baked where scenes are static, plus reflection probes
-- Volumetric fog with FogVolumes for local atmosphere, dust, and god rays
+- Volumetric fog with FogVolumes for local atmosphere, dust, and sun shafts
 - Directional light with high-quality soft shadows, plus carefully placed key, fill, and rim lights for every scene
 - SSAO, SSIL, SSR where it fits
 - HDR glow and bloom, tuned subtly

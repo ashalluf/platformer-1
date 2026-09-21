@@ -54,7 +54,7 @@ func _mood() -> LightingRig.Mood:
 	m.sun_color = Color(1.0, 0.565, 0.251)      # 2200 K
 	m.sun_energy = 3.1
 	m.sun_angular_distance = 1.1
-	m.sun_fog_energy = 1.2
+	m.sun_fog_energy = 2.2
 
 	# Fill: the sabkha bounce from below-front. Without it the shadow side dies.
 	m.fill_angles = Vector2(18.0, -28.0)
@@ -136,7 +136,7 @@ func _palette() -> void:
 		"mud": MaterialLab.concrete(Color(0.271, 0.231, 0.180), 1.0),
 		"sand": MaterialLab.sand(Color(0.867, 0.796, 0.651)),
 		"trunk": MaterialLab.plaster(Color(0.208, 0.200, 0.184), 1.0),
-		"leaf": MaterialLab.cloth(Color(0.212, 0.243, 0.180), 0.92),
+		"leaf": PropKit.foliage_material(Color(0.212, 0.243, 0.180), YARD_Y, 9.0, 0.42),
 		"door": MaterialLab.painted_metal(Color(0.184, 0.365, 0.275), 0.7),
 		"green": MaterialLab.plaster(Color(0.259, 0.376, 0.278), 1.0),
 		"shutter": MaterialLab.painted_metal(Color(0.420, 0.290, 0.196), 1.0),
@@ -434,10 +434,17 @@ func _layer_foreground() -> void:
 		mats["sand"], "FenceDrift")
 	# Plastic bags snagged in the mesh. They move; see _atmosphere.
 	for i in 3:
-		var bag := LevelKit.prop(geometry, Vector3(-15.0 + i * 4.6, -0.9 + i * 0.4, 5.1),
-			Vector3(0.42, 0.52, 0.06), mats["bag"], "SnaggedBag%d" % i)
-		bag.rotation = Vector3(0.2, 0.0, 0.3 - i * 0.25)
-		bag.add_to_group("wind_bag")
+		var pivot := Sway.new()
+		pivot.name = "BagSway%d" % i
+		pivot.position = Vector3(-15.0 + i * 4.6, -0.5 + i * 0.4, 5.1)
+		pivot.amplitude = 0.55 + i * 0.12
+		pivot.speed = 1.1 + i * 0.3
+		pivot.gust_amplitude = 0.38
+		pivot.axis = Vector3(0.35, 0.2, 1.0)
+		geometry.add_child(pivot)
+		var bag := LevelKit.prop(pivot, Vector3(0.0, -0.34, 0.0),
+			Vector3(0.42, 0.58, 0.05), mats["bag"], "SnaggedBag%d" % i)
+		bag.rotation.z = 0.2 - i * 0.2
 
 	# Razor wire across the top-left corner, heavy near-DOF, reading as a shape.
 	PropKit.razor_coil(geometry, Vector3(-7.6, 3.0, 9.0), Vector3(-2.6, 1.9, 9.0),
@@ -457,8 +464,13 @@ func _atmosphere() -> void:
 	var pocket := _fog_volume(Vector3(0.0, 1.0, 0.0), Vector3(13.0, 9.0, 9.0), -0.9, "HeroPocket")
 	pocket.shape = RenderingServer.FOG_VOLUME_SHAPE_ELLIPSOID
 
-	_dust(Vector3(10.0, -1.0, -12.0), Vector3(60.0, 14.0, 10.0), 260, 0.030)
-	_dust(Vector3(40.0, -2.0, -28.0), Vector3(130.0, 28.0, 18.0), 380, 0.075)
+	var shafts := _fog_volume(Vector3(24.0, 9.0, -26.0), Vector3(58.0, 13.0, 10.0),
+		0.020, "PipeRackShafts")
+	(shafts.material as FogMaterial).height_falloff = 0.0
+	(shafts.material as FogMaterial).edge_fade = 0.35
+
+	_dust(Vector3(10.0, -1.0, -12.0), Vector3(60.0, 14.0, 10.0), 340, 0.042)
+	_dust(Vector3(40.0, -2.0, -28.0), Vector3(130.0, 28.0, 18.0), 460, 0.10)
 
 
 func _fog_volume(pos: Vector3, size: Vector3, density: float, name_: String) -> FogVolume:
@@ -478,7 +490,7 @@ func _fog_volume(pos: Vector3, size: Vector3, density: float, name_: String) -> 
 	return fv
 
 
-## Drifting dust. These catch the key, and they are what makes the god rays
+## Drifting dust. These catch the key, and they are what makes the sun shafts
 ## through the pipe rack visible at all.
 func _dust(pos: Vector3, extents: Vector3, amount: int, scale_: float) -> GPUParticles3D:
 	var p := GPUParticles3D.new()
@@ -513,7 +525,7 @@ func _dust(pos: Vector3, extents: Vector3, amount: int, scale_: float) -> GPUPar
 	dm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	dm.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
 	dm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	dm.albedo_color = Color(1.0, 0.86, 0.68, 0.10)
+	dm.albedo_color = Color(1.0, 0.86, 0.68, 0.22)
 	dm.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
 	dm.proximity_fade_enabled = true
 	dm.proximity_fade_distance = 1.4
