@@ -197,6 +197,17 @@ earn the chain, come back.
 - All 100 stops the world, flashes the screen, and drops the chain in on a
   halo light. Verified: `chains=1` in the capture manifest.
 
+**There is a score.** `MusicForge` synthesises it: Hijaz — the maqam whose
+augmented second is the most recognisable sound in North African music — over a
+maqsoum darbuka pulse, with a modern low end under it. Five stems per theme
+(pad, bass, darbuka, plucked oud, tension), all the same tempo and length,
+started on the same frame and never restarted, so they stay in phase forever.
+Intensity is a mix decision rather than a different track, which means combat
+can come in on the next frame instead of the next bar. Brega counts the enemies
+near the player and drives it, so the score reacts without anyone writing a cue.
+Stems render on a worker thread. `tools/music_demo.gd` renders the whole thing
+to `docs/music_demo.wav`.
+
 **Two more silent bugs fixed.** `StandardMaterial3D.specular` is a Godot 3
 property name — every specular tweak in the project was a no-op that also
 spammed the log. And collect bursts were rendering as large red squares. The
@@ -226,8 +237,9 @@ with a pitfall list, and the benchmark build order.
 4. **The rifle has nothing to shoot.** Tracers fly and vanish; there is no
    impact, no decal, no enemy, no damage. Recoil movement tech is implemented
    but untested against real level geometry.
-5. **No music.** SFX and an ambience bed exist; there is no score. The Libyan /
-   North African musical identity in DESIGN.md is unbuilt.
+5. **Two themes and one arrangement.** Brega and the ice level have a score;
+   the other four World 1 levels do not, there are no transitions between
+   themes, and no stinger for a beat like the transformation.
 6. **One enemy type, in the greybox only.** The turret and the heavy walker
    from the enemy plan do not exist, no enemy appears in Brega, and there are
    no hazards — no spikes, no crushers, no fire, no water.

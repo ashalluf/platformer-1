@@ -22,6 +22,8 @@ const HUD_SCENE := preload("res://scenes/ui/HUD.tscn")
 ## 0 = street, 1 = prison. Level 1 opens in prison and changes mid-level.
 @export var player_outfit := 0
 @export var show_hud := true
+## Theme id from MusicDirector.THEMES, or "" for silence.
+@export var music_theme := ""
 
 var player: PlayerController
 var camera: GameCamera
@@ -44,6 +46,8 @@ func _ready() -> void:
 	_build_level()
 	_spawn_camera()
 	_spawn_player(_current_spawn())
+	if music_theme != "":
+		Music.play(music_theme, 0.2)
 	if show_hud:
 		var layer := CanvasLayer.new()
 		layer.name = "HUDLayer"

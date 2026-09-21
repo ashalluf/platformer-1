@@ -18,6 +18,7 @@ func _ready() -> void:
 	level_title = "GLACIER RUN"
 	spawn_point = Vector3(-4.0, 3.0, 0.0)
 	time_limit = 50.0
+	music_theme = "ice"
 	use_camera_bounds = true
 	camera_bounds_min = Vector2(-2.0, -8.0)
 	camera_bounds_max = Vector2(128.0, 30.0)

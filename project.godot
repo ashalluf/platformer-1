@@ -22,6 +22,7 @@ GraphicsDirector="*res://scripts/autoload/GraphicsDirector.gd"
 FX="*res://scripts/autoload/FXDirector.gd"
 Audio="*res://scripts/autoload/AudioDirector.gd"
 SceneFlow="*res://scripts/autoload/SceneFlow.gd"
+Music="*res://scripts/autoload/MusicDirector.gd"
 CaptureRunner="*res://scripts/autoload/CaptureRunner.gd"
 
 [debug]

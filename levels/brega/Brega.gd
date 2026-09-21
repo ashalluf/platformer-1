@@ -30,6 +30,7 @@ func _ready() -> void:
 	spawn_point = Vector3(-8.0, 1.4, 0.0)
 	kill_plane_y = -30.0
 	player_outfit = WanisBuilder.Outfit.PRISON
+	music_theme = "brega"
 	use_camera_bounds = true
 	camera_bounds_min = Vector2(X_START + 6.0, -14.0)
 	camera_bounds_max = Vector2(X_END - 6.0, 34.0)
@@ -190,6 +191,18 @@ func _section_d_cage() -> void:
 	_checkpoint(Vector3(196.0, YARD_Y + 4.6, 0.0), 1)
 	TrailBuilder.line(geometry, Vector3(189.0, YARD_Y + 5.5, 0.0),
 		Vector3(202.0, YARD_Y + 5.5, 0.0), 7)
+
+
+func _process(_delta: float) -> void:
+	# Music intensity follows how much trouble is nearby, so the score reacts
+	# without anyone writing a cue.
+	if not is_instance_valid(player):
+		return
+	var near := 0
+	for e: Node in get_tree().get_nodes_in_group("enemy"):
+		if e is Node3D and absf((e as Node3D).global_position.x - player.global_position.x) < 26.0:
+			near += 1
+	Music.set_intensity(clampf(0.25 + float(near) * 0.28, 0.0, 1.0))
 
 
 func _on_cage_opened() -> void:
