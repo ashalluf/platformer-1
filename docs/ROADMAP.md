@@ -3,21 +3,22 @@
 Ordered by impact. When in doubt, pick whatever most improves how the game looks.
 
 ## Now
-1. **Wanis, for real** — sculpted/procedural character mesh replacing the greybox
-   proxy, with PBR + subsurface skin, rim lighting, and the prison/jacket two-state
-   costume. The proxy is the single weakest thing on screen.
-2. **Beauty benchmark: Brega Prison Breakout, one screen** — final shippable
-   visual quality. Lighting, materials, atmosphere, hero. Everything later must
-   match or exceed it. Do not move past this until it passes the quality gate.
+1. **Bring Level 1 up to benchmark quality.** The level plays end to end but only
+   section A is dressed to the standard of the beauty shot. B through F are
+   correct geometry with the shared environment behind them and very little in
+   front of or around them.
+2. **The Iced Out warp and the first ice bonus level.** The secret bottle exists
+   and is findable; touching it does nothing yet. This is the whole chain
+   economy and none of it is built.
+3. **Make the frame move.** Wind, sway and dust are implemented but read as
+   nothing at the distances the camera uses. This is the difference between a
+   diorama and a place.
 
 ## Next
-3. Core systems: Sriracha bottles + trails, HEAT gauge, tuna sandwich lives,
-   checkpoints, save data, HUD.
-4. Chain Whip: attack + grapple, and the Brega transformation beat that unlocks it.
-5. Level 1: Brega Prison Breakout, full level at benchmark quality, with its
-   Iced Out Sriracha, first ice bonus level, and chain reward.
-6. Juice pass: particles, hit-stop, camera, post, audio architecture.
-7. Title screen, World 1 map, pause, settings, chain collection screen.
+4. Music: generative, maqam-derived, layered by level section.
+5. Enemy variety: the wall turret and the heavy walker; hazards.
+6. Title screen, pause, settings, World 1 map, chain collection screen.
+7. Boss-grade set piece for the end of Brega, or move to Level 2.
 
 ## After
 8. Level 2: Ajdabiya

@@ -38,6 +38,7 @@ func _ready() -> void:
 	geometry.name = "Geometry"
 	add_child(geometry)
 
+	_apply_spawn_override()
 	Gx.current_level_id = level_id
 	world_env = LightingRig.build(self, _mood())
 	_build_level()
@@ -52,6 +53,22 @@ func _ready() -> void:
 
 
 ## Override: the level's lighting identity.
+## `--spawn=X,Y` lets the capture tool shoot any section of a long level
+## without playing through to it. Applied here, after the subclass has set its
+## own spawn point in its _ready.
+func _apply_spawn_override() -> void:
+	for arg: String in OS.get_cmdline_user_args():
+		if not arg.begins_with("--spawn="):
+			continue
+		var parts := arg.substr(8).split(",")
+		if parts.size() < 2:
+			continue
+		spawn_point = Vector3(float(parts[0]), float(parts[1]), 0.0)
+		if parts.size() > 2:
+			player_outfit = int(parts[2])
+		return
+
+
 func _mood() -> LightingRig.Mood:
 	return LightingRig.neutral_studio()
 
@@ -109,6 +126,10 @@ func _on_player_died() -> void:
 	_respawning = true
 	FX.hitstop(0.08)
 	await get_tree().create_timer(0.75, true, false, true).timeout
+	if Gx.lives <= 0:
+		# Out of lives: back to the start of the level with a clean run.
+		Gx.reset_run()
+		active_checkpoint = -1
 	respawn()
 
 

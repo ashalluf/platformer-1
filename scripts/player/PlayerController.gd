@@ -62,7 +62,7 @@ enum State { IDLE, RUN, RISE, FALL, GLIDE, DASH, HURT, DEAD }
 @export var glide_fall_speed := 3.4
 @export var glide_ease := 34.0
 @export var glide_accel := 40.0
-@export var glide_max_speed := 7.4
+@export var glide_max_speed := 8.2
 ## Must already be falling this fast before the robe can catch — otherwise a
 ## held jump would turn every hop into a float.
 @export var glide_engage_speed := 1.4

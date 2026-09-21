@@ -1,6 +1,6 @@
 # PROGRESS
 
-## Status: milestones 1-4 in progress — engine, materials, hero, beauty benchmark v1
+## Status: Level 1 playable end to end
 
 ### Built
 
@@ -143,6 +143,36 @@ that was not exactly level with him. Recoil now pushes opposite the aim, so
 firing downward is a hover and firing upward drops him faster — two pieces of
 movement tech out of one line. One touch costs a life, DKC-style, with a
 generous invulnerability window and a visibility flicker.
+
+**LEVEL 1 EXISTS.** `levels/brega/Brega.tscn` is a 400-unit level in six
+sections, each introducing one thing and then asking for it again in a harder
+shape:
+
+| | | |
+|---|---|---|
+| A | THE WALKWAY | run, jump, trails — in prison grey |
+| B | THE YARD | double jump, the first SNITCH |
+| C | THE PIPE RACK | the thobe glide, over a drop no jump can cross |
+| D | PROPERTY CAGE | the transformation: thobe, chain, shemagh, rifle |
+| E | THE TANK FARM | vertical aim and run-and-gun |
+| F | THE FENCE | dash and glide chains, and out through the gate |
+
+Three checkpoints, a tuna sandwich, Sriracha trails throughout, a hidden Iced
+Out Sriracha below the catwalk in section E, and a level exit. `BregaKit` holds
+the shared environment so the benchmark shot and the playable level are the same
+place rather than two copies of it.
+
+The transformation beat is built to be felt: hit-stop, a bloom of light, a
+slow-motion window, the camera pushing in, and the costume swap landing on the
+flash rather than before it. Opening the cage also changes the level — it spawns
+the drones that section E is built around.
+
+**The autopilot found five level bugs before a human would have.** Twenty units
+of missing floor between the walkway and the yard; a cage whose set dressing was
+solid and blocked the beat; a glide flag that cleared itself on the frame it was
+set; an eight-unit gap with a rise that no jump clears; and a glide armed at a
+ledge *above* the player, which sank him into the pit in front of it. A full run
+now reaches the gate with 51 Sriracha collected.
 
 **Two more silent bugs fixed.** `StandardMaterial3D.specular` is a Godot 3
 property name — every specular tweak in the project was a no-op that also

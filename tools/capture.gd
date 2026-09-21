@@ -29,6 +29,8 @@ class_name CaptureSession extends Node
 ##   --look=x,y,z      point a locked camera at a target
 ##   --fov=F           override camera FOV
 ##   --pause-at=N      stop simulating input after frame N (hold the pose)
+##   --spawn=X,Y       override the level's spawn point, to shoot any section
+##                     of a long level without playing through to it
 
 const DEFAULTS := {
 	"level": "res://levels/greybox/Greybox.tscn",
@@ -205,6 +207,9 @@ func _run(stage: Node) -> void:
 var _ap_hold_left := 0
 var _ap_cooldown := 0
 var _ap_dash_armed := false
+var _ap_glide := false
+var _ap_brake := 1.0
+var _ap_glide_grace := 0
 var _ap_stuck_frames := 0
 var _ap_last_x := 0.0
 
@@ -254,6 +259,15 @@ func _autopilot(player: PlayerController) -> Dictionary:
 				var rise: float = top["position"].y - pos.y
 				want_jump = rise > 0.25
 				hold = int(clampf(remap(rise, 0.3, 3.2, 9.0, 26.0), 8.0, 26.0))
+		elif not _landing_ahead(space, pos, dir, player).is_empty():
+			# A ledge above and ahead: jump just high enough and ease off the
+			# stick so he lands on it instead of sailing past.
+			var ledge := _landing_ahead(space, pos, dir, player)
+			var rise: float = ledge["position"].y - pos.y
+			var reach: float = absf(ledge["position"].x - pos.x)
+			want_jump = true
+			hold = int(clampf(remap(rise, 0.4, 3.2, 10.0, 26.0), 9.0, 26.0))
+			_ap_brake = 0.55 if reach < 6.5 else 1.0
 		elif not gap_at.call(1.9) or not gap_at.call(3.0):
 			want_jump = true
 			# Size the hold to the gap: peek further ahead for the far edge.
@@ -261,6 +275,15 @@ func _autopilot(player: PlayerController) -> Dictionary:
 			if not gap_at.call(5.2):
 				hold = 26
 				_ap_dash_armed = true
+			# A gap this long is not a jump — but only glide it if the far side
+			# is BELOW him. Gliding at a ledge that is higher than he is just
+			# sinks him into the pit in front of it.
+			if not gap_at.call(8.5) and _descent_ahead(space, pos, dir, player):
+				_ap_glide = true
+				_ap_glide_grace = 8
+				# A glide needs the full stick; the short-hop brake from the
+				# previous jump would otherwise leave it short of the landing.
+				_ap_brake = 1.0
 
 	# Sweep the aim arc for anything on the enemy layer, then shoot at it.
 	var eye := pos + Vector3(0.0, 1.05, 0.0)
@@ -291,10 +314,49 @@ func _autopilot(player: PlayerController) -> Dictionary:
 		player.scripted_dash()
 		_ap_dash_armed = false
 
+	# The glide flag is armed on the same frame the jump is issued, while he is
+	# still touching the ground, so it gets a grace period before "landed"
+	# is allowed to clear it.
+	if _ap_glide:
+		_ap_glide_grace = maxi(_ap_glide_grace - 1, 0)
+		if grounded and _ap_glide_grace == 0:
+			_ap_glide = false
+		else:
+			return {"axis": dir * _ap_brake, "jump_held": true}
+
 	if _ap_hold_left == 0 and not grounded and player.velocity.y > 0.0:
 		player.scripted_jump_release()
 
-	return {"axis": dir, "jump_held": _ap_hold_left > 0}
+	if grounded:
+		_ap_brake = 1.0
+	return {"axis": dir * _ap_brake, "jump_held": _ap_hold_left > 0}
+
+
+## True when the next ground the autopilot can find ahead is well below him —
+## the shape of a glide, as opposed to a gap he should jump.
+func _descent_ahead(space: PhysicsDirectSpaceState3D, pos: Vector3, dir: float,
+		player: Node3D) -> bool:
+	for d: float in [10.0, 14.0, 18.0, 24.0]:
+		var top := pos + Vector3(d * dir, 2.0, 0.0)
+		var hit := _ray(space, top, top + Vector3(0.0, -34.0, 0.0), player)
+		if hit.is_empty():
+			continue
+		return hit["position"].y < pos.y - 2.5
+	return false
+
+
+## Looks for a surface above and ahead — a step up rather than a gap across.
+func _landing_ahead(space: PhysicsDirectSpaceState3D, pos: Vector3, dir: float,
+		player: Node3D) -> Dictionary:
+	for d: float in [2.2, 3.4, 4.6, 6.0]:
+		var top := pos + Vector3(d * dir, AP_STEP_REACH + 0.4, 0.0)
+		var hit := _ray(space, top, top + Vector3(0.0, -AP_STEP_REACH - 0.3, 0.0), player)
+		if hit.is_empty():
+			continue
+		var rise: float = hit["position"].y - pos.y
+		if rise > 0.4 and rise < AP_STEP_REACH:
+			return hit
+	return {}
 
 
 func _ray_mask(space: PhysicsDirectSpaceState3D, from: Vector3, to: Vector3,
