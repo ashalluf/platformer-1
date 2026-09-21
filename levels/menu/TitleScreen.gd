@@ -51,7 +51,7 @@ func _ready() -> void:
 	_menu.origin = Vector2(96.0, 336.0)
 	_menu.width = 392.0
 	layer.add_child(_menu)
-	_menu.add_row("play", "BREAK OUT", "ابدأ")
+	_menu.add_row("play", "WORLD ONE", "ابدأ")
 	_menu.add_row("ice", "GLACIER RUN", "الجليد")
 	_menu.add_row("chains", "THE CHAINS", "السلاسل")
 	_menu.add_row("lab", "MOVEMENT LAB", "التدريب")
@@ -97,8 +97,7 @@ func _process(delta: float) -> void:
 func _on_chosen(_index: int, id: String) -> void:
 	match id:
 		"play":
-			Gx.reset_run()
-			SceneFlow.change_scene("res://levels/brega/Brega.tscn")
+			SceneFlow.change_scene("res://levels/menu/WorldMap.tscn")
 		"ice":
 			Gx.reset_run()
 			SceneFlow.change_scene("res://levels/ice/IceBonus01.tscn")

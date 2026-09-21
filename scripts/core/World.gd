@@ -12,16 +12,18 @@ class Entry extends RefCounted:
 	var chain_id := ""
 	var name_en := ""
 	var name_ar := ""
+	var short_ar := ""       ## the place itself, for a label printed on a map
 	var subtitle := ""        ## the one line that says what this level is
 	var scene := ""           ## "" means not built yet
 	var kind := "run"         ## run | vehicle | boss
 	var map := Vector2.ZERO   ## position on the world map, 0..1 of the map field
 
-	func _init(id: String, en: String, ar: String, sub: String,
+	func _init(id: String, en: String, ar: String, short_: String, sub: String,
 			path: String, k: String, at: Vector2) -> void:
 		chain_id = id
 		name_en = en
 		name_ar = ar
+		short_ar = short_
 		subtitle = sub
 		scene = path
 		kind = k
@@ -34,19 +36,19 @@ class Entry extends RefCounted:
 ## World 1 — Eastern Libya, west to east, the way the coast road actually runs.
 static func world_one() -> Array:
 	return [
-		Entry.new("brega", "BREGA PRISON BREAKOUT", "هروب من سجن البريقة",
+		Entry.new("brega", "BREGA PRISON BREAKOUT", "هروب من سجن البريقة", "البريقة",
 			"Out of the cell block, through the petrochemical yard.",
 			"res://levels/brega/Brega.tscn", "run", Vector2(0.10, 0.62)),
-		Entry.new("ajdabiya", "AJDABIYA CROSSROADS", "مفترق أجدابيا",
+		Entry.new("ajdabiya", "AJDABIYA CROSSROADS", "مفترق أجدابيا", "أجدابيا",
 			"Where every road east meets. Market stalls and rooftops.",
 			"", "run", Vector2(0.31, 0.50)),
-		Entry.new("highway", "HIGHWAY TO BENGHAZI", "الطريق إلى بنغازي",
+		Entry.new("highway", "HIGHWAY TO BENGHAZI", "الطريق إلى بنغازي", "الساحلي",
 			"Two hundred kilometres of coast road, at speed.",
 			"", "vehicle", Vector2(0.54, 0.42)),
-		Entry.new("garyounis", "GARYOUNIS UNIVERSITY", "جامعة قاريونس",
+		Entry.new("garyounis", "GARYOUNIS UNIVERSITY", "جامعة قاريونس", "قاريونس",
 			"Colonnades, courtyards, and nobody where they should be.",
 			"", "run", Vector2(0.75, 0.33)),
-		Entry.new("benghazi", "BENGHAZI", "بنغازي",
+		Entry.new("benghazi", "BENGHAZI", "بنغازي", "بنغازي",
 			"Home. And whatever is waiting in it.",
 			"", "boss", Vector2(0.91, 0.22)),
 	]

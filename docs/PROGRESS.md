@@ -254,6 +254,26 @@ so a right-aligned box starts at the right edge *minus* its width), and both
 razor coils in the benchmark were named `RazorCoil`, so anything looking one up
 by name got the wrong one. `PropKit.razor_coil` now takes a name.
 
+### Added — the world map
+
+**World 1 is a place, not a list.** `levels/menu/WorldMap.gd` builds the
+eastern coast as a table map: the Gulf of Sidra, the shoreline walked west to
+east and then north to Benghazi, the coast road, and the five stops pinned
+along it in canon order. Map space is quarter-degrees from Brega, so the shape
+of the coast and the spacing of the towns are the real ones; the only
+conversion in the file is north becoming -z. Place names are printed flat on
+the land in Kufi, the way a name is printed on a paper map, and each pin wears
+the same medallion the chain for that level carries, so a pin and its trophy
+are obviously the same object.
+
+Terrain colour is soft-edged on purpose. Sabkha behind Brega and the first
+green of the Jebel above Benghazi are radial alpha falloffs generated at load,
+not polygons: a shape of a second colour laid on a map reads as a sticker
+however irregular its outline, and what sells it is the edge going away.
+
+Levels that are not built yet are pinned and refuse entry with a red shudder
+rather than being hidden, because the shape of the world is the promise.
+
 ### Weak — the honest list
 
 1. **The benchmark does not pass its own quality gate yet.** It splits into
@@ -279,14 +299,14 @@ by name got the wrong one. `PropKit.razor_coil` now takes a name.
 6. **One enemy type, in the greybox only.** The turret and the heavy walker
    from the enemy plan do not exist, no enemy appears in Brega, and there are
    no hazards — no spikes, no crushers, no fire, no water.
-7. **The menus are half a suite.** Title, pause and settings exist and are
-   drawn in the game's own shapes. The World 1 map and the chain collection
-   screen — which the canon requires — do not exist yet, and there is no
-   level-complete or game-over screen.
+7. **No level-complete or game-over screen.** Title, world map, chain
+   collection, pause and settings all exist and are drawn in the game's own
+   shapes. Finishing a level still just cuts back; dying out of lives still
+   just resets.
 8. **Checkpoints are a data structure with no scene.** `Stage` tracks them;
    nothing places or triggers them.
-9. **One ice level, and no collection screen.** The pool the canon calls for is
-   a pool of one, and the chains you earn can only be seen as HUD pips.
+9. **One ice level.** The pool the canon calls for is a pool of one, so the
+   Iced Out warp always lands in the same place.
 10. **Corner correction is implemented but untested** — the lab has the lip, but
     no capture has driven a jump into it at the right angle.
 11. **Performance is unprofiled** on real hardware. Software-renderer timings say
