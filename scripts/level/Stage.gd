@@ -18,6 +18,8 @@ const PLAYER_SCENE := preload("res://scenes/player/Player.tscn")
 @export var camera_bounds_min := Vector2(-1e6, -1e6)
 @export var camera_bounds_max := Vector2(1e6, 1e6)
 @export var use_camera_bounds := false
+## 0 = street, 1 = prison. Level 1 opens in prison and changes mid-level.
+@export var player_outfit := 0
 
 var player: PlayerController
 var camera: GameCamera
@@ -67,6 +69,9 @@ func _spawn_player(at: Vector3) -> void:
 	add_child(player)
 	player.terminal_fall_y = kill_plane_y
 	player.died.connect(_on_player_died)
+	var rig := player.get_node_or_null("Rig")
+	if rig and rig.has_method("set_outfit"):
+		rig.set_outfit(player_outfit)
 	camera.bind(player)
 	camera.snap_to_target()
 	player_spawned.emit(player)

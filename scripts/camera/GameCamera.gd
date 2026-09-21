@@ -10,6 +10,9 @@ class_name GameCamera extends Camera3D
 @export var distance := 16.0
 @export var base_fov := 34.0
 @export var height_offset := 2.35
+## Shifts the frame sideways relative to the subject, so he can sit off-centre
+## with the space he is heading into ahead of him.
+@export var lateral_offset := 0.0
 @export var follow_speed_x := 7.5
 @export var follow_speed_y_grounded := 5.0
 @export var follow_speed_y_air := 3.0
@@ -125,7 +128,7 @@ func _update_look_ahead(delta: float, vel: Vector3) -> void:
 
 
 func _update_focus(delta: float, tp: Vector3, grounded: bool) -> void:
-	var want_x := tp.x
+	var want_x := tp.x + lateral_offset
 	_focus.x = lerpf(_focus.x, want_x, 1.0 - exp(-follow_speed_x * delta))
 
 	var want_y := tp.y + height_offset

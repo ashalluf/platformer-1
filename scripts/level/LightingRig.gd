@@ -20,12 +20,28 @@ class Mood extends RefCounted:
 	var rim_energy := 1.5
 	var rim_color := Color(0.85, 0.72, 1.0)
 	var rim_angles := Vector2(-6.0, 178.0)
+	## Render layers the rim may touch. The hero is on layer 2; a rim that also
+	## lights the world is just a second key and it flattens everything.
+	var rim_cull_mask := 0xFFFFF
+
+	## A fill that touches only the hero layer. Lets the world sit in true
+	## shadow while the character keeps a readable front value — the single
+	## most useful light in a back-lit scene.
+	var hero_fill_energy := 0.0
+	var hero_fill_color := Color(0.78, 0.82, 0.92)
+	var hero_fill_angles := Vector2(-12.0, -24.0)
+	var hero_cull_mask := 2
 
 	var sky_top := Color(0.22, 0.36, 0.62)
 	var sky_horizon := Color(0.72, 0.68, 0.60)
 	var ground_horizon := Color(0.38, 0.32, 0.27)
 	var ground_bottom := Color(0.18, 0.14, 0.12)
 	var sky_energy := 1.0
+	## How fast the horizon colour gives way to the zenith colour. Low values
+	## keep the warm band tight to the horizon instead of flooding the sky.
+	var sky_curve := 0.15
+	var ground_curve := 0.2
+	var volumetric_density := 0.0025
 
 	var ambient_energy := 0.30
 	var fog_color := Color(0.62, 0.58, 0.52)
@@ -42,9 +58,11 @@ class Mood extends RefCounted:
 	var exposure := 1.0
 	var white := 6.0
 
-	var dof_distance := 34.0
+	var dof_distance := 0.0
 	var dof_transition := 18.0
 	var dof_amount := 0.10
+	var dof_near_distance := 0.0     ## 0 disables the near blur
+	var dof_near_transition := 4.0
 
 	var adjustment_saturation := 1.10
 	var adjustment_contrast := 1.10
@@ -81,6 +99,8 @@ static func build(parent: Node3D, mood: Mood) -> WorldEnvironment:
 	sky_mat.sky_energy_multiplier = mood.sky_energy
 	sky_mat.sun_angle_max = 12.0
 	sky_mat.sun_curve = 0.18
+	sky_mat.sky_curve = mood.sky_curve
+	sky_mat.ground_curve = mood.ground_curve
 	var sky := Sky.new()
 	sky.sky_material = sky_mat
 
@@ -137,7 +157,7 @@ static func build(parent: Node3D, mood: Mood) -> WorldEnvironment:
 	env.fog_aerial_perspective = 0.16
 
 	env.volumetric_fog_enabled = true
-	env.volumetric_fog_density = 0.0035
+	env.volumetric_fog_density = mood.volumetric_density
 	env.volumetric_fog_albedo = mood.fog_color
 	env.volumetric_fog_emission = mood.fog_emission
 	env.volumetric_fog_emission_energy = 0.15
@@ -156,13 +176,34 @@ static func build(parent: Node3D, mood: Mood) -> WorldEnvironment:
 	var we := WorldEnvironment.new()
 	we.name = "WorldEnvironment"
 	we.environment = env
+	# Depth of field lives on CameraAttributes in Godot 4, not on Environment.
+	# Near blur is what turns a foreground occluder into a shape rather than an
+	# object competing with the subject.
+	if mood.dof_near_distance > 0.0 or mood.dof_distance > 0.0:
+		var ca := CameraAttributesPractical.new()
+		ca.dof_blur_amount = mood.dof_amount
+		if mood.dof_near_distance > 0.0:
+			ca.dof_blur_near_enabled = true
+			ca.dof_blur_near_distance = mood.dof_near_distance
+			ca.dof_blur_near_transition = mood.dof_near_transition
+		if mood.dof_distance > 0.0:
+			ca.dof_blur_far_enabled = true
+			ca.dof_blur_far_distance = mood.dof_distance
+			ca.dof_blur_far_transition = mood.dof_transition
+		we.camera_attributes = ca
 	we.add_to_group("world_environment")
 	parent.add_child(we)
 
 	_light(parent, "Sun", mood.sun_angles, mood.sun_color, mood.sun_energy, true,
 		mood.sun_angular_distance, "sun", mood.sun_fog_energy)
 	_light(parent, "Fill", mood.fill_angles, mood.fill_color, mood.fill_energy, false, 4.0, "")
-	_light(parent, "Rim", mood.rim_angles, mood.rim_color, mood.rim_energy, false, 2.0, "")
+	var rim := _light(parent, "Rim", mood.rim_angles, mood.rim_color, mood.rim_energy, false, 2.0, "")
+	rim.light_cull_mask = mood.rim_cull_mask
+
+	if mood.hero_fill_energy > 0.0:
+		var hero := _light(parent, "HeroFill", mood.hero_fill_angles, mood.hero_fill_color,
+			mood.hero_fill_energy, false, 3.0, "")
+		hero.light_cull_mask = mood.hero_cull_mask
 
 	return we
 

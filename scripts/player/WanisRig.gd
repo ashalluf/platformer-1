@@ -106,6 +106,8 @@ func _rebuild_body() -> void:
 	# Skinning and cloth displacement both push past the rest-pose AABB; without
 	# a margin he pops out at the screen edge.
 	body.extra_cull_margin = 1.5
+	# Layer 2 is the hero layer: character-only rim lights cull to it.
+	body.layers = 1 | 2
 
 	var surfaces: Array = built["surfaces"]
 	for i in surfaces.size():

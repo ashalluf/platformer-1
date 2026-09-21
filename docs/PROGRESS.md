@@ -1,6 +1,6 @@
 # PROGRESS
 
-## Status: milestone 1 complete — engine, capture pipeline, controller
+## Status: milestones 1-4 in progress — engine, materials, hero, beauty benchmark v1
 
 ### Built
 
@@ -56,26 +56,75 @@ rulers, three step heights, three gap widths bracketing a running jump, a corner
 correction lip, up/down ramps, a dash-only gap, and a pit for the respawn path.
 Verified: the autopilot clears all of it end to end, including the dash gap.
 
+### Added since milestone 1
+
+**Material system** — `shaders/surface_weathered.gdshader` plus `MaterialLab` and
+`NoiseBank`. World-space triplanar with whiteout normal blending, macro tonal
+drift, dust accumulating on up-facing planes by world normal, grime creeping up
+from a per-material ground datum, and distance-faded detail. Concrete, lime
+plaster, rusted steel, painted sheet, corrugated roofing (analytic sine ridges,
+two triangles), sand, asphalt, subsurface skin, cloth, gold, chrome, glass.
+Nothing ships as a texture file.
+
+**Wanis** — a procedural skinned character. `MeshForge` sweeps cross-section
+rings along a 20-bone skeleton with superellipse profiles, per-ring bone weights,
+partial arcs and vertex colour as authoring data. White thobe, shemagh, gold
+chain, sirwal, sandals, hair built as an offset copy of the skull. `WanisRig`
+drives the skeleton procedurally; poses are targets and bones ease toward them,
+so overlap and follow-through come free.
+
+**Moveset** — double jump with a rotation flourish, and the thobe glide: hold
+jump while falling and the robe fills like a parachute, flattening the descent to
+3.4 u/s with wider lateral authority. It is a distinct silhouette, not a slower
+fall.
+
+**PropKit** — prefab facades with crane holes, deep-set windows with louvred
+shutters, storage tanks with bunds and spiral stairs, prilling towers, flare
+lattices, chain-link (procedural alpha, alpha-to-coverage), razor coils,
+eucalyptus, pipe racks, walkways, sandbag rows, and Arabic signage via TextMesh.
+
+**Arabic signage works.** Godot's TextServer shapes and orders Naskh and Kufi
+correctly. The Green Book-era wall carries a slogan, a crossing-out and a
+tricolour, all faded by the same sun.
+
+**Beauty benchmark v1** — `levels/brega/BregaBeauty.tscn`, "First Light,
+Exercise Yard". Nine depth layers, a back-lit 3.5° key, a hero-only fill and rim
+on a dedicated render layer, volumetric haze, a ground-mist FogVolume, a negative
+light under the walkway, three practicals, and the first two Sriracha bottles.
+
+**docs/ART_DIRECTION.md** is canon for World 1: visual pillars, a per-level
+colour script, shape and material rules, the depth-layer recipe, Godot settings
+with a pitfall list, and the benchmark build order.
+
 ### Weak — the honest list
 
-1. **The hero is a greybox proxy.** Primitive capsules. It reads as a person
-   running, which is the most that can be said for it. This is the single weakest
-   thing on screen and it is next.
-2. **No beauty benchmark yet.** Nothing in the repo has been taken to shippable
-   visual quality. The greybox looks like a competent greybox.
-3. **The bottom quarter of the frame is a flat slab.** Foreground occluders exist
-   but barely clip the frame. Real levels need a proper near layer.
-4. **No materials.** Everything is flat `StandardMaterial3D` albedo. No normal
-   maps, no roughness variation, no detail, no decals, no triplanar.
-5. **Nothing moves but the player.** No dust, no wind, no particles, no
-   environmental motion at all.
-6. **No audio.** Not one sound. The audio architecture does not exist yet.
-7. **No collectibles, no HUD, no enemies, no hazards, no UI.**
-8. **Corner correction is implemented but untested** — the lab has the lip, but no
-   capture has driven a jump into it at the right angle yet.
+1. **The benchmark does not pass its own quality gate yet.** It splits into
+   "dark building on the left, bright haze on the right" without enough
+   transition between them. It is atmospheric and it is not yet a marketing
+   frame. Specific failures: the god-ray shafts the brief calls for are not
+   forming; the material detail is invisible at the distances the camera
+   actually uses, so surfaces read as flat colour; the panel joint grid is
+   mechanical; the crane holes read as polka dots; the awning cluster at lower
+   left is awkwardly placed.
+2. **Nothing moves.** Dust particles exist but are nearly invisible; the snagged
+   bags do not move; there is no wind on anything. The brief requires at least
+   three independent things in motion and there are zero.
+3. **Wanis stands in the default idle.** The benchmark calls for authored
+   contrapposto with a hand on the broken rail post and the head turned 12°
+   past the shoulders. Levels cannot pose the character yet.
+4. **No AK-47.** Canon, designed, not built. It is part of the silhouette and
+   the primary ranged attack.
+5. **No audio.** Not one sound. The audio architecture does not exist.
+6. **No collectible gameplay.** The Sriracha bottle has a mesh and a glow but no
+   pickup, no HUD, no count, no trail authoring tool.
+7. **No enemies, hazards, checkpoints in a real level, or UI.**
+8. **Corner correction is implemented but untested** — the lab has the lip, but
+   no capture has driven a jump into it at the right angle.
 9. **Ice/chain/bonus systems are data-modelled in `Gx` but have no scenes.**
-10. **Performance is unprofiled** on real hardware. The software-renderer timings
-    say nothing about the 60 fps at 1080p target.
+10. **Performance is unprofiled** on real hardware. Software-renderer timings say
+    nothing about the 60 fps at 1080p target, and the benchmark scene is heavy.
+11. **Depth of field is off.** Godot's near-blur radius swallows the whole
+    gameplay plane; foreground separation is currently done with value alone.
 
 ### Known bugs
 - None open. Fixed this iteration: the jump state was being clobbered back to RUN
