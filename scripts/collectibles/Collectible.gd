@@ -70,7 +70,9 @@ func _collect(by: Node3D) -> void:
 	if _taken:
 		return
 	_taken = true
-	monitoring = false
+	# Deferred: _collect runs from an area/body signal, and toggling monitoring
+	# inside that dispatch is refused.
+	set_deferred("monitoring", false)
 	_on_collected(by)
 	collected.emit(by)
 	_burst()

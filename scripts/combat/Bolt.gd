@@ -99,7 +99,9 @@ func _on_body(body: Node3D) -> void:
 
 func _pop() -> void:
 	set_physics_process(false)
-	monitoring = false
+	# Deferred: _pop is called from body_entered, and Godot refuses to toggle
+	# monitoring while it is dispatching that signal.
+	set_deferred("monitoring", false)
 	var p := GPUParticles3D.new()
 	p.amount = 8
 	p.lifetime = 0.22

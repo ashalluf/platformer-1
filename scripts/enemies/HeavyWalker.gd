@@ -43,10 +43,10 @@ func _setup() -> void:
 	hitstop = 0.05
 	_origin = global_position
 	var shape := BoxShape3D.new()
-	shape.size = Vector3(1.05, 1.5, 0.9)
+	shape.size = Vector3(1.20, 2.10, 1.00)
 	var cs := CollisionShape3D.new()
 	cs.shape = shape
-	cs.position = Vector3(0, 0.78, 0)
+	cs.position = Vector3(0, 1.05, 0)
 	add_child(cs)
 
 
@@ -63,48 +63,57 @@ func _build() -> Node3D:
 	for side in 2:
 		var leg := Node3D.new()
 		leg.name = "Leg%d" % side
-		leg.position = Vector3(0.0, 1.02, -0.22 + side * 0.44)
+		leg.position = Vector3(0.0, 1.32, -0.26 + side * 0.52)
 		root.add_child(leg)
 		_legs.append(leg)
 
 		var thigh := MeshInstance3D.new()
 		var tm := BoxMesh.new()
-		tm.size = Vector3(0.24, 0.56, 0.24)
+		tm.size = Vector3(0.34, 0.66, 0.32)
 		thigh.mesh = tm
 		thigh.material_override = joint
-		thigh.position = Vector3(0, -0.28, 0)
+		thigh.position = Vector3(0, -0.33, 0)
 		leg.add_child(thigh)
 
 		var shin := Node3D.new()
 		shin.name = "Shin"
-		shin.position = Vector3(0, -0.56, 0)
+		shin.position = Vector3(0, -0.66, 0)
 		leg.add_child(shin)
 		_shins.append(shin)
 
 		var shin_mesh := MeshInstance3D.new()
 		var sm := BoxMesh.new()
-		sm.size = Vector3(0.20, 0.50, 0.20)
+		sm.size = Vector3(0.28, 0.58, 0.26)
 		shin_mesh.mesh = sm
 		shin_mesh.material_override = joint
-		shin_mesh.position = Vector3(0, -0.25, 0)
+		shin_mesh.position = Vector3(0, -0.29, 0)
 		shin.add_child(shin_mesh)
 
 		var foot := MeshInstance3D.new()
 		var fm := BoxMesh.new()
-		fm.size = Vector3(0.52, 0.16, 0.30)
+		fm.size = Vector3(0.66, 0.20, 0.38)
 		foot.mesh = fm
 		foot.material_override = plate
-		foot.position = Vector3(0.06, -0.52, 0)
+		foot.position = Vector3(0.07, -0.62, 0)
 		shin.add_child(foot)
 
 	_chassis = Node3D.new()
 	_chassis.name = "Chassis"
-	_chassis.position = Vector3(0, 1.10, 0)
+	_chassis.position = Vector3(0, 1.62, 0)
 	root.add_child(_chassis)
+
+	# A hip block, so the legs hang off something instead of out of a box.
+	var hips := MeshInstance3D.new()
+	var hpm := BoxMesh.new()
+	hpm.size = Vector3(0.70, 0.34, 1.16)
+	hips.mesh = hpm
+	hips.material_override = joint
+	hips.position = Vector3(0.0, -0.46, 0.0)
+	_chassis.add_child(hips)
 
 	var hull := MeshInstance3D.new()
 	var hm := BoxMesh.new()
-	hm.size = Vector3(1.00, 0.62, 0.86)
+	hm.size = Vector3(1.22, 0.78, 1.00)
 	hull.mesh = hm
 	hull.material_override = plate
 	_chassis.add_child(hull)
@@ -112,43 +121,51 @@ func _build() -> Node3D:
 	# A hazard chevron band along the top, the only saturated thing on it.
 	var band := MeshInstance3D.new()
 	var bm := BoxMesh.new()
-	bm.size = Vector3(0.86, 0.10, 0.88)
+	bm.size = Vector3(1.10, 0.14, 1.02)
 	band.mesh = bm
 	band.material_override = hazard
-	band.position = Vector3(0, 0.30, 0)
+	band.position = Vector3(0, 0.40, 0)
 	_chassis.add_child(band)
 
 	# The shield: a raked plate on the leading face. It is deliberately the
 	# biggest, flattest, most obvious thing on the model.
 	_shield = Node3D.new()
 	_shield.name = "Shield"
-	_shield.position = Vector3(-0.52, -0.02, 0)
+	_shield.position = Vector3(-0.66, -0.06, 0)
 	_chassis.add_child(_shield)
 	var sp := MeshInstance3D.new()
 	var spm := BoxMesh.new()
-	spm.size = Vector3(0.16, 0.92, 0.94)
+	spm.size = Vector3(0.18, 1.26, 1.10)
 	sp.mesh = spm
 	sp.material_override = plate
-	sp.rotation_degrees = Vector3(0, 0, -11.0)
+	sp.rotation_degrees = Vector3(0, 0, -15.0)
 	_shield.add_child(sp)
 	for i in 3:
 		var rib := MeshInstance3D.new()
 		var rm := BoxMesh.new()
-		rm.size = Vector3(0.06, 0.86, 0.07)
+		rm.size = Vector3(0.07, 1.18, 0.09)
 		rib.mesh = rm
 		rib.material_override = joint
-		rib.position = Vector3(-0.10, 0.0, -0.30 + i * 0.30)
-		rib.rotation_degrees = Vector3(0, 0, -11.0)
+		rib.position = Vector3(-0.11, 0.0, -0.36 + i * 0.36)
+		rib.rotation_degrees = Vector3(0, 0, -15.0)
 		_shield.add_child(rib)
 
 	# Sensor head on the back of the hull — the unarmoured part, and the part
 	# that tells you what it is about to do.
+	var mast := MeshInstance3D.new()
+	var mm := BoxMesh.new()
+	mm.size = Vector3(0.14, 0.34, 0.14)
+	mast.mesh = mm
+	mast.material_override = joint
+	mast.position = Vector3(0.44, 0.38, 0)
+	_chassis.add_child(mast)
+
 	var head := MeshInstance3D.new()
 	var hd := BoxMesh.new()
-	hd.size = Vector3(0.34, 0.26, 0.40)
+	hd.size = Vector3(0.40, 0.30, 0.46)
 	head.mesh = hd
 	head.material_override = joint
-	head.position = Vector3(0.44, 0.30, 0)
+	head.position = Vector3(0.44, 0.62, 0)
 	_chassis.add_child(head)
 
 	_lamp_mesh = MeshInstance3D.new()
@@ -160,7 +177,9 @@ func _build() -> Node3D:
 	_lamp_mesh.mesh = lm
 	_lamp_mat = MaterialLab.emissive(Color(0.40, 0.90, 0.60), 1.0)
 	_lamp_mesh.material_override = _lamp_mat
-	_lamp_mesh.position = Vector3(0.56, 0.32, 0)
+	# On the camera-facing side of the head, not its end. In a side-on game a
+	# lamp on the front of a machine is a lamp nobody ever sees.
+	_lamp_mesh.position = Vector3(0.44, 0.64, 0.26)
 	_chassis.add_child(_lamp_mesh)
 
 	_lamp = OmniLight3D.new()
@@ -285,10 +304,10 @@ func _walk(delta: float) -> void:
 		var lift := maxf(sin(phase), 0.0)
 		_legs[i].rotation.z = cos(phase) * 0.34 * clampf(speed / 3.0, 0.15, 1.0)
 		_shins[i].rotation.z = -lift * 0.42
-		_legs[i].position.y = 1.02 + lift * 0.05
+		_legs[i].position.y = 1.32 + lift * 0.06
 	# The body drops on each footfall, which is where the weight comes from.
 	if _chassis != null:
-		_chassis.position.y = 1.10 - absf(sin(_cycle)) * 0.035
+		_chassis.position.y = 1.62 - absf(sin(_cycle)) * 0.045
 
 
 func _set_lamp(tint: Color, energy: float) -> void:
