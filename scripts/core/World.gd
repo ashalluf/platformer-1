@@ -41,7 +41,7 @@ static func world_one() -> Array:
 			"res://levels/brega/Brega.tscn", "run", Vector2(0.10, 0.62)),
 		Entry.new("ajdabiya", "AJDABIYA CROSSROADS", "مفترق أجدابيا", "أجدابيا",
 			"Where every road east meets. Market stalls and rooftops.",
-			"", "run", Vector2(0.31, 0.50)),
+			"res://levels/ajdabiya/Ajdabiya.tscn", "run", Vector2(0.31, 0.50)),
 		Entry.new("highway", "HIGHWAY TO BENGHAZI", "الطريق إلى بنغازي", "الساحلي",
 			"Two hundred kilometres of coast road, at speed.",
 			"", "vehicle", Vector2(0.54, 0.42)),

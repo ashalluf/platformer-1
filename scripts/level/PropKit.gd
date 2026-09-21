@@ -535,8 +535,8 @@ static func laundry_line(parent: Node3D, from: Vector3, to: Vector3, sag: float,
 		var t := (float(i) + 0.5) / float(count)
 		var p := from.lerp(to, t)
 		p.y -= sag * sin(t * PI)
-		var w := rng.randf_range(0.34, 0.62)
-		var h := rng.randf_range(0.42, 0.88)
+		var w := rng.randf_range(0.46, 0.80)
+		var h := rng.randf_range(0.58, 1.10)
 		var cloth := MaterialLab.cloth(colours[rng.randi() % colours.size()], 0.92)
 		cloth.cull_mode = BaseMaterial3D.CULL_DISABLED
 		var mi := _mi(root, "Cloth%d" % i, _box(Vector3(w, h, 0.02)), cloth,
@@ -628,6 +628,186 @@ static func perimeter_wall(parent: Node3D, left_x: float, base_y: float,
 	salt.material_override = gradient_decal(Color(0.78, 0.755, 0.695), 0.46, "band")
 	salt.position = Vector3(left_x + width * 0.5, base_y + height * 0.275, z + 0.37)
 	root.add_child(salt)
+	return root
+
+
+## A date palm. Not the eucalyptus builder with green on it: a palm is a bare
+## fibrous column and a crown of long fronds that arch and droop, and the arch
+## is the entire silhouette.
+static func palm(parent: Node3D, base: Vector3, height: float,
+		trunk_mat: Material, frond_mat: Material, seed_ := 0) -> Node3D:
+	var root := Node3D.new()
+	root.name = "Palm"
+	root.position = base
+	parent.add_child(root)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_ * 4703 + 29
+
+	# Trunk in segments, leaning and tapering: the old frond bases are what
+	# make a palm trunk read as a palm trunk.
+	var segs := maxi(6, int(height / 0.75))
+	var lean := rng.randf_range(-0.10, 0.10)
+	for i in segs:
+		var t := float(i) / float(segs)
+		var r := lerpf(height * 0.036, height * 0.024, t)
+		var seg := _mi(root, "Trunk%d" % i, _cyl(r, height / float(segs) * 1.12, 8),
+			trunk_mat, Vector3(lean * height * t * t, height * (t + 0.5 / segs), 0.0))
+		seg.rotation.z = -lean * 0.8
+		# Frond-base collar every other segment.
+		if i % 2 == 0:
+			_mi(root, "Collar%d" % i, _box(Vector3(r * 2.5, 0.10, r * 2.4)),
+				trunk_mat, Vector3(lean * height * t * t,
+					height * (t + 0.5 / segs), 0.0))
+
+	var top := Vector3(lean * height, height, 0.0)
+	var fronds := rng.randi_range(9, 12)
+	for i in fronds:
+		var a := TAU * float(i) / float(fronds) + rng.randf_range(-0.1, 0.1)
+		var pivot := Node3D.new()
+		pivot.name = "Frond%d" % i
+		pivot.position = top
+		pivot.rotation = Vector3(0.0, a, 0.0)
+		root.add_child(pivot)
+		# The frond is a chain of flattened boxes bending over and down.
+		var len_ := height * rng.randf_range(0.30, 0.44)
+		var links := 5
+		var droop := rng.randf_range(0.30, 0.55)
+		for k in links:
+			var t := (float(k) + 0.5) / float(links)
+			var leaf := _mi(pivot, "Leaf%d" % k,
+				_box(Vector3(len_ / float(links) * 1.15,
+					0.05, lerpf(0.42, 0.14, t) * height * 0.10)),
+				frond_mat,
+				Vector3(len_ * t, -droop * t * t * height * 0.22, 0.0))
+			leaf.rotation.z = -droop * t * 1.5
+	# A cluster of dates under the crown, which is the only warm note on it.
+	for i in 3:
+		var d := _mi(root, "Dates%d" % i, _cyl(height * 0.030, height * 0.09, 7),
+			frond_mat, top + Vector3(rng.randf_range(-0.25, 0.25), -height * 0.06,
+				rng.randf_range(-0.2, 0.2)))
+		d.rotation.z = rng.randf_range(-0.3, 0.3)
+	return root
+
+
+# --- Town: market street, shopfronts, roofs -------------------------------
+
+## A market stall: four poles, a sagging awning in striped cloth, a counter and
+## crates under it. The awning is the point — it is the one place in this game
+## where saturated colour is allowed to sit in the gameplay band, because a
+## market without it is a row of tables.
+static func market_stall(parent: Node3D, at: Vector3, width: float,
+		frame_mat: Material, awning_a: Color, awning_b: Color,
+		crate_mat: Material, seed_ := 5) -> Node3D:
+	var root := Node3D.new()
+	root.name = "MarketStall"
+	root.position = at
+	parent.add_child(root)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_ * 31 + 7
+
+	var h := rng.randf_range(2.05, 2.35)
+	var depth := 1.5
+	for i in 4:
+		var sx := (-0.5 + float(i % 2)) * width
+		var sz := (-0.5 + float(i / 2)) * depth
+		_mi(root, "Pole%d" % i, _cyl(0.035, h, 6), frame_mat,
+			Vector3(sx, h * 0.5, sz))
+
+	# Awning: two slabs meeting at a ridge, sagging between the poles.
+	var strips := maxi(4, int(width / 0.42))
+	var mm := _joint_multimesh(_box(Vector3(width / float(strips), 0.035, depth * 1.35)))
+	var xf: Array[Transform3D] = []
+	var colours := PackedColorArray()
+	for i in strips:
+		var t := (float(i) + 0.5) / float(strips)
+		var sag := -sin(t * PI) * 0.09
+		xf.append(Transform3D(Basis(Vector3.RIGHT, 0.10),
+			Vector3((t - 0.5) * width, h + 0.10 + sag, 0.0)))
+		colours.append(awning_a if i % 2 == 0 else awning_b)
+	mm.use_colors = true
+	mm.instance_count = xf.size()
+	for i in xf.size():
+		mm.set_instance_transform(i, xf[i])
+		mm.set_instance_color(i, colours[i])
+	var cloth := MaterialLab.cloth(Color.WHITE, 0.95)
+	cloth.vertex_color_use_as_albedo = true
+	cloth.cull_mode = BaseMaterial3D.CULL_DISABLED
+	_mm_node(root, "Awning", mm, cloth)
+
+	# Counter and produce crates.
+	_mi(root, "Counter", _box(Vector3(width * 0.96, 0.10, depth * 0.8)),
+		crate_mat, Vector3(0, 0.92, 0))
+	_mi(root, "CounterLeg", _box(Vector3(width * 0.9, 0.86, 0.10)),
+		crate_mat, Vector3(0, 0.46, -0.28))
+	for i in rng.randi_range(2, 4):
+		var cw := rng.randf_range(0.42, 0.62)
+		_mi(root, "Crate%d" % i, _box(Vector3(cw, 0.30, 0.44)), crate_mat,
+			Vector3(rng.randf_range(-0.4, 0.4) * width, 1.12, rng.randf_range(-0.2, 0.2)))
+	return root
+
+
+## A shopfront bay: a roller shutter, a lintel, a painted sign board and the
+## step up off the street. Repeated along a wall it is most of a market street.
+static func shopfront(parent: Node3D, at: Vector3, width: float, height: float,
+		wall_mat: Material, shutter_mat: Material, sign_mat: Material,
+		open_ := false) -> Node3D:
+	var root := Node3D.new()
+	root.name = "Shopfront"
+	root.position = at
+	parent.add_child(root)
+
+	# The opening itself is a recess, so the bay has depth in a side view.
+	_mi(root, "Recess", _box(Vector3(width * 0.86, height * 0.72, 0.50)),
+		wall_mat, Vector3(0, height * 0.36, -0.30))
+	_mi(root, "Lintel", _box(Vector3(width, 0.26, 0.62)), wall_mat,
+		Vector3(0, height * 0.72 + 0.13, 0.0))
+	_mi(root, "Step", _box(Vector3(width * 0.94, 0.16, 0.7)), wall_mat,
+		Vector3(0, 0.08, 0.30))
+
+	# Shutter: down to the lintel when open, most of the way when shut.
+	var drop := height * 0.18 if open_ else height * 0.68
+	_mi(root, "Shutter", _box(Vector3(width * 0.84, drop, 0.08)), shutter_mat,
+		Vector3(0, height * 0.72 - drop * 0.5, 0.05))
+
+	_mi(root, "SignBoard", _box(Vector3(width * 0.92, 0.42, 0.10)), sign_mat,
+		Vector3(0, height * 0.72 + 0.44, 0.10))
+	return root
+
+
+## Everything that lives on a Libyan roof: a parapet, black water tanks on
+## stands, a dish, and a run of reinforcement bar left sticking out of the
+## columns because the next storey is always going to get built.
+static func roof_kit(parent: Node3D, left_x: float, top_y: float, width: float,
+		z: float, wall_mat: Material, tank_mat: Material, rebar_mat: Material,
+		seed_ := 9) -> Node3D:
+	var root := Node3D.new()
+	root.name = "RoofKit"
+	parent.add_child(root)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_ * 101 + 3
+
+	_mi(root, "Parapet", _box(Vector3(width, 0.52, 0.30)), wall_mat,
+		Vector3(left_x + width * 0.5, top_y + 0.26, z + 0.55))
+	_mi(root, "ParapetCap", _box(Vector3(width, 0.09, 0.42)), wall_mat,
+		Vector3(left_x + width * 0.5, top_y + 0.54, z + 0.55))
+
+	for i in maxi(1, int(width / 7.0)):
+		var x := left_x + (float(i) + rng.randf_range(0.2, 0.8)) * (width / maxf(float(int(width / 7.0)), 1.0))
+		# Stand, then tank: a tank sitting flat on a roof reads as a barrel.
+		_mi(root, "TankStand%d" % i, _box(Vector3(0.9, 0.42, 0.7)), rebar_mat,
+			Vector3(x, top_y + 0.21, z))
+		var t := _mi(root, "RoofTank%d" % i, _cyl(0.42, 0.90, 14), tank_mat,
+			Vector3(x, top_y + 0.87, z))
+		t.rotation.y = rng.randf_range(0.0, TAU)
+
+	# Rebar stubs: the storey that was always going to be added.
+	for i in maxi(2, int(width / 3.5)):
+		var rx := left_x + (float(i) + 0.5) * (width / maxf(float(int(width / 3.5)), 1.0))
+		var rh := rng.randf_range(0.35, 0.8)
+		var bar := _mi(root, "Rebar%d" % i, _cyl(0.022, rh, 5), rebar_mat,
+			Vector3(rx, top_y + rh * 0.5, z - 0.35))
+		bar.rotation = Vector3(rng.randf_range(-0.12, 0.12), 0.0,
+			rng.randf_range(-0.16, 0.16))
 	return root
 
 

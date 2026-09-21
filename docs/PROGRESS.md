@@ -1,6 +1,6 @@
 # PROGRESS
 
-## Status: Level 1 playable end to end
+## Status: Levels 1 and 2 playable end to end
 
 ### Built
 
@@ -325,6 +325,36 @@ the turret's lens on purpose — one vocabulary for danger.
 player's rifle is instant because it is his; everything shot at him travels
 slowly enough to be read, stepped around or jumped over, which is what makes a
 turret a platforming problem rather than a damage tax.
+
+### Added — Level 2: Ajdabiya Crossroads
+
+**World 1 has a second level.** `levels/ajdabiya/` is a 334-unit run through the
+crossroads town, and it is built to be the counterweight to Brega. Brega is a
+dead plant at first light: key behind the geometry, cold shadow, no people,
+almost no colour. Ajdabiya is the same coast two hours later and forty
+kilometres east, and it is a town — the sun is up and *in front*, the street is
+lit, shadows are short and hard blue, and colour is everywhere because people
+put it there. The rule that carries over is that he is still the brightest
+thing in frame, so the town spends its saturation on mid values and keeps the
+whites for him.
+
+**Two lines through it.** The street is the safe, slow, generous line: awnings
+to run under, stalls to break sightlines, cover from anything above. The roofs
+are the fast line: longer gaps, less cover, better sriracha and the only route
+to the Iced Out bottle. They cross at four points, so the choice is never
+locked in.
+
+**New kit, all reusable:** market stalls with sagging striped awnings,
+shopfront bays with roller shutters and sign boards, the roof kit every Libyan
+roof carries (parapet, black water tanks on stands, rebar stubs for the storey
+that was always going to be added), town facades with window reveals,
+balconies, air conditioners and washing lines, date palms built as a fibrous
+column and a crown of arching fronds, and street dressing — bollards,
+planters, parked cars, road patches and a dashed centre line.
+
+**The minaret is skyline only.** It is never a platform, never a target and
+nothing is ever placed on it. It is there because it is there in every town on
+this coast, and it is treated with the respect that implies.
 
 ### Weak — the honest list
 
