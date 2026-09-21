@@ -20,6 +20,8 @@ signal dash_ended()
 signal footstep(speed_ratio: float)
 signal turned(facing: int)
 signal died()
+signal hit(from: Vector3)
+signal invulnerable_changed(active: bool)
 
 enum State { IDLE, RUN, RISE, FALL, GLIDE, DASH, HURT, DEAD }
 
@@ -87,6 +89,15 @@ enum State { IDLE, RUN, RISE, FALL, GLIDE, DASH, HURT, DEAD }
 ## He keeps the rifle up for a moment after the trigger, so tapping does not
 ## strobe the pose.
 @export var weapon_hold_time := 0.55
+## Vertical aim, Contra-style: hold up or down while firing. Without it the
+## rifle cannot touch anything that is not exactly level with him.
+@export var max_aim_angle := 1.05      ## ~60 degrees
+@export var aim_speed := 9.0
+
+@export_group("Damage")
+@export var invuln_time := 1.25
+@export var hit_knockback := Vector2(7.5, 7.0)
+@export var hit_control_lock := 0.28
 
 @export_group("World")
 @export var plane_z := 0.0
@@ -117,8 +128,11 @@ var _was_on_floor := true
 var _fall_peak_speed := 0.0
 var _step_distance := 0.0
 var _control_locked := 0.0
+var _invuln_left := 0.0
 var _firing := false
 var _weapon_up := 0.0
+var _aim := 0.0
+var _aim_input := 0.0
 var rifle: Rifle
 
 ## Set false by cutscenes and the capture harness's scripted-input mode.
@@ -158,6 +172,7 @@ func _gather_input() -> void:
 	if Input.is_action_just_pressed("dash"):
 		_try_dash()
 	_firing = Input.is_action_pressed("attack")
+	_aim_input = Input.get_axis("move_down", "move_up")
 
 
 func _apply_deadzone(raw: float) -> float:
@@ -189,6 +204,11 @@ func scripted_dash() -> void:
 
 func set_scripted_fire(held: bool) -> void:
 	_firing = held
+
+
+## -1 aims straight down, +1 straight up.
+func set_scripted_aim(value: float) -> void:
+	_aim_input = clampf(value, -1.0, 1.0)
 
 
 # --- Physics ----------------------------------------------------------------
@@ -224,6 +244,7 @@ func _physics_process(delta: float) -> void:
 func _update_weapon(delta: float) -> void:
 	if rifle == null:
 		return
+	_aim = lerpf(_aim, _aim_input, 1.0 - exp(-aim_speed * delta))
 	var want := _firing and state != State.DEAD
 	var before := _weapon_up > 0.0
 	if want:
@@ -236,11 +257,16 @@ func _update_weapon(delta: float) -> void:
 	if not want:
 		return
 	var grounded := is_on_floor()
-	if rifle.try_fire(facing, grounded):
+	if rifle.try_fire_dir(aim_direction(), grounded):
 		var kick: float = recoil_ground if grounded else recoil_air
-		velocity.x -= facing * kick
-		if not grounded and velocity.y < 2.0:
-			velocity.y += recoil_lift
+		var back := -aim_direction()
+		velocity.x += back.x * kick
+		if not grounded:
+			# Firing downward is a hover; firing upward drops him faster. Both
+			# are legitimate movement tech and both fall out of one line.
+			velocity.y += back.y * kick * 1.35
+			if velocity.y < 2.0 and absf(back.y) < 0.2:
+				velocity.y += recoil_lift
 		FX.shake(0.10 if grounded else 0.14, Vector2(-facing * 0.9, 0.25))
 		Audio.play_shot(rifle.muzzle.global_position)
 		Audio.play("shell", global_position, -14.0, randf_range(0.9, 1.15))
@@ -252,6 +278,10 @@ func _tick_timers(delta: float) -> void:
 	_buffer_left = maxf(_buffer_left - delta, 0.0)
 	_dash_cd_left = maxf(_dash_cd_left - delta, 0.0)
 	_control_locked = maxf(_control_locked - delta, 0.0)
+	if _invuln_left > 0.0:
+		_invuln_left = maxf(_invuln_left - delta, 0.0)
+		if _invuln_left <= 0.0:
+			invulnerable_changed.emit(false)
 
 
 func _physics_normal(delta: float, on_floor: bool) -> void:
@@ -510,6 +540,35 @@ func _accumulate_steps(delta: float) -> void:
 
 # --- Damage / death ---------------------------------------------------------
 
+## One touch costs a life, DKC-style — no health bar, just consequence. The
+## invulnerability window afterwards is generous because a knockback that lands
+## you in a second hit is the worst feeling a platformer can produce.
+func take_hit(_amount: float, from: Vector3) -> void:
+	if state == State.DEAD or _invuln_left > 0.0:
+		return
+	_invuln_left = invuln_time
+	invulnerable_changed.emit(true)
+	_set_gliding(false)
+	_control_locked = hit_control_lock
+	var away := signf(global_position.x - from.x)
+	if is_zero_approx(away):
+		away = -facing
+	velocity.x = away * hit_knockback.x
+	velocity.y = hit_knockback.y
+	state = State.FALL
+	FX.hitstop(0.075)
+	FX.shake(0.5, Vector2(away * 1.4, 0.4))
+	Audio.play("hurt", global_position, -2.0)
+	Audio.reset_combo()
+	hit.emit(from)
+	if Gx.lose_life() <= 0:
+		kill()
+
+
+func is_invulnerable() -> bool:
+	return _invuln_left > 0.0
+
+
 func kill() -> void:
 	if state == State.DEAD:
 		return
@@ -545,6 +604,17 @@ func is_dashing() -> bool:
 
 func is_airborne() -> bool:
 	return state == State.RISE or state == State.FALL or state == State.GLIDE
+
+
+## Unit vector the rifle is pointing, in world space.
+func aim_direction() -> Vector3:
+	var a := _aim * max_aim_angle
+	return Vector3(facing * cos(a), sin(a), 0.0)
+
+
+## -1..1, the smoothed aim. Drives the rig.
+func aim() -> float:
+	return _aim
 
 
 ## 0..1 — how far the rifle is up. Drives the arm pose and the HUD.

@@ -10,6 +10,8 @@ signal fired(muzzle_position: Vector3, direction: Vector3)
 
 @export var rate_of_fire := 9.5          ## rounds per second
 @export var muzzle_velocity := 62.0
+@export var damage := 1.0
+@export var range_ := 42.0
 @export var recoil_impulse := 1.9        ## horizontal push per round, airborne
 @export var recoil_ground_scale := 0.22  ## planted, he absorbs most of it
 @export var spread_min := 0.008
@@ -84,7 +86,16 @@ func _build_flash() -> void:
 	_flash_mesh.add_child(cross)
 
 
+## The attach is deferred, so the rifle can be freed (on respawn) before it
+## runs. If that happens the pool would never enter the tree and never be
+## freed — an intermittent two-object leak at exit.
 func _attach_tracers() -> void:
+	if not is_instance_valid(_tracers):
+		return
+	if not is_inside_tree():
+		_tracers.queue_free()
+		_tracers = null
+		return
 	var root := get_tree().current_scene
 	if root == null:
 		root = get_tree().root
@@ -143,8 +154,12 @@ func can_fire() -> bool:
 	return _cooldown <= 0.0
 
 
-## Returns true if a round left the barrel this call.
 func try_fire(facing: int, grounded: bool) -> bool:
+	return try_fire_dir(Vector3(facing, 0.0, 0.0), grounded)
+
+
+## Returns true if a round left the barrel this call.
+func try_fire_dir(aim: Vector3, _grounded: bool) -> bool:
 	if not can_fire():
 		return false
 	_cooldown = 1.0 / rate_of_fire
@@ -152,16 +167,83 @@ func try_fire(facing: int, grounded: bool) -> bool:
 	var spread := lerpf(spread_min, spread_max, clampf(_bloom, 0.0, 1.0))
 	_bloom = minf(_bloom + bloom_per_shot, 1.0)
 
-	var dir := Vector3(facing, randf_range(-spread, spread), 0.0).normalized()
+	# Spread is applied perpendicular to the aim, not as a fixed Y jitter, so
+	# it stays honest when he is shooting straight up.
+	var base := aim.normalized()
+	var perp := Vector3(-base.y, base.x, 0.0)
+	var dir := (base + perp * randf_range(-spread, spread)).normalized()
 	_flash_left = 0.045
 	_flash_mesh.rotation.z = randf_range(0.0, TAU)
 	_shells.restart()
 	_shells.emitting = true
-	if is_instance_valid(_tracers):
-		_tracers.spawn(muzzle.global_position, dir, muzzle_velocity)
 
+	_hitscan(muzzle.global_position, dir)
 	fired.emit(muzzle.global_position, dir)
 	return true
+
+
+## Tracers are cosmetic; this is the shot. Raycast against the world (layer 1)
+## and enemies (layer 8), stop the tracer at the hit, and spark the impact.
+func _hitscan(from: Vector3, dir: Vector3) -> void:
+	var space := get_world_3d().direct_space_state
+	var q := PhysicsRayQueryParameters3D.create(from, from + dir * range_)
+	q.collision_mask = 1 | 8
+	q.collide_with_areas = false
+	var hit := space.intersect_ray(q)
+	var end := from + dir * range_
+	if not hit.is_empty():
+		end = hit["position"]
+		var body: Object = hit["collider"]
+		if body is Enemy:
+			(body as Enemy).hurt(damage, from, dir)
+		else:
+			_impact(end, hit["normal"])
+	if is_instance_valid(_tracers):
+		var length: float = maxf((end - from).length(), 0.4)
+		_tracers.spawn(from, dir, muzzle_velocity, minf(length, 2.4), 0.035,
+			minf(length / muzzle_velocity, 0.30))
+
+
+## Dust puff and a couple of chips where the round lands.
+func _impact(at: Vector3, normal: Vector3) -> void:
+	var p := GPUParticles3D.new()
+	p.amount = 8
+	p.lifetime = 0.35
+	p.one_shot = true
+	p.explosiveness = 1.0
+	p.local_coords = false
+	p.visibility_aabb = AABB(Vector3(-2, -2, -2), Vector3(4, 4, 4))
+
+	var pm := ParticleProcessMaterial.new()
+	pm.direction = normal
+	pm.spread = 46.0
+	pm.initial_velocity_min = 1.6
+	pm.initial_velocity_max = 4.2
+	pm.gravity = Vector3(0, -9.0, 0)
+	pm.damping_min = 4.0
+	pm.damping_max = 9.0
+	pm.scale_min = 0.5
+	pm.scale_max = 1.3
+	p.process_material = pm
+
+	var quad := QuadMesh.new()
+	quad.size = Vector2(0.05, 0.05)
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_color = Color(0.85, 0.78, 0.66, 0.85)
+	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	mat.disable_receive_shadows = true
+	quad.material = mat
+	p.draw_pass_1 = quad
+
+	var root := get_tree().current_scene
+	if root == null:
+		return
+	root.add_child(p)
+	p.global_position = at
+	p.emitting = true
+	p.finished.connect(p.queue_free)
 
 
 func bloom() -> float:
@@ -169,5 +251,9 @@ func bloom() -> float:
 
 
 func _exit_tree() -> void:
-	if is_instance_valid(_tracers):
-		_tracers.queue_free()
+	if not is_instance_valid(_tracers):
+		return
+	# Always deferred: during a scene teardown the pool can still have a parent
+	# that is mid-removal, and free() would assert.
+	_tracers.queue_free()
+	_tracers = null

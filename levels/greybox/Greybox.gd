@@ -39,6 +39,7 @@ func _build_level() -> void:
 	_section_dash_gap()
 	_backdrop()
 	_trails()
+	_enemies()
 
 
 ## 0. Run-up: enough flat ground to reach and read top speed.
@@ -93,6 +94,21 @@ func _section_dash_gap() -> void:
 	# Pit between them — falling here exercises the respawn path.
 	LevelKit.prop(geometry, Vector3(77.0, GROUND_Y - 8.0, -3.0), Vector3(13.0, 0.4, 4.0),
 		_pal["marker"], "PitFloorMarker")
+
+
+## A patrol of Snitch drones over the runway and the gap section, so the
+## combat loop gets exercised by the same autopilot run that tests traversal.
+func _enemies() -> void:
+	for spec: Array in [
+			[-16.0, 2.6, 4.0],
+			[6.0, 5.4, 3.0],
+			[22.0, 6.4, 3.5],
+			[50.0, 8.6, 4.5],
+		]:
+		var d := SnitchDrone.new()
+		geometry.add_child(d)
+		d.position = Vector3(spec[0], GROUND_Y + spec[1], 0.0)
+		d.patrol_span = spec[2]
 
 
 ## Collectible trails. The lab is also where trail shapes get checked against

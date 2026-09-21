@@ -262,6 +262,20 @@ func _autopilot(player: PlayerController) -> Dictionary:
 				hold = 26
 				_ap_dash_armed = true
 
+	# Sweep the aim arc for anything on the enemy layer, then shoot at it.
+	var eye := pos + Vector3(0.0, 1.05, 0.0)
+	var found := false
+	for step in 7:
+		var a: float = lerpf(-0.9, 1.05, float(step) / 6.0)
+		var probe := eye + Vector3(cos(a) * 17.0 * dir, sin(a) * 17.0, 0.0)
+		if not _ray_mask(space, eye, probe, player, 8).is_empty():
+			player.set_scripted_aim(a / player.max_aim_angle)
+			found = true
+			break
+	if not found:
+		player.set_scripted_aim(0.0)
+	player.set_scripted_fire(found)
+
 	if _ap_stuck_frames > 24:
 		want_jump = true
 		hold = 26
@@ -281,6 +295,15 @@ func _autopilot(player: PlayerController) -> Dictionary:
 		player.scripted_jump_release()
 
 	return {"axis": dir, "jump_held": _ap_hold_left > 0}
+
+
+func _ray_mask(space: PhysicsDirectSpaceState3D, from: Vector3, to: Vector3,
+		exclude: Node3D, mask: int) -> Dictionary:
+	var q := PhysicsRayQueryParameters3D.create(from, to)
+	q.exclude = [exclude.get_rid()]
+	q.collision_mask = mask
+	q.collide_with_areas = false
+	return space.intersect_ray(q)
 
 
 func _ray(space: PhysicsDirectSpaceState3D, from: Vector3, to: Vector3,
@@ -345,6 +368,9 @@ func _save_frame(frame: int, t: float, stage: Node) -> void:
 		entry["vel"] = [snappedf(player.velocity.x, 0.01), snappedf(player.velocity.y, 0.01)]
 		entry["state"] = PlayerController.State.keys()[player.state]
 		entry["on_floor"] = player.is_on_floor()
+		entry["sriracha"] = Gx.sriracha
+		entry["lives"] = Gx.lives
+	entry["enemies"] = get_tree().get_nodes_in_group("enemy").size()
 	manifest.append(entry)
 	print("  f%04d t=%.2fs %s" % [frame, t, entry.get("state", "-")])
 

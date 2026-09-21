@@ -55,6 +55,7 @@ func bind(c: PlayerController) -> void:
 	c.air_jumped.connect(_on_air_jumped)
 	c.dash_started.connect(_on_dash_started)
 	c.fired.connect(_on_fired)
+	c.hit.connect(_on_hit)
 	c.rifle = rifle
 
 
@@ -197,6 +198,12 @@ func _process(delta: float) -> void:
 	_drive_squash(delta)
 	_drive_billow(delta)
 	_drive_rifle(delta)
+	# Invulnerability flicker: alpha would need a transparent pass on every
+	# material, so it blinks visibility instead. Faster and it reads better.
+	if controller.is_invulnerable():
+		body.visible = fmod(Time.get_ticks_msec() * 0.001, 0.14) < 0.08
+	elif not body.visible:
+		body.visible = true
 
 	if _weapon_blend > 0.25 and controller.state != PlayerController.State.DASH:
 		_pose_rifle(delta)
@@ -280,8 +287,11 @@ func _drive_rifle(delta: float) -> void:
 	_recoil += _recoil_vel * delta
 
 	var t := _weapon_blend
+	# Aim tilts the rifle about X; +Z is his forward, so a positive X rotation
+	# raises the muzzle.
+	var aim_rot := Vector3(controller.aim() * controller.max_aim_angle, 0.0, 0.0)
 	rifle.position = SLUNG_POS.lerp(READY_POS, t) + Vector3(0.0, 0.0, -_recoil * 0.18)
-	rifle.rotation = SLUNG_ROT.lerp(READY_ROT, t) + Vector3(-_recoil * 0.9, 0.0, 0.0)
+	rifle.rotation = SLUNG_ROT.lerp(READY_ROT + aim_rot, t) + Vector3(-_recoil * 0.9, 0.0, 0.0)
 
 
 ## Rifle up: both hands on it, shoulders squared, head over the sights. The
@@ -291,17 +301,20 @@ func _pose_rifle(delta: float) -> void:
 	var speed := controller.speed_ratio()
 	var grounded := controller.is_on_floor()
 
-	_pose(B.ARM_R, Vector3(-1.35 - _recoil * 0.5, 0.0, -0.30), k)
-	_pose(B.FOREARM_R, Vector3(-0.62, 0.0, 0.0), k)
-	_pose(B.ARM_L, Vector3(-1.05 - _recoil * 0.3, 0.0, 0.46), k)
-	_pose(B.FOREARM_L, Vector3(-0.78, 0.0, 0.0), k)
+	# Arms follow the aim so the rifle stays in his hands.
+	var aim := controller.aim() * controller.max_aim_angle
+	_pose(B.ARM_R, Vector3(-1.35 - aim * 0.85 - _recoil * 0.5, 0.0, -0.30), k)
+	_pose(B.FOREARM_R, Vector3(-0.62 + aim * 0.18, 0.0, 0.0), k)
+	_pose(B.ARM_L, Vector3(-1.05 - aim * 0.95 - _recoil * 0.3, 0.0, 0.46), k)
+	_pose(B.FOREARM_L, Vector3(-0.78 + aim * 0.22, 0.0, 0.0), k)
 	_pose(B.SHOULDER_R, Vector3(0.0, 0.0, -0.22 - _recoil * 0.3), k)
 	_pose(B.SHOULDER_L, Vector3(0.0, 0.0, 0.26), k)
 
 	_pose(B.SPINE, Vector3(-0.10 - _recoil * 0.35, 0.0, 0.0), k)
 	_pose(B.CHEST, Vector3(-0.05, 0.0, 0.0), k)
-	_pose(B.NECK, Vector3(0.10 + _recoil * 0.4, 0.0, 0.0), k)
-	_pose(B.HEAD, Vector3(0.05, 0.0, 0.0), k)
+	# Head follows the muzzle — he looks where he shoots.
+	_pose(B.NECK, Vector3(0.10 - aim * 0.30 + _recoil * 0.4, 0.0, 0.0), k)
+	_pose(B.HEAD, Vector3(0.05 - aim * 0.24, 0.0, 0.0), k)
 
 	if grounded and speed > 0.08:
 		_cycle += delta * lerpf(6.2, 13.0, speed)
@@ -325,6 +338,11 @@ func _pose_rifle(delta: float) -> void:
 		_pose(B.SHIN_L, Vector3(0.44, 0.0, 0.0), k)
 		_pose(B.SHIN_R, Vector3(0.30, 0.0, 0.0), k)
 		_hip_y = lerpf(_hip_y, 0.0, k)
+
+
+func _on_hit(_from: Vector3) -> void:
+	_squash = -0.22
+	_squash_vel = 0.0
 
 
 func _on_fired() -> void:

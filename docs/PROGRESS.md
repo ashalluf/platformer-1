@@ -131,6 +131,19 @@ positional and 8 non-positional players, and drives volumes from the settings.
 `tools/audio_demo.gd` renders the whole palette to `docs/audio_demo.wav` so
 audio can be reviewed the way screenshots are.
 
+**Combat.** `Enemy` is the base contract: telegraph before committing, flash
+and recoil on being hit, die in a way worth watching. World 1's prison enemies
+are Brega's automated security — a tonal decision as much as a design one, since
+full-auto gunplay against machines stays playful in a way gunplay against people
+would not. The SNITCH drone patrols, sweeps, stiffens and brightens to white
+during a visible wind-up, charges, then leaves a recovery window that is the
+player's turn. The rifle is hitscan with cosmetic tracers, and **vertical aim**
+(hold up or down) exists because without it the rifle could not touch anything
+that was not exactly level with him. Recoil now pushes opposite the aim, so
+firing downward is a hover and firing upward drops him faster — two pieces of
+movement tech out of one line. One touch costs a life, DKC-style, with a
+generous invulnerability window and a visibility flicker.
+
 **Two more silent bugs fixed.** `StandardMaterial3D.specular` is a Godot 3
 property name — every specular tweak in the project was a no-op that also
 spammed the log. And collect bursts were rendering as large red squares. The
@@ -162,8 +175,9 @@ with a pitfall list, and the benchmark build order.
    but untested against real level geometry.
 5. **No music.** SFX and an ambience bed exist; there is no score. The Libyan /
    North African musical identity in DESIGN.md is unbuilt.
-6. **No enemies, no hazards, no damage.** Nothing can hurt him and nothing can
-   be hurt. The rifle fires into empty air.
+6. **One enemy type, in the greybox only.** The turret and the heavy walker
+   from the enemy plan do not exist, no enemy appears in Brega, and there are
+   no hazards — no spikes, no crushers, no fire, no water.
 7. **No menus.** No title screen, no pause, no settings, no World 1 map, no
    chain collection screen. The HUD is the only UI.
 8. **Checkpoints are a data structure with no scene.** `Stage` tracks them;
