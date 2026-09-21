@@ -5,7 +5,7 @@ extends Node3D
 ## explicit --level= jumps straight to a scene, everything else falls through
 ## to the default entry scene.
 
-@export var default_scene := "res://levels/greybox/Greybox.tscn"
+@export var default_scene := "res://levels/menu/TitleScreen.tscn"
 
 
 func _ready() -> void:

@@ -308,9 +308,9 @@ static func chainlink(parent: Node3D, left_x: float, base_y: float, width: float
 ## Razor wire as a coil of tori. Out of focus in the foreground it needs to read
 ## as a shape, not as wire, so the segment count stays low on purpose.
 static func razor_coil(parent: Node3D, from: Vector3, to: Vector3, radius: float,
-		mat: Material, coils := 12) -> Node3D:
+		mat: Material, coils := 12, name_ := "RazorCoil") -> Node3D:
 	var root := Node3D.new()
-	root.name = "RazorCoil"
+	root.name = name_
 	parent.add_child(root)
 	var torus := TorusMesh.new()
 	torus.inner_radius = radius - 0.02

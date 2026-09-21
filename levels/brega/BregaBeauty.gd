@@ -448,7 +448,7 @@ func _layer_foreground() -> void:
 
 	# Razor wire across the top-left corner, heavy near-DOF, reading as a shape.
 	PropKit.razor_coil(geometry, Vector3(-7.6, 3.0, 9.0), Vector3(-2.6, 1.9, 9.0),
-		0.30, mats["dark"], 10)
+		0.30, mats["dark"], 10, "RazorCoilForeground")
 	# A dead casuarina closing the right edge, silvered bone-white.
 	PropKit.eucalyptus(geometry, Vector3(9.6, -5.4, 8.6), 13.0,
 		mats["dark"], mats["dark"], false, 91)

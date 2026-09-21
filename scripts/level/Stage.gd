@@ -145,7 +145,33 @@ func respawn() -> void:
 	_spawn_player(_current_spawn())
 
 
+var _pause_menu: PauseMenu
+
+
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("restart"):
+	if event.is_action_pressed("pause") and show_hud:
+		_toggle_pause()
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("restart"):
 		active_checkpoint = -1
 		respawn()
+
+
+func _toggle_pause() -> void:
+	if is_instance_valid(_pause_menu):
+		return
+	get_tree().paused = true
+	var layer := CanvasLayer.new()
+	layer.name = "PauseLayer"
+	layer.layer = 90
+	layer.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(layer)
+	_pause_menu = PauseMenu.new()
+	layer.add_child(_pause_menu)
+	_pause_menu.resumed.connect(func() -> void:
+		get_tree().paused = false
+		layer.queue_free())
+	_pause_menu.quit_to_title.connect(func() -> void:
+		get_tree().paused = false
+		layer.queue_free()
+		SceneFlow.change_scene("res://levels/menu/TitleScreen.tscn"))

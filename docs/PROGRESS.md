@@ -218,6 +218,42 @@ autopilot run at high quality.
 colour script, shape and material rules, the depth-layer recipe, Godot settings
 with a pitfall list, and the benchmark build order.
 
+### Added — the UI suite
+
+**Nothing in the UI is a themed Control.** A focused Godot `Button` draws a
+rectangle with a blue outline, and that is the exact default look this project
+is not allowed to have. `UIKit` draws cut-corner skewed slabs, letterspaced
+type, chevrons, rules and chain pips; `MenuList` owns its own selection, input
+and drawing and reports which row was chosen. Everything is `_draw`, so it
+scales to any resolution and carries the game's shapes rather than the engine's.
+
+**The title screen is the beauty benchmark.** `levels/menu/TitleScreen.gd`
+extends `BregaBeauty` outright — same geometry, same colour script, same
+lighting — so the first frame of the game is literally the frame every level
+has to match, and the title can never look like a different game. Wanis stands
+on the walkway in his thobe with the rifle slung, input disabled, while the
+camera breathes on two out-of-phase sines slow enough that you never see the
+loop. The type sits in the left column behind a soft wedge of shade; the
+razor coil that crosses that column in the benchmark drops to the bottom edge,
+because a black tangle behind cream type is a fight neither side wins.
+
+**Pause and settings exist.** `Stage` builds a `PauseMenu` on a layer above the
+HUD with `PROCESS_MODE_ALWAYS`; `SettingsPanel` adjusts master/music/sfx volume,
+screen shake, graphics tier and fullscreen with left/right, writing straight
+through to `Gx`, which persists them and tells the directors — there is no apply
+step and nothing to forget to save.
+
+**`scripts/core/World.gd` is the canon level manifest.** Brega → Ajdabiya →
+Highway to Benghazi → Garyounis → Benghazi, stated exactly once, with Arabic
+names, map positions and level kind. Levels that are not built yet carry an
+empty scene path, so the map can draw them locked rather than pretend.
+
+Two silent bugs fixed on the way: `MenuList` laid its Arabic labels out a full
+text-box width past the slab's right edge (`draw_string` lays out from `pos`,
+so a right-aligned box starts at the right edge *minus* its width), and both
+razor coils in the benchmark were named `RazorCoil`, so anything looking one up
+by name got the wrong one. `PropKit.razor_coil` now takes a name.
+
 ### Weak — the honest list
 
 1. **The benchmark does not pass its own quality gate yet.** It splits into
@@ -243,8 +279,10 @@ with a pitfall list, and the benchmark build order.
 6. **One enemy type, in the greybox only.** The turret and the heavy walker
    from the enemy plan do not exist, no enemy appears in Brega, and there are
    no hazards — no spikes, no crushers, no fire, no water.
-7. **No menus.** No title screen, no pause, no settings, no World 1 map, no
-   chain collection screen. The HUD is the only UI.
+7. **The menus are half a suite.** Title, pause and settings exist and are
+   drawn in the game's own shapes. The World 1 map and the chain collection
+   screen — which the canon requires — do not exist yet, and there is no
+   level-complete or game-over screen.
 8. **Checkpoints are a data structure with no scene.** `Stage` tracks them;
    nothing places or triggers them.
 9. **One ice level, and no collection screen.** The pool the canon calls for is
