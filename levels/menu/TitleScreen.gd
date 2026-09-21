@@ -48,11 +48,12 @@ func _ready() -> void:
 	layer.add_child(_overlay)
 
 	_menu = MenuList.new()
-	_menu.origin = Vector2(96.0, 356.0)
+	_menu.origin = Vector2(96.0, 336.0)
 	_menu.width = 392.0
 	layer.add_child(_menu)
 	_menu.add_row("play", "BREAK OUT", "ابدأ")
 	_menu.add_row("ice", "GLACIER RUN", "الجليد")
+	_menu.add_row("chains", "THE CHAINS", "السلاسل")
 	_menu.add_row("lab", "MOVEMENT LAB", "التدريب")
 	_menu.add_row("settings", "SETTINGS", "الإعدادات")
 	_menu.chosen.connect(_on_chosen)
@@ -101,6 +102,8 @@ func _on_chosen(_index: int, id: String) -> void:
 		"ice":
 			Gx.reset_run()
 			SceneFlow.change_scene("res://levels/ice/IceBonus01.tscn")
+		"chains":
+			SceneFlow.change_scene("res://levels/menu/Collection.tscn")
 		"lab":
 			Gx.reset_run()
 			SceneFlow.change_scene("res://levels/greybox/Greybox.tscn")
