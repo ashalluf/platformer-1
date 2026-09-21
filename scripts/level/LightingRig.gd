@@ -11,6 +11,7 @@ class Mood extends RefCounted:
 	var sun_color := Color(1.0, 0.86, 0.66)
 	var sun_angles := Vector2(-42.0, 38.0)   ## pitch, yaw in degrees
 	var sun_angular_distance := 1.1          ## soft shadow width
+	var sun_fog_energy := 2.4                ## how hard the key writes into volumetrics
 
 	var fill_energy := 0.55
 	var fill_color := Color(0.42, 0.55, 0.78)
@@ -31,9 +32,10 @@ class Mood extends RefCounted:
 	var fog_density := 0.0022
 	var fog_sun_scatter := 0.35
 	var fog_emission := Color(0.35, 0.30, 0.26)
+	var fog_anisotropy := 0.72
 
 	var glow_intensity := 0.55
-	var glow_bloom := 0.18
+	var glow_bloom := 0.0        ## >0 is guaranteed washout; keep it at zero
 	var glow_hdr_threshold := 1.05
 
 	var tonemap := Environment.TONE_MAPPER_AGX
@@ -98,7 +100,7 @@ static func build(parent: Node3D, mood: Mood) -> WorldEnvironment:
 	env.ssao_detail = 0.6
 
 	env.ssil_enabled = true
-	env.ssil_radius = 4.0
+	env.ssil_radius = 2.2   ## the 5.0 default bleeds background onto the hero
 	env.ssil_intensity = 0.9
 
 	env.ssr_enabled = true
@@ -118,6 +120,13 @@ static func build(parent: Node3D, mood: Mood) -> WorldEnvironment:
 	env.glow_bloom = mood.glow_bloom
 	env.glow_hdr_threshold = mood.glow_hdr_threshold
 	env.glow_blend_mode = Environment.GLOW_BLEND_MODE_SOFTLIGHT
+	# Energy only in the wide levels — levels 1 and 2 carrying energy is the
+	# cheap-bloom halo.
+	env.set("glow_levels/1", 0.0)
+	env.set("glow_levels/2", 0.0)
+	env.set("glow_levels/3", 0.6)
+	env.set("glow_levels/4", 1.0)
+	env.set("glow_levels/5", 1.0)
 	env.glow_strength = 1.0
 
 	env.fog_enabled = true
@@ -135,6 +144,9 @@ static func build(parent: Node3D, mood: Mood) -> WorldEnvironment:
 	env.volumetric_fog_gi_inject = 1.0
 	env.volumetric_fog_length = 90.0
 	env.volumetric_fog_detail_spread = 2.0
+	# The 0.2 default means no god ray will ever form.
+	env.volumetric_fog_anisotropy = mood.fog_anisotropy
+	env.volumetric_fog_temporal_reprojection_amount = 0.68
 
 	env.adjustment_enabled = true
 	env.adjustment_saturation = mood.adjustment_saturation
@@ -148,7 +160,7 @@ static func build(parent: Node3D, mood: Mood) -> WorldEnvironment:
 	parent.add_child(we)
 
 	_light(parent, "Sun", mood.sun_angles, mood.sun_color, mood.sun_energy, true,
-		mood.sun_angular_distance, "sun")
+		mood.sun_angular_distance, "sun", mood.sun_fog_energy)
 	_light(parent, "Fill", mood.fill_angles, mood.fill_color, mood.fill_energy, false, 4.0, "")
 	_light(parent, "Rim", mood.rim_angles, mood.rim_color, mood.rim_energy, false, 2.0, "")
 
@@ -156,7 +168,8 @@ static func build(parent: Node3D, mood: Mood) -> WorldEnvironment:
 
 
 static func _light(parent: Node3D, name_: String, angles: Vector2, color: Color,
-		energy: float, shadows: bool, angular: float, group: String) -> DirectionalLight3D:
+		energy: float, shadows: bool, angular: float, group: String,
+		fog_energy := 0.0) -> DirectionalLight3D:
 	var l := DirectionalLight3D.new()
 	l.name = name_
 	l.rotation_degrees = Vector3(angles.x, angles.y, 0.0)
@@ -164,12 +177,16 @@ static func _light(parent: Node3D, name_: String, angles: Vector2, color: Color,
 	l.light_energy = energy
 	l.shadow_enabled = shadows
 	l.light_angular_distance = angular
+	if not shadows:
+		l.light_volumetric_fog_energy = 0.0
 	if shadows:
 		l.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
 		l.directional_shadow_max_distance = 160.0
 		l.directional_shadow_blend_splits = true
-		l.shadow_bias = 0.04
-		l.shadow_normal_bias = 1.4
+		l.shadow_bias = 0.03
+		l.shadow_normal_bias = 0.8   ## 2.0 default peter-pans small props
+		l.shadow_opacity = 0.84
+		l.light_volumetric_fog_energy = fog_energy
 	else:
 		# Fill and rim must not double-count in GI; they exist for shaping only.
 		l.light_specular = 0.35 if name_ == "Fill" else 1.2

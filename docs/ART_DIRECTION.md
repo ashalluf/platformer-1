@@ -293,6 +293,41 @@ Levels 1, 2 and 5 and is authored as one shader, not as hand-placed decals. Bott
 
 ## The hero: Wanis, the Libyan Gangsta
 
+> **CANON OVERRIDE — 2026-09-21.** This section was written before the costume and
+> moveset were fixed by the project owner. Binding canon is:
+>
+> - **Wanis wears a white thobe**, not a red jacket. The robe is the silhouette.
+> - **The jard tail is a shemagh** — deep madder red, over the shoulder, down the
+>   back. Same job: velocity vector and silhouette-breaker. Same 40% envelope break.
+> - **He carries a fully automatic AK-47.** It is his primary ranged attack and it
+>   is part of the silhouette: slung across the back at rest, shouldered when firing.
+> - **Moveset: run, variable jump, double jump, Heat Dash, and the thobe glide** —
+>   hold jump while falling and the robe fills like a parachute, flattening the
+>   descent. The glide is a distinct silhouette, not a slower fall.
+>
+> Everything else below — the proportion band, the three-mass rule, negative space,
+> the asymmetry budget, the TF2 dark-bottom placement rule, oversized sandals —
+> stands and is being built to. Where a line below says "jacket", read "thobe";
+> where it says "jard tail", read "shemagh".
+>
+> **Why white works better than the red jacket did:** against a drained pastel
+> world capped at S 0.55 / V 0.72, a near-white robe makes Wanis the brightest
+> value in every frame, which is a stronger readability lever than hue contrast
+> alone. The saturated-red reservation moves entirely to the shemagh and the
+> Sriracha, which sharpens it. And a robe is the right thing to catch wind.
+>
+> **Revised hero palette (binding):**
+>
+> | Zone | Share | Hex | Notes |
+> |---|---|---|---|
+> | Thobe | 58% | `#F4F1EA` base, `#DCD6C8` shade, `#FFFDF6` sun | Cotton. Fine weave shaded in-shader, never textured. |
+> | Sirwal below the hem | 12% | `#999487` | The value step that keeps the hem line crisp. |
+> | Shemagh | 11% | `#9A1D16` base, `#5E120E` shade | The only saturated hue he carries. |
+> | Hair + beard + shades | 12% | `#0E0C0D` | The dark top mass. Matte — roughness 0.74. |
+> | Skin | 5% | `#BD8052` | Subsurface on. |
+> | Gold chain | 1% | `#F2BD42` | Metallic 1.0, roughness 0.16. The glint. |
+> | Sandals | 1% | `#57381F` | Oversized per the rule below. |
+
 ### Proportions
 
 **5.25 heads tall.** 1.78 m in world units, head 0.339 m. This band keeps face

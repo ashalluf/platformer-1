@@ -45,6 +45,17 @@ const TIMELINES := {
 		[15.0, "stop"],
 	],
 
+	# Ground jump held through the apex, so the thobe catches on the way down,
+	# then a double jump into a second glide.
+	"glide": [
+		[0.5, "right"],
+		[1.3, "jump"],
+		[3.6, "jumprelease"],
+		[3.9, "jump"],
+		[6.4, "jumprelease"],
+		[7.4, "stop"],
+	],
+
 	"dash": [
 		[0.5, "right"],
 		[1.4, "dash"],

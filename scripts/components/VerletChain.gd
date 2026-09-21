@@ -13,6 +13,10 @@ class_name VerletChain extends MeshInstance3D
 @export var damping := 0.86
 @export var stiffness := 0.55        ## constraint iterations blend
 @export var wind_strength := 0.6
+## Constant acceleration in the ANCHOR's local space — used to hold cloth away
+## from the body. Local, not world: in a side-scroller "behind him" is local -Z,
+## which becomes world -X once he is facing along the screen.
+@export var bias := Vector3.ZERO
 @export var wind_speed := 2.4
 @export var inertia := 1.0           ## how much anchor motion whips the chain
 @export var chain_material: Material
@@ -52,6 +56,7 @@ func _process(delta: float) -> void:
 	_time += delta
 
 	var anchor := parent.global_position
+	var world_bias := parent.global_transform.basis * bias
 	var anchor_vel := (anchor - _anchor_prev) / maxf(delta, 0.0001)
 	_anchor_prev = anchor
 
@@ -69,7 +74,7 @@ func _process(delta: float) -> void:
 		var vel := (cur - _prev[i]) * damping
 		vel -= anchor_vel * delta * inertia * 0.35
 		_prev[i] = cur
-		var acc := Vector3(0.0, -gravity, 0.0) + wind
+		var acc := Vector3(0.0, -gravity, 0.0) + wind + world_bias
 		_points[i] = cur + vel + acc * delta * delta
 
 	# Distance constraints, anchored end first.
@@ -90,6 +95,8 @@ func _process(delta: float) -> void:
 		_points[0] = anchor
 
 	_rebuild_ribbon()
+	if OS.get_cmdline_user_args().has("--debug-cloth") and Engine.get_process_frames() % 60 == 0:
+		print("CLOTH %s pts=%d head=%s tail=%s vis=%s" % [name, _points.size(), _points[0], _points[_points.size() - 1], is_visible_in_tree()])
 
 
 func _rebuild_ribbon() -> void:

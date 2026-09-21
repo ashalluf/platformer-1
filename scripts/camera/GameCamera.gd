@@ -58,6 +58,9 @@ var _noise := FastNoiseLite.new()
 
 func _ready() -> void:
 	projection = Camera3D.PROJECTION_PERSPECTIVE
+	# The 0.05 default wrecks depth precision, SSAO, SSR and contact shadows.
+	near = 0.5
+	far = 1400.0
 	fov = base_fov
 	_noise.noise_type = FastNoiseLite.TYPE_SIMPLEX
 	_noise.frequency = 0.9

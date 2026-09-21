@@ -11,13 +11,15 @@ class_name PlayerController extends CharacterBody3D
 
 signal jumped(from_coyote: bool)
 signal landed(impact: float)      ## 0..1, how hard the landing was
+signal air_jumped(index: int)
+signal glide_changed(active: bool)
 signal dash_started(charged: bool)
 signal dash_ended()
 signal footstep(speed_ratio: float)
 signal turned(facing: int)
 signal died()
 
-enum State { IDLE, RUN, RISE, FALL, DASH, HURT, DEAD }
+enum State { IDLE, RUN, RISE, FALL, GLIDE, DASH, HURT, DEAD }
 
 @export_group("Run")
 @export var max_run_speed := 9.2
@@ -46,6 +48,21 @@ enum State { IDLE, RUN, RISE, FALL, DASH, HURT, DEAD }
 @export var jump_buffer := 0.13
 ## Horizontal boost applied on jump, so jumping out of a run feels committed.
 @export var jump_horizontal_kick := 0.7
+## Double jump. Refunded on landing, like the air dash.
+@export var air_jumps := 1
+@export var air_jump_mult := 0.92
+
+@export_group("Glide")
+## The thobe catches the wind. Hold jump while falling and the descent flattens
+## out to a drift, with more lateral authority than a normal fall.
+@export var glide_fall_speed := 3.4
+@export var glide_ease := 34.0
+@export var glide_accel := 40.0
+@export var glide_max_speed := 7.4
+## Must already be falling this fast before the robe can catch — otherwise a
+## held jump would turn every hop into a float.
+@export var glide_engage_speed := 1.4
+@export var glide_spin_up := 0.16
 
 @export_group("Dash")
 @export var dash_speed := 23.0
@@ -80,6 +97,9 @@ var _dash_dir := 1
 var _dash_charged := false
 var _air_dash_used := false
 var _jump_cut_armed := false
+var _air_jumps_left := 0
+var _gliding := false
+var _glide_blend := 0.0
 var _was_on_floor := true
 var _fall_peak_speed := 0.0
 var _step_distance := 0.0
@@ -96,6 +116,7 @@ func _ready() -> void:
 	floor_max_angle = deg_to_rad(52.0)
 	floor_snap_length = 0.45
 	floor_stop_on_slope = true
+	_air_jumps_left = air_jumps
 	slide_on_ceiling = true
 	_recompute_jump()
 
@@ -115,6 +136,7 @@ func _gather_input() -> void:
 	want_jump_held = Input.is_action_pressed("jump")
 	if Input.is_action_just_pressed("jump"):
 		_buffer_left = jump_buffer
+		_try_air_jump()
 	if Input.is_action_just_released("jump"):
 		_jump_cut_armed = true
 	if Input.is_action_just_pressed("dash"):
@@ -137,6 +159,7 @@ func set_scripted_input(axis: float, jump_held: bool) -> void:
 
 func scripted_jump() -> void:
 	_buffer_left = jump_buffer
+	_try_air_jump()
 
 
 func scripted_jump_release() -> void:
@@ -195,6 +218,16 @@ func _apply_horizontal(delta: float, on_floor: bool) -> void:
 	var vx := velocity.x
 	var accel: float
 
+	if _gliding:
+		target = move_input * glide_max_speed
+		velocity.x = move_toward(vx, target, glide_accel * delta)
+		if not is_zero_approx(move_input):
+			var want_g := int(signf(move_input))
+			if want_g != facing:
+				facing = want_g
+				turned.emit(facing)
+		return
+
 	if _control_locked > 0.0:
 		accel = air_decel
 	elif is_zero_approx(move_input):
@@ -217,6 +250,10 @@ func _apply_gravity(delta: float, on_floor: bool) -> void:
 	if on_floor:
 		# A small downward bias keeps the body glued through slope transitions.
 		velocity.y = minf(velocity.y, 0.0) - 0.1
+		_set_gliding(false)
+		return
+
+	if _update_glide(delta):
 		return
 
 	var g := gravity
@@ -233,6 +270,46 @@ func _apply_gravity(delta: float, on_floor: bool) -> void:
 	velocity.y = maxf(velocity.y - g * delta, -max_fall_speed)
 
 
+## True while the robe is carrying him, in which case it owns vertical motion.
+func _update_glide(delta: float) -> bool:
+	var want := want_jump_held and velocity.y < -glide_engage_speed and state != State.DASH
+	_set_gliding(want)
+	if not _gliding:
+		_glide_blend = maxf(_glide_blend - delta / glide_spin_up, 0.0)
+		return false
+
+	# Ease into the drift rather than snapping — the robe has to fill first.
+	_glide_blend = minf(_glide_blend + delta / glide_spin_up, 1.0)
+	var target := -lerpf(maxf(-velocity.y, glide_fall_speed), glide_fall_speed, _glide_blend)
+	velocity.y = move_toward(velocity.y, target, glide_ease * delta)
+	return true
+
+
+func _set_gliding(value: bool) -> void:
+	if _gliding == value:
+		return
+	_gliding = value
+	glide_changed.emit(value)
+
+
+func _try_air_jump() -> void:
+	if is_on_floor() or _coyote_left > 0.0 or state == State.DASH or state == State.DEAD:
+		return
+	if _air_jumps_left <= 0:
+		return
+	_air_jumps_left -= 1
+	_buffer_left = 0.0
+	_jump_cut_armed = false
+	_set_gliding(false)
+	_glide_blend = 0.0
+	velocity.y = jump_velocity * air_jump_mult
+	if not is_zero_approx(move_input):
+		velocity.x += move_input * jump_horizontal_kick
+		velocity.x = clampf(velocity.x, -max_run_speed * 1.45, max_run_speed * 1.45)
+	state = State.RISE
+	air_jumped.emit(air_jumps - _air_jumps_left)
+
+
 func _try_consume_jump(on_floor: bool) -> void:
 	if _buffer_left <= 0.0:
 		return
@@ -245,6 +322,7 @@ func _try_consume_jump(on_floor: bool) -> void:
 	_coyote_left = 0.0
 	_jump_cut_armed = false
 	_air_dash_used = false
+	_air_jumps_left = air_jumps
 	velocity.y = jump_velocity
 	if not is_zero_approx(move_input):
 		velocity.x += move_input * jump_horizontal_kick
@@ -261,6 +339,8 @@ func _update_locomotion_state(on_floor: bool) -> void:
 		return
 	if on_floor:
 		state = State.IDLE if absf(velocity.x) < 0.35 else State.RUN
+	elif _gliding:
+		state = State.GLIDE
 	else:
 		state = State.RISE if velocity.y > 0.0 else State.FALL
 	if velocity.y < 0.0:
@@ -327,7 +407,10 @@ func _on_land() -> void:
 	var impact := clampf(_fall_peak_speed / max_fall_speed, 0.0, 1.0)
 	_fall_peak_speed = 0.0
 	_air_dash_used = false
+	_air_jumps_left = air_jumps
 	_jump_cut_armed = false
+	_set_gliding(false)
+	_glide_blend = 0.0
 	landed.emit(impact)
 	if impact > 0.45:
 		FX.hitstop(lerpf(0.0, 0.055, inverse_lerp(0.45, 1.0, impact)))
@@ -393,4 +476,16 @@ func is_dashing() -> bool:
 
 
 func is_airborne() -> bool:
-	return state == State.RISE or state == State.FALL
+	return state == State.RISE or state == State.FALL or state == State.GLIDE
+
+
+func is_gliding() -> bool:
+	return _gliding
+
+
+func glide_blend() -> float:
+	return _glide_blend
+
+
+func air_jumps_left() -> int:
+	return _air_jumps_left
