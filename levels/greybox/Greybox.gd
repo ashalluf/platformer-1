@@ -106,9 +106,11 @@ func _enemies() -> void:
 			[50.0, 8.6, 4.5],
 		]:
 		var d := SnitchDrone.new()
-		geometry.add_child(d)
+		# Placed before it enters the tree: an enemy anchors its patrol on its
+		# own position in _setup, which runs inside _ready.
 		d.position = Vector3(spec[0], GROUND_Y + spec[1], 0.0)
 		d.patrol_span = spec[2]
+		geometry.add_child(d)
 
 
 ## Collectible trails. The lab is also where trail shapes get checked against

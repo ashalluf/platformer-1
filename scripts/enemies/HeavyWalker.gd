@@ -215,9 +215,12 @@ func _behaviour(delta: float) -> void:
 		Mode.PATROL:
 			_set_lamp(Color(0.40, 0.90, 0.60), 1.1)
 			velocity.x = walk_speed * facing
-			if absf(global_position.x - _origin.x) > patrol_span:
+			# Turn at the end of the beat OR at the edge of whatever it is
+			# standing on. Without the edge test a patrol on a deck walks off
+			# it on its first pass and the encounter never happens.
+			if absf(global_position.x - _origin.x) > patrol_span or not _floor_ahead():
 				facing = -facing
-				global_position.x = _origin.x + patrol_span * signf(-float(facing)) * 0.98
+				velocity.x = walk_speed * facing
 			if sees:
 				_mode = Mode.ALERT
 				_timer = 0.0
@@ -237,10 +240,12 @@ func _behaviour(delta: float) -> void:
 				Audio.play("land", global_position, -4.0, 0.7)
 		Mode.CHARGE:
 			_set_lamp(Color(1.0, 0.26, 0.16), 6.0)
-			velocity.x = charge_speed * facing
+			# It will not run itself off a ledge; it plants instead, which also
+			# happens to be the moment the player wants to be behind it.
+			velocity.x = charge_speed * facing if _floor_ahead(1.35) else 0.0
 			_chassis.position.x = 0.10 * float(facing)
 			_chassis.rotation.z = -0.06 * float(facing)
-			if _timer >= charge_time or is_on_wall():
+			if _timer >= charge_time or is_on_wall() or not _floor_ahead(1.35):
 				_mode = Mode.RECOVER
 				_timer = 0.0
 		Mode.RECOVER:
@@ -257,6 +262,17 @@ func _behaviour(delta: float) -> void:
 				_timer = 0.0
 
 	_walk(delta)
+
+
+## Is there floor under the next step? Probes from knee height down past the
+## feet, which also copes with the shallow steps the decks are made of.
+func _floor_ahead(reach := 0.95) -> bool:
+	var space := get_world_3d().direct_space_state
+	var from := global_position + Vector3(reach * float(facing), 0.6, 0.0)
+	var q := PhysicsRayQueryParameters3D.create(from, from + Vector3(0, -2.2, 0))
+	q.exclude = [get_rid()]
+	q.collision_mask = 1
+	return not space.intersect_ray(q).is_empty()
 
 
 ## A two-beat walk. No blending, no curves: a heavy machine's legs are levers
