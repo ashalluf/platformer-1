@@ -273,8 +273,15 @@ func _terrace(left_x: float, right_x: float, height: float, seed_: int) -> void:
 		Vector3(w, 0.5, 7.0), mats["block"], "TerraceRoof%d" % seed_)
 	PropKit.roof_kit(geometry, left_x + 0.8, STREET_Y + height, w - 1.6, -5.0,
 		mats["block"], mats["tank"], mats["rebar"], seed_)
+	PropKit.building_massing(geometry, left_x, STREET_Y, w, height, -5.0,
+		mats["render_c"], mats["block"], 0, seed_)
 	AjdabiyaKit.town_facade(geometry, mats, left_x + 0.6, STREET_Y + 3.8,
 		w - 1.2, height - 4.3, -4.96, seed_ + 3)
+	# One stairwell per terrace, set back behind the play line.
+	PropKit.stair_head(geometry,
+		Vector3(left_x + w * 0.5 + fmod(float(seed_) * 3.7, 4.0) - 2.0,
+			STREET_Y + height, -4.2),
+		mats["render_b"], mats["shutter_blue"], mats["block"])
 
 	var shutters: Array = [mats["shutter_blue"], mats["shutter_green"], mats["shutter_red"]]
 	var bays := maxi(1, int(w / 4.6))

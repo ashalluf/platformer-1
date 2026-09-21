@@ -140,6 +140,8 @@ static func deep_layers(parent: Node3D, mats: Dictionary,
 				Vector3(w, h, 10.0), tone, "TownBlock")
 			LevelKit.prop(parent, Vector3(x + w * 0.5, base + h + 0.28, z - 0.3),
 				Vector3(w * 1.01, 0.56, 10.2), mats["block"], "TownParapet")
+			LevelKit.prop(parent, Vector3(x + w * 0.5, base + h - 0.16, z + 5.2),
+				Vector3(w + 0.5, 0.28, 0.5), mats["block"], "TownCornice")
 			if rng.randf() < 0.55:
 				PropKit.roof_kit(parent, x + 0.6, base + h, w - 1.2, z + 4.6,
 					mats["block"], mats["tank"], mats["rebar"], int(x))
@@ -171,8 +173,14 @@ static func far_terrace(parent: Node3D, mats: Dictionary,
 		var tone: Material = [mats["render"], mats["render_b"], mats["render_c"]][rng.randi() % 3]
 		LevelKit.prop(parent, Vector3(x + w * 0.5, STREET_Y + h * 0.5, -22.0),
 			Vector3(w, h, 8.0), tone, "FarBlock")
+		PropKit.building_massing(parent, x, STREET_Y, w, h, -18.0,
+			mats["render_c"], mats["block"], 0, int(x))
 		PropKit.roof_kit(parent, x + 0.8, STREET_Y + h, w - 1.6, -21.6,
 			mats["block"], mats["tank"], mats["rebar"], int(x) + 41)
+		if rng.randf() < 0.7:
+			PropKit.stair_head(parent,
+				Vector3(x + w * 0.5 + rng.randf_range(-3.0, 3.0), STREET_Y + h, -20.5),
+				mats["render_b"], mats["shutter_green"], mats["block"])
 		town_facade(parent, mats, x + 0.6, STREET_Y + 3.9, w - 1.2, h - 4.4,
 			-17.96, int(x) + 17)
 		var bays := maxi(2, int(w / 4.2))

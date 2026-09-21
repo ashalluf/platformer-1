@@ -689,6 +689,71 @@ static func palm(parent: Node3D, base: Vector3, height: float,
 	return root
 
 
+## Massing: the projections that stop a building being a rectangle.
+##
+## A wall is never a single plane. It has a plinth it stands on, a string
+## course at every floor line, a cornice before the parapet, and at least one
+## bay that steps forward off the rest. Each of these is a few centimetres of
+## geometry and each one buys a hard shadow line across the whole facade, which
+## at gameplay distance is worth more than any amount of texture.
+static func building_massing(parent: Node3D, left_x: float, base_y: float,
+		width: float, height: float, z: float, wall_mat: Material,
+		trim_mat: Material, floors := 0, seed_ := 1) -> Node3D:
+	var root := Node3D.new()
+	root.name = "Massing"
+	parent.add_child(root)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_ * 1259 + 41
+	var storeys := floors if floors > 0 else maxi(1, int(height / 3.2))
+
+	# Plinth: the base course, stepped out and usually a different material.
+	_mi(root, "Plinth", _box(Vector3(width + 0.34, 0.62, 0.34)), trim_mat,
+		Vector3(left_x + width * 0.5, base_y + 0.31, z + 0.17))
+
+	# String courses at the floor lines.
+	for i in range(1, storeys):
+		var y := base_y + height * float(i) / float(storeys)
+		_mi(root, "String%d" % i, _box(Vector3(width + 0.20, 0.16, 0.22)),
+			trim_mat, Vector3(left_x + width * 0.5, y, z + 0.11))
+
+	# Cornice under the parapet: the deepest projection on the building, and
+	# the one that throws the shadow that separates roof from wall.
+	_mi(root, "Cornice", _box(Vector3(width + 0.46, 0.26, 0.46)), trim_mat,
+		Vector3(left_x + width * 0.5, base_y + height - 0.13, z + 0.23))
+
+	# One or two bays stepping forward off the rest of the front.
+	var bays := rng.randi_range(1, 2)
+	for i in bays:
+		var bw := rng.randf_range(width * 0.18, width * 0.34)
+		var bx := left_x + rng.randf_range(0.1, 0.9) * (width - bw) + bw * 0.5
+		var bh := height * rng.randf_range(0.55, 0.92)
+		var out := rng.randf_range(0.28, 0.5)
+		_mi(root, "Bay%d" % i, _box(Vector3(bw, bh, out * 2.0)), wall_mat,
+			Vector3(bx, base_y + bh * 0.5, z + out))
+		# The bay gets its own little cornice, or it reads as a pasted slab.
+		_mi(root, "BayCap%d" % i, _box(Vector3(bw + 0.24, 0.18, out * 2.0 + 0.24)),
+			trim_mat, Vector3(bx, base_y + bh + 0.09, z + out))
+	return root
+
+
+## The enclosed stairwell that comes up onto every flat roof, with its door and
+## its little parapet. It is the one thing on a roofline that is person-sized,
+## which is what gives the rest of the roof its scale.
+static func stair_head(parent: Node3D, at: Vector3, wall_mat: Material,
+		door_mat: Material, trim_mat: Material) -> Node3D:
+	var root := Node3D.new()
+	root.name = "StairHead"
+	root.position = at
+	parent.add_child(root)
+	_mi(root, "Box", _box(Vector3(2.4, 2.4, 2.2)), wall_mat, Vector3(0, 1.2, 0))
+	_mi(root, "Cap", _box(Vector3(2.7, 0.22, 2.5)), trim_mat, Vector3(0, 2.45, 0))
+	_mi(root, "Door", _box(Vector3(0.9, 1.9, 0.12)), door_mat,
+		Vector3(0.0, 0.95, 1.12))
+	_mi(root, "Lintel", _box(Vector3(1.15, 0.16, 0.22)), trim_mat,
+		Vector3(0.0, 1.98, 1.16))
+	return root
+
+
 # --- Town: market street, shopfronts, roofs -------------------------------
 
 ## A market stall: four poles, a sagging awning in striped cloth, a counter and
