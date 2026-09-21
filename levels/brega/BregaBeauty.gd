@@ -32,6 +32,7 @@ var mats := {}
 func _ready() -> void:
 	level_id = "brega_beauty"
 	level_title = "BREGA — FIRST LIGHT"
+	show_hud = false   ## it is a beauty frame; the HUD is signed off elsewhere
 	spawn_point = Vector3(0.0, 1.2, 0.0)
 	kill_plane_y = -40.0
 	super._ready()
@@ -54,20 +55,25 @@ func _mood() -> LightingRig.Mood:
 	m.sun_color = Color(1.0, 0.565, 0.251)      # 2200 K
 	m.sun_energy = 3.1
 	m.sun_angular_distance = 1.1
-	m.sun_fog_energy = 2.2
+	m.sun_disc_size = 0.34   ## a smaller disc; the glow was owning the frame
+	m.sun_fog_energy = 3.0
 
-	# Fill: the sabkha bounce from below-front. Without it the shadow side dies.
+	# Fill: the sabkha bounce from below-front. Cool, and deliberately weak —
+	# the front of the block is in shade and it has to STAY in shade, because
+	# the hero is a white thobe and he only reads if the wall behind him is a
+	# value he can beat. Warm light and cool shadow is also the only thing
+	# stopping this frame being one orange.
 	m.fill_angles = Vector2(18.0, -28.0)
-	m.fill_color = Color(0.722, 0.690, 0.627)
-	m.fill_energy = 0.62
+	m.fill_color = Color(0.475, 0.545, 0.720)
+	m.fill_energy = 0.54
 
 	# Rim: hero layer only.
 	m.rim_angles = Vector2(-4.0, 128.0)
 	m.rim_color = Color(1.0, 0.722, 0.467)
-	m.rim_energy = 5.5
+	m.rim_energy = 8.0
 	m.rim_cull_mask = 2
 
-	m.hero_fill_energy = 2.1
+	m.hero_fill_energy = 2.5
 	m.hero_fill_color = Color(0.72, 0.78, 0.94)
 	m.hero_fill_angles = Vector2(-14.0, -30.0)
 
@@ -83,21 +89,23 @@ func _mood() -> LightingRig.Mood:
 	m.ground_bottom = Color(0.376, 0.345, 0.306)
 	m.sky_energy = 1.0
 	m.sky_curve = 0.11
-	m.volumetric_density = 0.0014
-	m.ambient_energy = 0.34
+	m.volumetric_density = 0.0010
+	m.ambient_energy = 0.29
 
 	m.fog_color = Color(0.835, 0.804, 0.741)
-	m.fog_density = 0.0013
-	m.fog_sun_scatter = 0.35
+	m.fog_density = 0.0009
+	# 0.35 puts a hot bloom on everything within 40 degrees of the key and the
+	# whole right of frame goes to white paper.
+	m.fog_sun_scatter = 0.15
 	m.fog_emission = Color(0.06, 0.045, 0.035)
 	m.fog_anisotropy = 0.78
 
 	m.tonemap = Environment.TONE_MAPPER_AGX
-	m.exposure = 1.14
-	m.white = 8.0
-	m.glow_intensity = 0.30
-	m.glow_hdr_threshold = 1.45
-	m.adjustment_saturation = 1.08
+	m.exposure = 1.08
+	m.white = 8.5
+	m.glow_intensity = 0.17
+	m.glow_hdr_threshold = 1.85
+	m.adjustment_saturation = 1.14
 	m.adjustment_contrast = 1.06
 	return m
 
@@ -109,6 +117,8 @@ func _build_level() -> void:
 	_layer_tank_farm()
 	_layer_mid_yard()
 	_layer_pipe_rack()
+	_layer_bridge()
+	_layer_flare()
 	_layer_facade()
 	_layer_gameplay()
 	_layer_foreground()
@@ -119,18 +129,18 @@ func _build_level() -> void:
 func _palette() -> void:
 	mats = {
 		# Prefab slab beige, salt-fretted at the base.
-		"slab": MaterialLab.plaster(Color(0.545, 0.518, 0.455), 1.0),
-		"joint": MaterialLab.concrete(Color(0.235, 0.215, 0.185), 1.0),
+		"slab": MaterialLab.plaster(Color(0.425, 0.402, 0.356), 1.0),
+		"joint": MaterialLab.concrete(Color(0.170, 0.156, 0.138), 1.0),
 		"dark": MaterialLab.concrete(Color(0.055, 0.050, 0.050), 0.2),
-		"wall": MaterialLab.plaster(Color(0.255, 0.243, 0.224), 1.0),
-		"deck": MaterialLab.concrete(Color(0.40, 0.385, 0.355), 1.0),
+		"wall": MaterialLab.plaster(Color(0.180, 0.172, 0.162), 1.0),
+		"deck": MaterialLab.concrete(Color(0.325, 0.312, 0.290), 1.0),
 		"rail": MaterialLab.rusted_metal(Color(0.40, 0.235, 0.145), 0.75),
 		"rebar": MaterialLab.rusted_metal(Color(0.757, 0.396, 0.165), 1.0),
 		"rust": MaterialLab.rusted_metal(Color(0.243, 0.133, 0.090), 1.0),
-		"tank": MaterialLab.plaster(Color(0.612, 0.592, 0.545), 1.0),
+		"tank": MaterialLab.plaster(Color(0.415, 0.398, 0.366), 1.0),
 		"tank_burnt": MaterialLab.concrete(Color(0.125, 0.098, 0.086), 1.0),
-		"bund": MaterialLab.concrete(Color(0.345, 0.329, 0.294), 1.0),
-		"tower": MaterialLab.concrete(Color(0.490, 0.475, 0.447), 1.0),
+		"bund": MaterialLab.concrete(Color(0.245, 0.233, 0.210), 1.0),
+		"tower": MaterialLab.concrete(Color(0.300, 0.290, 0.274), 1.0),
 		"steel": MaterialLab.painted_metal(Color(0.055, 0.055, 0.062), 0.9),
 		"sabkha": MaterialLab.sand(Color(0.576, 0.553, 0.502)),
 		"mud": MaterialLab.concrete(Color(0.271, 0.231, 0.180), 1.0),
@@ -138,7 +148,7 @@ func _palette() -> void:
 		"trunk": MaterialLab.plaster(Color(0.208, 0.200, 0.184), 1.0),
 		"leaf": PropKit.foliage_material(Color(0.212, 0.243, 0.180), YARD_Y, 9.0, 0.42),
 		"door": MaterialLab.painted_metal(Color(0.184, 0.365, 0.275), 0.7),
-		"green": MaterialLab.plaster(Color(0.259, 0.376, 0.278), 1.0),
+		"green": MaterialLab.plaster(Color(0.185, 0.268, 0.200), 1.0),
 		"shutter": MaterialLab.painted_metal(Color(0.420, 0.290, 0.196), 1.0),
 		"bag": MaterialLab.cloth(Color(0.678, 0.639, 0.545), 0.95),
 	}
@@ -285,6 +295,161 @@ func _layer_pipe_rack() -> void:
 
 # --- Layer 5: the cell block facade ----------------------------------------
 
+## The one thing burning in a plant that stopped running: a flare with a live
+## tip and a plume that drifts across the empty half of the frame. It is the
+## focal point the right of the image did not have, and the only motion in the
+## composition big enough to read at this distance.
+func _layer_flare() -> void:
+	var base := Vector3(22.0, YARD_Y - 1.0, -52.0)
+	PropKit.flare_stack(geometry, base, 21.0, 4.4, mats["steel"])
+
+	var tip := base + Vector3(0.0, 21.2, 0.0)
+	var flame := MeshInstance3D.new()
+	flame.name = "Flame"
+	var cone := CylinderMesh.new()
+	cone.top_radius = 0.04
+	cone.bottom_radius = 0.78
+	cone.height = 3.4
+	cone.radial_segments = 12
+	flame.mesh = cone
+	# Additive at high energy goes white and the flare stops being fire. Keep
+	# the energy low and let the colour carry it.
+	var fire := MaterialLab.emissive(Color(1.0, 0.36, 0.07), 1.1)
+	fire.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	fire.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	fire.albedo_color = Color(1.0, 0.42, 0.10, 0.75)
+	flame.material_override = fire
+	flame.position = tip + Vector3(0.45, 1.7, 0.0)
+	flame.rotation_degrees = Vector3(0.0, 0.0, -14.0)
+	geometry.add_child(flame)
+
+	var glow := OmniLight3D.new()
+	glow.name = "FlareGlow"
+	glow.light_color = Color(1.0, 0.60, 0.22)
+	glow.light_energy = 28.0
+	glow.omni_range = 34.0
+	glow.light_volumetric_fog_energy = 4.0
+	glow.shadow_enabled = false
+	glow.position = tip + Vector3(0.0, 2.0, 0.0)
+	geometry.add_child(glow)
+
+	_plume(tip + Vector3(1.0, 3.2, 0.0))
+
+
+## The plume. Big, slow, and leaning downwind, which at this distance is the
+## only movement in frame that the eye can actually see.
+func _plume(at: Vector3) -> void:
+	var p := GPUParticles3D.new()
+	p.name = "FlarePlume"
+	p.position = at
+	p.amount = 170
+	p.lifetime = 26.0
+	p.preprocess = 24.0
+	p.fixed_fps = 24
+	p.interpolate = true
+	p.local_coords = false
+	p.visibility_aabb = AABB(Vector3(-20, -6, -20), Vector3(140, 90, 40))
+
+	var pm := ParticleProcessMaterial.new()
+	pm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
+	pm.emission_sphere_radius = 1.1
+	# Downwind, not straight up: a vertical plume leaves the frame in two
+	# seconds, and a plume that lies over on the wind is what a flare in an
+	# onshore breeze actually does.
+	pm.direction = Vector3(1.0, 0.30, 0.0)
+	pm.spread = 12.0
+	pm.initial_velocity_min = 2.2
+	pm.initial_velocity_max = 3.6
+	pm.gravity = Vector3(0.75, 0.02, 0.0)
+	pm.scale_min = 4.0
+	pm.scale_max = 11.0
+	pm.turbulence_enabled = true
+	pm.turbulence_noise_strength = 0.5
+	pm.turbulence_noise_scale = 0.8
+	var ramp := Gradient.new()
+	ramp.set_color(0, Color(0.30, 0.20, 0.16, 0.62))
+	ramp.set_color(1, Color(0.34, 0.29, 0.28, 0.0))
+	ramp.add_point(0.16, Color(0.38, 0.26, 0.19, 0.55))
+	var ramp_tex := GradientTexture1D.new()
+	ramp_tex.gradient = ramp
+	pm.color_ramp = ramp_tex
+	p.process_material = pm
+
+	var quad := QuadMesh.new()
+	quad.size = Vector2(1.0, 1.0)
+	var sm := StandardMaterial3D.new()
+	sm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	sm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	sm.albedo_color = Color(1, 1, 1, 1)
+	sm.albedo_texture = PropKit._decal_texture("radial")
+	sm.vertex_color_use_as_albedo = true
+	sm.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	sm.disable_receive_shadows = true
+	quad.material = sm
+	p.draw_pass_1 = quad
+	geometry.add_child(p)
+
+
+## Layer -13: the middle ground.
+##
+## The recorded failure of this frame was that it split into a dark building on
+## the left and a bright haze on the right with nothing between them. This is
+## the between: a pole line and a conveyor gantry that both start behind the
+## block and walk out into the light, so the eye has a way across.
+func _layer_bridge() -> void:
+	var z := -13.0
+	var steel: Material = mats["steel"]
+
+	# Pole line. The poles march out of the block's shadow into the sun, which
+	# is the transition the frame was missing.
+	var tops: Array[Vector3] = []
+	for i in 7:
+		var x := -6.0 + i * 7.4
+		var h := 7.2 + sin(float(i) * 1.7) * 0.5
+		LevelKit.prop(geometry, Vector3(x, YARD_Y + h * 0.5, z),
+			Vector3(0.22, h, 0.22), steel, "Pole%d" % i)
+		# Crossarm, so the pole is a shape and not a stick.
+		LevelKit.prop(geometry, Vector3(x, YARD_Y + h - 0.55, z),
+			Vector3(2.3, 0.14, 0.14), steel, "Crossarm%d" % i)
+		tops.append(Vector3(x, YARD_Y + h - 0.55, z))
+	for i in tops.size() - 1:
+		for lane in 3:
+			var off := Vector3(0.0, 0.0, 0.0)
+			var lift := -0.02 - lane * 0.02
+			PropKit.cable(geometry, tops[i] + Vector3(-0.9 + lane * 0.9, lift, 0.0),
+				tops[i + 1] + Vector3(-0.9 + lane * 0.9, lift, 0.0),
+				0.95 + lane * 0.12, mats["dark"], 12, 0.058)
+
+	# A conveyor gantry running out of the block toward the plant, on legs.
+	var gz := -17.5
+	var gantry := Node3D.new()
+	gantry.name = "Conveyor"
+	geometry.add_child(gantry)
+	var y0 := YARD_Y + 6.6
+	LevelKit.prop(gantry, Vector3(14.0, y0 + 2.1, gz), Vector3(46.0, 1.5, 2.0),
+		mats["bund"], "ConveyorCase")
+	LevelKit.prop(gantry, Vector3(14.0, y0 + 2.95, gz), Vector3(46.0, 0.22, 2.3),
+		steel, "ConveyorLid")
+	for i in 6:
+		var lx := -4.0 + i * 8.0
+		LevelKit.prop(gantry, Vector3(lx, YARD_Y + 3.3, gz),
+			Vector3(0.42, 6.6, 0.42), steel, "GantryLeg%d" % i)
+		LevelKit.prop(gantry, Vector3(lx + 1.6, YARD_Y + 4.6, gz),
+			Vector3(3.4, 0.16, 0.16), steel, "GantryBrace%d" % i)
+
+	# A header tank on a frame, out in the light: the one bright silhouette in
+	# the middle distance, so the eye has somewhere to land between the two
+	# halves of the frame.
+	var tz := -11.0
+	for i in 4:
+		LevelKit.prop(geometry, Vector3(9.4 + (i % 2) * 2.6, YARD_Y + 2.6, tz + (i / 2) * 2.2),
+			Vector3(0.24, 5.2, 0.24), steel, "TowerLeg%d" % i)
+	LevelKit.prop(geometry, Vector3(10.7, YARD_Y + 5.6, tz + 1.1),
+		Vector3(4.2, 1.0, 3.4), mats["tank"], "HeaderTank")
+	LevelKit.prop(geometry, Vector3(10.7, YARD_Y + 6.3, tz + 1.1),
+		Vector3(3.4, 0.5, 2.8), mats["tank"], "HeaderTankCap")
+
+
 func _layer_facade() -> void:
 	var facade := PropKit.prefab_facade(geometry, -62.0, YARD_Y, 67.0, 10.6, -5.0,
 		mats["slab"], {
@@ -295,6 +460,46 @@ func _layer_facade() -> void:
 	# building read as a solid and not as a painted flat.
 	LevelKit.prop(facade, Vector3(5.0, YARD_Y + 5.3, -5.0), Vector3(0.5, 10.6, 5.2),
 		mats["joint"], "BlockEndWall")
+
+	# The whole front of this wall is in shade — the key is behind the building
+	# — so everything that stops it reading as one flat grey has to come from
+	# bounce. Warm off the yard floor along the bottom, cool sky down the top.
+	var bounce := MeshInstance3D.new()
+	bounce.name = "YardBounce"
+	var bq := QuadMesh.new()
+	bq.size = Vector2(67.0, 5.4)
+	bounce.mesh = bq
+	bounce.material_override = PropKit.gradient_decal(
+		Color(0.74, 0.40, 0.17), 0.46, "band")
+	bounce.position = Vector3(-28.5, YARD_Y + 2.7, -2.44)
+	facade.add_child(bounce)
+
+	var skylit := MeshInstance3D.new()
+	skylit.name = "SkyBounce"
+	var sq := QuadMesh.new()
+	sq.size = Vector2(67.0, 4.6)
+	skylit.mesh = sq
+	skylit.material_override = PropKit.gradient_decal(
+		Color(0.36, 0.44, 0.66), 0.30, "streak")
+	skylit.position = Vector3(-28.5, YARD_Y + 8.3, -2.44)
+	facade.add_child(skylit)
+
+	# Everything bolted to the front of a wall that has been in use for fifty
+	# years. The face is in shade, so none of its detail can come from light —
+	# it all has to stand off the wall and read as silhouette.
+	PropKit.wall_services(facade, -60.0, YARD_Y, 64.0, 10.4, -2.46,
+		mats["rust"], mats["steel"], 5)
+
+	# The roofline is where this building gets to be lived in: aerials, dishes
+	# all pointed the same way, header tanks. Silhouette against a bright sky
+	# costs nothing and is most of what separates a set from a box.
+	PropKit.roof_clutter(facade, -60.0, YARD_Y + 10.75, 64.0, -4.6,
+		mats["dark"], 13)
+	# A service drop off the parapet to the first pole, sagging across the gap.
+	PropKit.cable(facade, Vector3(4.2, YARD_Y + 10.5, -3.0),
+		Vector3(-6.0, YARD_Y + 6.6, -13.0), 1.1, mats["dark"], 14, 0.060)
+	PropKit.cable(facade, Vector3(4.2, YARD_Y + 10.2, -3.0),
+		Vector3(-6.0, YARD_Y + 6.3, -13.0), 1.35, mats["dark"], 14, 0.060)
 
 	# Salt has fretted the bottom half-metre back to blockwork.
 	LevelKit.prop(facade, Vector3(-28.5, YARD_Y + 0.25, -2.2), Vector3(67.0, 0.5, 0.22),
@@ -446,6 +651,16 @@ func _layer_foreground() -> void:
 			Vector3(0.42, 0.58, 0.05), mats["bag"], "SnaggedBag%d" % i)
 		bag.rotation.z = 0.2 - i * 0.2
 
+	# A fallen conveyor beam across the bottom-left corner. Every frame needs
+	# one near-black shape in front of everything, or the image has no floor.
+	# Sized to the near frustum, not to the world: at this depth the frame is
+	# only about seven units across, so a beam the length of the walkway would
+	# black out the whole image.
+	LevelKit.prop(geometry, Vector3(0.9, -0.62, 9.5), Vector3(5.4, 0.46, 0.46),
+		mats["dark"], "FallenBeam").rotation.z = deg_to_rad(15.0)
+	LevelKit.prop(geometry, Vector3(-0.5, 0.15, 9.5), Vector3(0.34, 2.0, 0.34),
+		mats["dark"], "BeamStub").rotation.z = deg_to_rad(-11.0)
+
 	# Razor wire across the top-left corner, heavy near-DOF, reading as a shape.
 	PropKit.razor_coil(geometry, Vector3(-7.6, 3.0, 9.0), Vector3(-2.6, 1.9, 9.0),
 		0.30, mats["dark"], 10, "RazorCoilForeground")
@@ -464,10 +679,21 @@ func _atmosphere() -> void:
 	var pocket := _fog_volume(Vector3(0.0, 1.0, 0.0), Vector3(13.0, 9.0, 9.0), -0.9, "HeroPocket")
 	pocket.shape = RenderingServer.FOG_VOLUME_SHAPE_ELLIPSOID
 
-	var shafts := _fog_volume(Vector3(24.0, 9.0, -26.0), Vector3(58.0, 13.0, 10.0),
+	# Light shafts only exist on the camera side of whatever is cutting them.
+	# The key travels toward +z and -x, so the volume has to sit between the
+	# pipe rack and the lens, not behind it — which is where it used to be, and
+	# why no shaft ever formed.
+	var shafts := _fog_volume(Vector3(14.0, 6.5, -13.0), Vector3(52.0, 15.0, 20.0),
 		0.020, "PipeRackShafts")
 	(shafts.material as FogMaterial).height_falloff = 0.0
-	(shafts.material as FogMaterial).edge_fade = 0.35
+	(shafts.material as FogMaterial).edge_fade = 0.30
+	(shafts.material as FogMaterial).albedo = Color(1.0, 0.90, 0.76)
+
+	# A second, tighter one in the near yard, cut by the walkway and its legs.
+	var near := _fog_volume(Vector3(6.0, -2.4, -5.0), Vector3(26.0, 9.0, 12.0),
+		0.016, "YardShafts")
+	(near.material as FogMaterial).height_falloff = 0.0
+	(near.material as FogMaterial).edge_fade = 0.35
 
 	_dust(Vector3(10.0, -1.0, -12.0), Vector3(60.0, 14.0, 10.0), 340, 0.042)
 	_dust(Vector3(40.0, -2.0, -28.0), Vector3(130.0, 28.0, 18.0), 460, 0.10)

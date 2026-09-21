@@ -85,47 +85,367 @@ static func prefab_facade(parent: Node3D, left_x: float, base_y: float, width: f
 	_mi(root, "Mass", _box(Vector3(width, height, depth)), mat,
 		Vector3(left_x + width * 0.5, base_y + height * 0.5, z))
 
-	var panel_w := 3.0
-	var panel_h := 1.2
-	var cols := int(ceil(width / panel_w))
-	var rows := int(ceil(height / panel_h))
 	var joint: Material = opts.get("joint_mat", mat)
-	var hole_mat: Material = opts.get("hole_mat", mat)
+	var dark: Material = opts.get("dark_mat", joint)
 	var front := z + depth * 0.5
+	# A stable per-facade seed, so the same wall comes back identical every run
+	# but two walls in one level are not the same wall.
+	var rng := RandomNumberGenerator.new()
+	rng.seed = int(opts.get("seed", int(absf(left_x) * 977.0 + width * 31.0)))
 
-	# Joint lines: 12 mm reveals, cut as thin dark strips rather than geometry.
-	for c in cols + 1:
-		var jx := left_x + c * panel_w
-		if jx > left_x + width:
-			break
-		_mi(root, "JointV%d" % c, _box(Vector3(0.028, height, 0.03)), joint,
-			Vector3(jx, base_y + height * 0.5, front))
+	# --- Bays ---------------------------------------------------------------
+	# Real prefab blocks are cast from a handful of panel widths, not one. Walk
+	# the wall laying bays down until it is covered; the last one is trimmed.
+	var bay_widths := [3.0, 3.0, 3.0, 2.4, 3.6]
+	var bays: Array[float] = []
+	var x := 0.0
+	while x < width - 0.05:
+		var w: float = bay_widths[rng.randi() % bay_widths.size()]
+		w = minf(w, width - x)
+		bays.append(w)
+		x += w
+
+	var panel_h := 1.2
+	var rows := int(ceil(height / panel_h))
+
+	# --- Joints -------------------------------------------------------------
+	var vert_mm := _joint_multimesh(_box(Vector3(0.022, height, 0.03)))
+	var verts: Array[Transform3D] = []
+	var bay_x := 0.0
+	for w: float in bays:
+		verts.append(Transform3D(Basis.IDENTITY,
+			Vector3(left_x + bay_x, base_y + height * 0.5, front)))
+		bay_x += w
+	verts.append(Transform3D(Basis.IDENTITY,
+		Vector3(left_x + width, base_y + height * 0.5, front)))
+	_fill_multimesh(vert_mm, verts)
+	_mm_node(root, "JointsV", vert_mm, joint)
+
+	var horiz_mm := _joint_multimesh(_box(Vector3(width, 0.022, 0.03)))
+	var horiz: Array[Transform3D] = []
 	for r in rows + 1:
 		var jy := base_y + r * panel_h
 		if jy > base_y + height:
 			break
-		_mi(root, "JointH%d" % r, _box(Vector3(width, 0.028, 0.03)), joint,
-			Vector3(left_x + width * 0.5, jy, front))
+		horiz.append(Transform3D(Basis.IDENTITY,
+			Vector3(left_x + width * 0.5, jy, front)))
+	_fill_multimesh(horiz_mm, horiz)
+	_mm_node(root, "JointsH", horiz_mm, joint)
 
-	# Crane holes, one per panel centre. `open_holes` many are knocked through.
+	# --- Lifting holes ------------------------------------------------------
+	# Two per panel, near its top corners, which is where a crane actually
+	# takes a slab — and most of them have been grouted up since. Only the
+	# unpatched ones read, and they are the ones that stain.
 	var open_count: int = opts.get("open_holes", 3)
-	var idx := 0
-	for c in cols:
+	var patched: Array[Transform3D] = []
+	var open_holes: Array[Transform3D] = []
+	var stains: Array[Transform3D] = []
+	bay_x = 0.0
+	for bi in bays.size():
+		var w: float = bays[bi]
 		for r in rows:
-			var hx := left_x + (c + 0.5) * panel_w
-			var hy := base_y + (r + 0.5) * panel_h
-			if hy > base_y + height - 0.3:
+			var hy := base_y + (r + 1) * panel_h - 0.26
+			if hy > base_y + height - 0.2:
 				continue
-			idx += 1
-			var open_hole := (idx * 7) % 23 < open_count
-			var m := _cyl(0.062, 0.05, 12)
-			var node := _mi(root, "Hole%d_%d" % [c, r],
-				m, hole_mat if not open_hole else opts.get("dark_mat", hole_mat),
-				Vector3(hx, hy, front + 0.016), Vector3(PI * 0.5, 0.0, 0.0))
-			node.scale = Vector3(1.0, 0.6, 1.0)
-			if open_hole:
-				node.position.z = front - 0.06
-				node.scale = Vector3(1.15, 2.4, 1.15)
+			for side in 2:
+				var hx := left_x + bay_x + (0.42 if side == 0 else w - 0.42)
+				var basis := Basis(Vector3.RIGHT, PI * 0.5).scaled(
+					Vector3(1.0, 0.55, 1.0))
+				var open_hole := rng.randf() < (float(open_count) / 14.0)
+				if open_hole:
+					open_holes.append(Transform3D(
+						Basis(Vector3.RIGHT, PI * 0.5).scaled(Vector3(1.0, 1.9, 1.0)),
+						Vector3(hx, hy, front - 0.05)))
+					stains.append(Transform3D(
+						Basis.IDENTITY.scaled(Vector3(0.20,
+							rng.randf_range(0.55, 1.35), 1.0)),
+						Vector3(hx, hy - 0.42, front + 0.014)))
+				else:
+					patched.append(Transform3D(basis, Vector3(hx, hy, front + 0.014)))
+		bay_x += w
+
+	var hole_mesh := _cyl(0.055, 0.05, 10)
+	if not patched.is_empty():
+		var pm := _joint_multimesh(hole_mesh)
+		_fill_multimesh(pm, patched)
+		_mm_node(root, "HolesPatched", pm, opts.get("hole_mat", joint))
+	if not open_holes.is_empty():
+		var om := _joint_multimesh(hole_mesh)
+		_fill_multimesh(om, open_holes)
+		_mm_node(root, "HolesOpen", om, dark)
+
+	# --- Weathering ---------------------------------------------------------
+	# Streaks under the horizontal joints are the single most recognisable
+	# thing about a concrete panel wall, and they are what stops the grid
+	# reading as graph paper.
+	var streaks: Array[Transform3D] = []
+	bay_x = 0.0
+	for bi in bays.size():
+		var w: float = bays[bi]
+		for r in rows:
+			var jy := base_y + (r + 1) * panel_h
+			if jy > base_y + height:
+				continue
+			var count := rng.randi_range(1, 3)
+			for _i in count:
+				var sx := left_x + bay_x + rng.randf_range(0.25, w - 0.25)
+				var sh := rng.randf_range(0.35, 1.05)
+				var sw := rng.randf_range(0.10, 0.34)
+				streaks.append(Transform3D(
+					Basis.IDENTITY.scaled(Vector3(sw, sh, 1.0)),
+					Vector3(sx, jy - sh * 0.5, front + 0.012)))
+		bay_x += w
+	if not streaks.is_empty():
+		var sm := _joint_multimesh(_unit_quad())
+		_fill_multimesh(sm, streaks)
+		_mm_node(root, "Streaks", sm,
+			gradient_decal(Color(0.085, 0.068, 0.055), 0.62, "streak"))
+
+	# Stains under the open holes, darker and narrower than the joint runs.
+	if not stains.is_empty():
+		var stm := _joint_multimesh(_unit_quad())
+		_fill_multimesh(stm, stains)
+		_mm_node(root, "HoleStains", stm,
+			gradient_decal(Color(0.065, 0.050, 0.040), 0.85, "streak"))
+
+	# Salt fretting: the pale damp band that eats the bottom metre of every
+	# wall on this coast.
+	var salt := MeshInstance3D.new()
+	salt.name = "SaltBand"
+	var sq := QuadMesh.new()
+	sq.size = Vector2(width, 1.6)
+	salt.mesh = sq
+	salt.material_override = gradient_decal(Color(0.80, 0.775, 0.710), 0.58, "band")
+	salt.position = Vector3(left_x + width * 0.5, base_y + 0.8, front + 0.010)
+	root.add_child(salt)
+
+	# Big, soft tonal patches: no two panels came out of the mould the same
+	# colour, and at gameplay distance that variation is the only material
+	# detail that survives.
+	var tones: Array[Transform3D] = []
+	for _i in maxi(4, int(width / 6.0)):
+		var tw := rng.randf_range(3.0, 9.0)
+		var th := rng.randf_range(2.0, height * 0.9)
+		tones.append(Transform3D(
+			Basis.IDENTITY.scaled(Vector3(tw, th, 1.0)),
+			Vector3(left_x + rng.randf_range(0.0, width),
+				base_y + rng.randf_range(0.0, height), front + 0.008)))
+	var tm := _joint_multimesh(_unit_quad())
+	_fill_multimesh(tm, tones)
+	_mm_node(root, "Tones", tm,
+		gradient_decal(Color(0.30, 0.255, 0.195), 0.34, "radial"))
+	return root
+
+
+## A 1x1 quad with its origin at the centre, for decals scaled by transform.
+static func _unit_quad() -> QuadMesh:
+	var q := QuadMesh.new()
+	q.size = Vector2.ONE
+	return q
+
+
+static func _joint_multimesh(mesh: Mesh) -> MultiMesh:
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.mesh = mesh
+	return mm
+
+
+static func _fill_multimesh(mm: MultiMesh, xforms: Array[Transform3D]) -> void:
+	mm.instance_count = xforms.size()
+	for i in xforms.size():
+		mm.set_instance_transform(i, xforms[i])
+
+
+static func _mm_node(parent: Node3D, name_: String, mm: MultiMesh,
+		mat: Material) -> MultiMeshInstance3D:
+	var node := MultiMeshInstance3D.new()
+	node.name = name_
+	node.multimesh = mm
+	node.material_override = mat
+	parent.add_child(node)
+	return node
+
+
+## A soft-edged decal on a flat surface, generated rather than authored, so
+## weathering costs a 64px image instead of a texture in the repository.
+##
+## `mode` is "streak" (strong at the top, running down, soft at both sides),
+## "radial" (a soft blob) or "band" (strong at the bottom, fading up).
+static func gradient_decal(tint: Color, strength: float,
+		mode := "radial") -> StandardMaterial3D:
+	var m := StandardMaterial3D.new()
+	m.albedo_color = Color(tint.r, tint.g, tint.b, strength)
+	m.albedo_texture = _decal_texture(mode)
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.roughness = 0.95
+	m.metallic = 0.0
+	m.cull_mode = BaseMaterial3D.CULL_DISABLED
+	return m
+
+
+static var _decal_cache := {}
+
+## A single-channel falloff in alpha. A one-dimensional gradient cannot do
+## this: a dirt run needs to fade down AND off both sides, or it reads as a
+## grey rectangle stuck to the wall.
+static func _decal_texture(mode: String) -> ImageTexture:
+	if _decal_cache.has(mode):
+		return _decal_cache[mode]
+	var size := 64
+	var img := Image.create(size, size, false, Image.FORMAT_RGBA8)
+	for y in size:
+		for x in size:
+			var u := (float(x) + 0.5) / float(size)
+			# QuadMesh UVs put v = 0 at the top, which is where a run starts.
+			var v := (float(y) + 0.5) / float(size)
+			var a := 0.0
+			match mode:
+				"streak":
+					a = pow(1.0 - v, 1.45) * pow(sin(u * PI), 1.1)
+				"band":
+					a = pow(v, 1.7) * clampf(minf(u, 1.0 - u) * 7.0, 0.0, 1.0)
+				_:
+					var d := Vector2(u - 0.5, v - 0.5).length() * 2.0
+					a = clampf(1.0 - d, 0.0, 1.0)
+					a = a * a * (3.0 - 2.0 * a)
+			img.set_pixel(x, y, Color(1.0, 1.0, 1.0, a))
+	var tex := ImageTexture.create_from_image(img)
+	_decal_cache[mode] = tex
+	return tex
+
+
+## A slack cable between two points. Catenary, not a straight line: a straight
+## cable is the single fastest way to make a skyline look untouched by gravity.
+static func cable(parent: Node3D, from: Vector3, to: Vector3, sag: float,
+		mat: Material, segments := 14, thickness := 0.035) -> MultiMeshInstance3D:
+	var pts: Array[Vector3] = []
+	for i in segments + 1:
+		var t := float(i) / float(segments)
+		var p := from.lerp(to, t)
+		p.y -= sag * sin(t * PI)
+		pts.append(p)
+
+	var mm := _joint_multimesh(_box(Vector3(1.0, thickness, thickness)))
+	var xf: Array[Transform3D] = []
+	for i in segments:
+		var a := pts[i]
+		var b := pts[i + 1]
+		var mid := (a + b) * 0.5
+		var dir := (b - a)
+		var basis := Basis.IDENTITY.scaled(Vector3(dir.length(), 1.0, 1.0))
+		# Aim the segment down the run: yaw then pitch, which is enough for a
+		# cable that never rolls.
+		var yaw := atan2(-dir.z, dir.x)
+		var pitch := asin(clampf(dir.normalized().y, -1.0, 1.0))
+		basis = Basis(Vector3.UP, yaw) * Basis(Vector3(0, 0, 1), pitch) * basis
+		xf.append(Transform3D(basis, mid))
+	_fill_multimesh(mm, xf)
+	return _mm_node(parent, "Cable", mm, mat)
+
+
+## Roof clutter: aerials, a dish, a header tank. Silhouette against the sky is
+## what makes a roofline read as lived on rather than as the top of a box.
+static func roof_clutter(parent: Node3D, left_x: float, top_y: float, width: float,
+		z: float, mat: Material, seed_ := 7) -> Node3D:
+	var root := Node3D.new()
+	root.name = "RoofClutter"
+	parent.add_child(root)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_
+
+	var count := maxi(3, int(width / 9.0))
+	for i in count:
+		var x := left_x + (float(i) + rng.randf_range(0.15, 0.85)) * (width / float(count))
+		match rng.randi() % 3:
+			0:
+				# Television aerial: a mast with a ladder of elements.
+				# Thick on purpose: at gameplay distance anything under about
+				# 70 mm disappears into the sky and the roofline goes bald.
+				var h := rng.randf_range(1.6, 2.8)
+				_mi(root, "Mast%d" % i, _box(Vector3(0.085, h, 0.085)), mat,
+					Vector3(x, top_y + h * 0.5, z))
+				for e in rng.randi_range(3, 6):
+					var ey := top_y + h * (0.42 + 0.11 * e)
+					var ew: float = 1.25 - 0.13 * e
+					_mi(root, "Element%d_%d" % [i, e],
+						_box(Vector3(ew, 0.065, 0.065)), mat, Vector3(x, ey, z))
+			1:
+				# Satellite dish on a stub pole, all of them facing the same way
+				# because they are all pointed at the same satellite.
+				var ph := rng.randf_range(0.7, 1.2)
+				_mi(root, "DishPole%d" % i, _box(Vector3(0.095, ph, 0.095)), mat,
+					Vector3(x, top_y + ph * 0.5, z))
+				var dish := _mi(root, "Dish%d" % i, _cyl(0.58, 0.09, 16), mat,
+					Vector3(x, top_y + ph + 0.38, z + 0.18),
+					Vector3(deg_to_rad(66.0), 0.0, 0.0))
+				dish.scale = Vector3(1.0, 1.0, 0.85)
+			_:
+				# Header tank on legs: every roof on this coast has one.
+				var tw := rng.randf_range(0.7, 1.1)
+				_mi(root, "TankLegs%d" % i, _box(Vector3(tw * 0.8, 0.34, 0.6)), mat,
+					Vector3(x, top_y + 0.17, z))
+				_mi(root, "HeaderTank%d" % i,
+					_cyl(tw * 0.5, tw * 0.72, 14), mat,
+					Vector3(x, top_y + 0.34 + tw * 0.36, z))
+	return root
+
+
+## Everything bolted to the front of a lived-in block: downpipes, conduit runs,
+## split-unit condensers, a washing line. A shadowed wall has no light to give
+## it structure, so all of its detail has to be silhouette standing off the
+## face — which is also exactly what a real one looks like.
+static func wall_services(parent: Node3D, left_x: float, base_y: float,
+		width: float, height: float, z: float, pipe_mat: Material,
+		box_mat: Material, seed_ := 3) -> Node3D:
+	var root := Node3D.new()
+	root.name = "WallServices"
+	parent.add_child(root)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_
+
+	# Downpipes: full height, standing 120 mm off the face, with brackets.
+	var drops := maxi(3, int(width / 6.5))
+	for i in drops:
+		var x := left_x + (float(i) + rng.randf_range(0.2, 0.8)) * (width / float(drops))
+		var r := rng.randf_range(0.075, 0.105)
+		_mi(root, "Downpipe%d" % i, _cyl(r, height, 8), pipe_mat,
+			Vector3(x, base_y + height * 0.5, z + 0.12))
+		# The shoe at the bottom, kicking the water out into the yard.
+		_mi(root, "Shoe%d" % i, _cyl(r, 0.5, 8), pipe_mat,
+			Vector3(x, base_y + 0.28, z + 0.34), Vector3(deg_to_rad(38.0), 0, 0))
+		for b in int(height / 2.2):
+			_mi(root, "Bracket%d_%d" % [i, b], _box(Vector3(0.05, 0.05, 0.26)),
+				pipe_mat, Vector3(x, base_y + 0.9 + b * 2.2, z + 0.06))
+
+	# Horizontal conduit runs: the wiring someone added later, going round
+	# whatever was already there.
+	var runs := maxi(3, int(width / 9.0))
+	for i in runs:
+		var y := base_y + rng.randf_range(height * 0.25, height * 0.8)
+		var x0 := left_x + rng.randf_range(0.0, width * 0.4)
+		var w := rng.randf_range(width * 0.25, width * 0.55)
+		_mi(root, "Conduit%d" % i, _box(Vector3(w, 0.07, 0.07)), pipe_mat,
+			Vector3(x0 + w * 0.5, y, z + 0.09))
+		# A drop off the end into a junction box.
+		var dh := rng.randf_range(0.8, 2.4)
+		_mi(root, "ConduitDrop%d" % i, _box(Vector3(0.07, dh, 0.07)), pipe_mat,
+			Vector3(x0 + w, y - dh * 0.5, z + 0.09))
+		_mi(root, "Junction%d" % i, _box(Vector3(0.22, 0.30, 0.16)), box_mat,
+			Vector3(x0 + w, y - dh, z + 0.12))
+
+	# Split-unit condensers on brackets, all at about the same height because
+	# they all went in the same year.
+	var units := maxi(3, int(width / 7.5))
+	for i in units:
+		var x := left_x + (float(i) + rng.randf_range(0.25, 0.75)) * (width / float(units))
+		var y := base_y + height * rng.randf_range(0.55, 0.72)
+		_mi(root, "AC%d" % i, _box(Vector3(1.15, 0.74, 0.44)), box_mat,
+			Vector3(x, y, z + 0.20))
+		_mi(root, "ACBracket%d" % i, _box(Vector3(1.25, 0.08, 0.40)), pipe_mat,
+			Vector3(x, y - 0.41, z + 0.22))
+		_mi(root, "ACPipe%d" % i, _box(Vector3(0.06, 1.1, 0.06)), pipe_mat,
+			Vector3(x + 0.34, y - 0.85, z + 0.10))
 	return root
 
 
