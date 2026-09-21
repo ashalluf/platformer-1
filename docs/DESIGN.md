@@ -130,7 +130,24 @@ scale as the trail continues, so a Sriracha line is a melodic phrase.
 
 ## PART III — ART DIRECTION
 
-> Filled in from the World 1 art-direction brief. See `docs/ART_DIRECTION.md`.
+**`docs/ART_DIRECTION.md` is the canon art-direction document.** It holds the visual
+pillars, the World 1 colour script, shape-language and material rules, Wanis's complete
+design in both costume states, the nine-layer depth recipe, the Godot implementation
+spec, and the Level 1 beauty benchmark build order. It supersedes any art guidance
+elsewhere in this file and defers to Part IV below on camera geometry and controller feel.
+
+The three decisions that govern everything else:
+
+1. **World 1 is one day** — sunrise (Brega) → mid-morning ghibli (Ajdabiya) → hard
+   afternoon (Highway) → golden hour (Garyounis) → night (Benghazi). That is the only
+   cohesion device the five levels need.
+2. **Each level owns exactly one unique hue**, and the five occupy five different hue
+   families: regime green, sabkha terra rossa, oleander pink, the gold dome, copper patina.
+3. **Wanis is the only saturated thing in the frame.** World-surface albedo is capped at
+   HSV S 0.55 / V 0.72 inside hue 340°–25°; that band belongs to the jacket and the
+   Sriracha alone. Danger is signalled with hazard chevrons and a white flash, never red.
+
+Colour script board: `docs/screenshots/2026-09-21_world1-colour-script.svg`
 
 ---
 

@@ -1,0 +1,275 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1680" height="1180" viewBox="0 0 1680 1180" font-family="Helvetica,Arial,sans-serif">
+<defs>
+<linearGradient id="sky0" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0%" stop-color="#2B3A55"/>
+<stop offset="25%" stop-color="#6B5F6E"/>
+<stop offset="50%" stop-color="#C97B45"/>
+<stop offset="75%" stop-color="#FFA657"/>
+<stop offset="100%" stop-color="#D5CDBD"/>
+</linearGradient>
+<linearGradient id="sky1" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0%" stop-color="#8FA8C4"/>
+<stop offset="25%" stop-color="#C9B79C"/>
+<stop offset="50%" stop-color="#D9C3A4"/>
+<stop offset="75%" stop-color="#B5713F"/>
+<stop offset="100%" stop-color="#7A4A2C"/>
+</linearGradient>
+<linearGradient id="sky2" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0%" stop-color="#4A7FA8"/>
+<stop offset="25%" stop-color="#7FB2D8"/>
+<stop offset="50%" stop-color="#B9CBD4"/>
+<stop offset="75%" stop-color="#D5CDBD"/>
+<stop offset="100%" stop-color="#DCCBAE"/>
+</linearGradient>
+<linearGradient id="sky3" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0%" stop-color="#3E6E96"/>
+<stop offset="25%" stop-color="#8E8CA8"/>
+<stop offset="50%" stop-color="#E2B98A"/>
+<stop offset="75%" stop-color="#FFB068"/>
+<stop offset="100%" stop-color="#FF9942"/>
+</linearGradient>
+<linearGradient id="sky4" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0%" stop-color="#0E1626"/>
+<stop offset="25%" stop-color="#1F2C44"/>
+<stop offset="50%" stop-color="#33405C"/>
+<stop offset="75%" stop-color="#6B4A50"/>
+<stop offset="100%" stop-color="#FF6A3A"/>
+</linearGradient>
+</defs>
+<rect width="1680" height="1180" fill="#0B0D11"/>
+<text x="48" y="58" fill="#EAE0CC" font-size="30" font-weight="700" letter-spacing="3">LIBYAN GANGSTAS — WORLD 1 COLOUR SCRIPT</text>
+<text x="48" y="86" fill="#8A8578" font-size="15" letter-spacing="1.5">ONE DAY, SUNRISE TO NIGHT, ACROSS FIVE LEVELS.  GROUND FAMILY NEVER CHANGES — ONLY THE LIGHT ON IT.  SHADOW IS NEVER NEUTRAL AND NEVER BLACK.</text>
+<line x1="48" y1="104" x2="1632" y2="104" stroke="#2A2E36" stroke-width="1"/>
+<rect x="48" y="132" width="296" height="196" fill="url(#sky0)"/>
+<rect x="48" y="328" width="296" height="34" fill="#E8E2D2"/>
+<rect x="48" y="132" width="296" height="230" fill="none" stroke="#2A2E36"/>
+<circle cx="298" cy="174" r="15" fill="#FF8A2E" opacity="0.95"/>
+<circle cx="298" cy="174" r="24" fill="#FF8A2E" opacity="0.22"/>
+<text x="48" y="384" fill="#EAE0CC" font-size="15" font-weight="700" letter-spacing="1.2">1  BREGA PRISON BREAKOUT</text>
+<text x="48" y="404" fill="#9A9488" font-size="12.5">05:52 → 06:40  ·  sunrise</text>
+<text x="48" y="422" fill="#6E6A60" font-size="11.5">2° → 11°  ESE 101°</text>
+<text x="48" y="438" fill="#6E6A60" font-size="11.5">1950K → 2850K</text>
+<rect x="48" y="454" width="64" height="34" fill="#FF8A2E" stroke="#2A2E36"/>
+<text x="48" y="502" fill="#6E6A60" font-size="10" letter-spacing="1">KEY</text>
+<text x="48" y="515" fill="#4E4C46" font-size="9" font-family="monospace">#FF8A2E</text>
+<rect x="122" y="454" width="64" height="34" fill="#A7B6C8" stroke="#2A2E36"/>
+<text x="122" y="502" fill="#6E6A60" font-size="10" letter-spacing="1">FILL</text>
+<text x="122" y="515" fill="#4E4C46" font-size="9" font-family="monospace">#A7B6C8</text>
+<rect x="196" y="454" width="64" height="34" fill="#FFB877" stroke="#2A2E36"/>
+<text x="196" y="502" fill="#6E6A60" font-size="10" letter-spacing="1">RIM</text>
+<text x="196" y="515" fill="#4E4C46" font-size="9" font-family="monospace">#FFB877</text>
+<rect x="270" y="454" width="64" height="34" fill="#3A4152" stroke="#2A2E36"/>
+<text x="270" y="502" fill="#6E6A60" font-size="10" letter-spacing="1">FOG</text>
+<text x="270" y="515" fill="#4E4C46" font-size="9" font-family="monospace">#3A4152</text>
+<text x="48" y="536" fill="#5E5A52" font-size="10.5">vol 0.016 · aniso 0.78</text>
+<rect x="48" y="548" width="296" height="52" fill="#2E7A3F"/>
+<text x="60" y="570" fill="#0B0D11" font-size="12.5" font-weight="700" letter-spacing="1.4">REGIME GREEN</text>
+<text x="60" y="587" fill="#0B0D11" font-size="11" font-family="monospace" opacity="0.75">#2E7A3F  ·  unique to this level</text>
+<rect x="48.0" y="610" width="46.333333333333336" height="22" fill="#D8CEB6"/>
+<rect x="97.33333333333334" y="610" width="46.333333333333336" height="22" fill="#B4AEA2"/>
+<rect x="146.66666666666669" y="610" width="46.333333333333336" height="22" fill="#E4E0D4"/>
+<rect x="196.0" y="610" width="46.333333333333336" height="22" fill="#C1652A"/>
+<rect x="245.33333333333334" y="610" width="46.333333333333336" height="22" fill="#5E3220"/>
+<rect x="294.6666666666667" y="610" width="46.333333333333336" height="22" fill="#7D8B6A"/>
+<text x="48" y="647" fill="#4E4C46" font-size="10" letter-spacing="1">SUPPORTING PALETTE</text>
+<rect x="374" y="132" width="296" height="196" fill="url(#sky1)"/>
+<rect x="374" y="328" width="296" height="34" fill="#D8C5A0"/>
+<rect x="374" y="132" width="296" height="230" fill="none" stroke="#2A2E36"/>
+<circle cx="624" cy="174" r="15" fill="#FF9B44" opacity="0.95"/>
+<circle cx="624" cy="174" r="24" fill="#FF9B44" opacity="0.22"/>
+<text x="374" y="384" fill="#EAE0CC" font-size="15" font-weight="700" letter-spacing="1.2">2  AJDABIYA</text>
+<text x="374" y="404" fill="#9A9488" font-size="12.5">09:10 → 10:30  ·  ghibli</text>
+<text x="374" y="422" fill="#6E6A60" font-size="11.5">34° → obscured  ESE 118°</text>
+<text x="374" y="438" fill="#6E6A60" font-size="11.5">4900K → 2500K</text>
+<rect x="374" y="454" width="64" height="34" fill="#FF9B44" stroke="#2A2E36"/>
+<text x="374" y="502" fill="#6E6A60" font-size="10" letter-spacing="1">KEY</text>
+<text x="374" y="515" fill="#4E4C46" font-size="9" font-family="monospace">#FF9B44</text>
+<rect x="448" y="454" width="64" height="34" fill="#B5713F" stroke="#2A2E36"/>
+<text x="448" y="502" fill="#6E6A60" font-size="10" letter-spacing="1">FILL</text>
+<text x="448" y="515" fill="#4E4C46" font-size="9" font-family="monospace">#B5713F</text>
+<rect x="522" y="454" width="64" height="34" fill="#E08B4A" stroke="#2A2E36"/>
+<text x="522" y="502" fill="#6E6A60" font-size="10" letter-spacing="1">RIM</text>
+<text x="522" y="515" fill="#4E4C46" font-size="9" font-family="monospace">#E08B4A</text>
+<rect x="596" y="454" width="64" height="34" fill="#B5713F" stroke="#2A2E36"/>
+<text x="596" y="502" fill="#6E6A60" font-size="10" letter-spacing="1">FOG</text>
+<text x="596" y="515" fill="#4E4C46" font-size="9" font-family="monospace">#B5713F</text>
+<text x="374" y="536" fill="#5E5A52" font-size="10.5">vol 0.055 · end 70</text>
+<rect x="374" y="548" width="296" height="52" fill="#9C4E33"/>
+<text x="386" y="570" fill="#0B0D11" font-size="12.5" font-weight="700" letter-spacing="1.4">SABKHA TERRA ROSSA</text>
+<text x="386" y="587" fill="#0B0D11" font-size="11" font-family="monospace" opacity="0.75">#9C4E33  ·  unique to this level</text>
+<rect x="374.0" y="610" width="46.333333333333336" height="22" fill="#E6DCC6"/>
+<rect x="423.3333333333333" y="610" width="46.333333333333336" height="22" fill="#C2B49C"/>
+<rect x="472.6666666666667" y="610" width="46.333333333333336" height="22" fill="#8E9A8C"/>
+<rect x="522.0" y="610" width="46.333333333333336" height="22" fill="#F4F1E8"/>
+<rect x="571.3333333333334" y="610" width="46.333333333333336" height="22" fill="#5E8A5C"/>
+<rect x="620.6666666666667" y="610" width="46.333333333333336" height="22" fill="#3E5A6B"/>
+<text x="374" y="647" fill="#4E4C46" font-size="10" letter-spacing="1">SUPPORTING PALETTE</text>
+<rect x="700" y="132" width="296" height="196" fill="url(#sky2)"/>
+<rect x="700" y="328" width="296" height="34" fill="#6E6A62"/>
+<rect x="700" y="132" width="296" height="230" fill="none" stroke="#2A2E36"/>
+<circle cx="950" cy="174" r="15" fill="#FFE2C8" opacity="0.95"/>
+<circle cx="950" cy="174" r="24" fill="#FFE2C8" opacity="0.22"/>
+<text x="700" y="384" fill="#EAE0CC" font-size="15" font-weight="700" letter-spacing="1.2">3  HIGHWAY TO BENGHAZI</text>
+<text x="700" y="404" fill="#9A9488" font-size="12.5">13:40 → 15:20  ·  hard afternoon</text>
+<text x="700" y="422" fill="#6E6A60" font-size="11.5">61°  SSW 205°</text>
+<text x="700" y="438" fill="#6E6A60" font-size="11.5">5500K</text>
+<rect x="700" y="454" width="64" height="34" fill="#FFE2C8" stroke="#2A2E36"/>
+<text x="700" y="502" fill="#6E6A60" font-size="10" letter-spacing="1">KEY</text>
+<text x="700" y="515" fill="#4E4C46" font-size="9" font-family="monospace">#FFE2C8</text>
+<rect x="774" y="454" width="64" height="34" fill="#8E8880" stroke="#2A2E36"/>
+<text x="774" y="502" fill="#6E6A60" font-size="10" letter-spacing="1">FILL</text>
+<text x="774" y="515" fill="#4E4C46" font-size="9" font-family="monospace">#8E8880</text>
+<rect x="848" y="454" width="64" height="34" fill="#9FC4E8" stroke="#2A2E36"/>
+<text x="848" y="502" fill="#6E6A60" font-size="10" letter-spacing="1">RIM</text>
+<text x="848" y="515" fill="#4E4C46" font-size="9" font-family="monospace">#9FC4E8</text>
+<rect x="922" y="454" width="64" height="34" fill="#DCCBAE" stroke="#2A2E36"/>
+<text x="922" y="502" fill="#6E6A60" font-size="10" letter-spacing="1">FOG</text>
+<text x="922" y="515" fill="#4E4C46" font-size="9" font-family="monospace">#DCCBAE</text>
+<text x="700" y="536" fill="#5E5A52" font-size="10.5">vol 0.006 · heat haze</text>
+<rect x="700" y="548" width="296" height="52" fill="#E58FA6"/>
+<text x="712" y="570" fill="#0B0D11" font-size="12.5" font-weight="700" letter-spacing="1.4">OLEANDER PINK</text>
+<text x="712" y="587" fill="#0B0D11" font-size="11" font-family="monospace" opacity="0.75">#E58FA6  ·  unique to this level</text>
+<rect x="700.0" y="610" width="46.333333333333336" height="22" fill="#4A4741"/>
+<rect x="749.3333333333334" y="610" width="46.333333333333336" height="22" fill="#CFC9B8"/>
+<rect x="798.6666666666666" y="610" width="46.333333333333336" height="22" fill="#DDCBA6"/>
+<rect x="848.0" y="610" width="46.333333333333336" height="22" fill="#8A9683"/>
+<rect x="897.3333333333334" y="610" width="46.333333333333336" height="22" fill="#8A5A3C"/>
+<rect x="946.6666666666667" y="610" width="46.333333333333336" height="22" fill="#1F6B3A"/>
+<text x="700" y="647" fill="#4E4C46" font-size="10" letter-spacing="1">SUPPORTING PALETTE</text>
+<rect x="1026" y="132" width="296" height="196" fill="url(#sky3)"/>
+<rect x="1026" y="328" width="296" height="34" fill="#B5AFA2"/>
+<rect x="1026" y="132" width="296" height="230" fill="none" stroke="#2A2E36"/>
+<circle cx="1276" cy="174" r="15" fill="#FFB068" opacity="0.95"/>
+<circle cx="1276" cy="174" r="24" fill="#FFB068" opacity="0.22"/>
+<text x="1026" y="384" fill="#EAE0CC" font-size="15" font-weight="700" letter-spacing="1.2">4  GARYOUNIS UNIVERSITY</text>
+<text x="1026" y="404" fill="#9A9488" font-size="12.5">17:35 → 18:20  ·  golden hour</text>
+<text x="1026" y="422" fill="#6E6A60" font-size="11.5">9° → 4°  W 268°</text>
+<text x="1026" y="438" fill="#6E6A60" font-size="11.5">3050K → 2400K</text>
+<rect x="1026" y="454" width="64" height="34" fill="#FFB068" stroke="#2A2E36"/>
+<text x="1026" y="502" fill="#6E6A60" font-size="10" letter-spacing="1">KEY</text>
+<text x="1026" y="515" fill="#4E4C46" font-size="9" font-family="monospace">#FFB068</text>
+<rect x="1100" y="454" width="64" height="34" fill="#6E86A8" stroke="#2A2E36"/>
+<text x="1100" y="502" fill="#6E6A60" font-size="10" letter-spacing="1">FILL</text>
+<text x="1100" y="515" fill="#4E4C46" font-size="9" font-family="monospace">#6E86A8</text>
+<rect x="1174" y="454" width="64" height="34" fill="#FFC98A" stroke="#2A2E36"/>
+<text x="1174" y="502" fill="#6E6A60" font-size="10" letter-spacing="1">RIM</text>
+<text x="1174" y="515" fill="#4E4C46" font-size="9" font-family="monospace">#FFC98A</text>
+<rect x="1248" y="454" width="64" height="34" fill="#E2B98A" stroke="#2A2E36"/>
+<text x="1248" y="502" fill="#6E6A60" font-size="10" letter-spacing="1">FOG</text>
+<text x="1248" y="515" fill="#4E4C46" font-size="9" font-family="monospace">#E2B98A</text>
+<text x="1026" y="536" fill="#5E5A52" font-size="10.5">vol 0.028 · aniso 0.86</text>
+<rect x="1026" y="548" width="296" height="52" fill="#C9A227"/>
+<text x="1038" y="570" fill="#0B0D11" font-size="12.5" font-weight="700" letter-spacing="1.4">THE GOLD DOME</text>
+<text x="1038" y="587" fill="#0B0D11" font-size="11" font-family="monospace" opacity="0.75">#C9A227  ·  unique to this level</text>
+<rect x="1026.0" y="610" width="46.333333333333336" height="22" fill="#A8A296"/>
+<rect x="1075.3333333333333" y="610" width="46.333333333333336" height="22" fill="#8C8C88"/>
+<rect x="1124.6666666666667" y="610" width="46.333333333333336" height="22" fill="#9FB3B8"/>
+<rect x="1174.0" y="610" width="46.333333333333336" height="22" fill="#9E8D6B"/>
+<rect x="1223.3333333333333" y="610" width="46.333333333333336" height="22" fill="#2C4A2E"/>
+<rect x="1272.6666666666667" y="610" width="46.333333333333336" height="22" fill="#6B8E4E"/>
+<text x="1026" y="647" fill="#4E4C46" font-size="10" letter-spacing="1">SUPPORTING PALETTE</text>
+<rect x="1352" y="132" width="296" height="196" fill="url(#sky4)"/>
+<rect x="1352" y="328" width="296" height="34" fill="#6E7A80"/>
+<rect x="1352" y="132" width="296" height="230" fill="none" stroke="#2A2E36"/>
+<circle cx="1602" cy="174" r="15" fill="#C8D8FF" opacity="0.95"/>
+<circle cx="1602" cy="174" r="24" fill="#C8D8FF" opacity="0.22"/>
+<text x="1352" y="384" fill="#EAE0CC" font-size="15" font-weight="700" letter-spacing="1.2">5  BENGHAZI</text>
+<text x="1352" y="404" fill="#9A9488" font-size="12.5">19:05 → 21:00  ·  dusk into night</text>
+<text x="1352" y="422" fill="#6E6A60" font-size="11.5">moon 52°  E 84°</text>
+<text x="1352" y="438" fill="#6E6A60" font-size="11.5">8200K moon · 1900K sodium</text>
+<rect x="1352" y="454" width="64" height="34" fill="#C8D8FF" stroke="#2A2E36"/>
+<text x="1352" y="502" fill="#6E6A60" font-size="10" letter-spacing="1">KEY</text>
+<text x="1352" y="515" fill="#4E4C46" font-size="9" font-family="monospace">#C8D8FF</text>
+<rect x="1426" y="454" width="64" height="34" fill="#2A3A56" stroke="#2A2E36"/>
+<text x="1426" y="502" fill="#6E6A60" font-size="10" letter-spacing="1">FILL</text>
+<text x="1426" y="515" fill="#4E4C46" font-size="9" font-family="monospace">#2A3A56</text>
+<rect x="1500" y="454" width="64" height="34" fill="#8FB8E8" stroke="#2A2E36"/>
+<text x="1500" y="502" fill="#6E6A60" font-size="10" letter-spacing="1">RIM</text>
+<text x="1500" y="515" fill="#4E4C46" font-size="9" font-family="monospace">#8FB8E8</text>
+<rect x="1574" y="454" width="64" height="34" fill="#1F2C44" stroke="#2A2E36"/>
+<text x="1574" y="502" fill="#6E6A60" font-size="10" letter-spacing="1">FOG</text>
+<text x="1574" y="515" fill="#4E4C46" font-size="9" font-family="monospace">#1F2C44</text>
+<text x="1352" y="536" fill="#5E5A52" font-size="10.5">vol 0.035 · emis lift</text>
+<rect x="1352" y="548" width="296" height="52" fill="#5FA391"/>
+<text x="1364" y="570" fill="#0B0D11" font-size="12.5" font-weight="700" letter-spacing="1.4">COPPER PATINA</text>
+<text x="1364" y="587" fill="#0B0D11" font-size="11" font-family="monospace" opacity="0.75">#5FA391  ·  unique to this level</text>
+<rect x="1352.0" y="610" width="46.333333333333336" height="22" fill="#FFA13B"/>
+<rect x="1401.3333333333333" y="610" width="46.333333333333336" height="22" fill="#E3D9C2"/>
+<rect x="1450.6666666666667" y="610" width="46.333333333333336" height="22" fill="#E8C9A0"/>
+<rect x="1500.0" y="610" width="46.333333333333336" height="22" fill="#D9A9A0"/>
+<rect x="1549.3333333333333" y="610" width="46.333333333333336" height="22" fill="#4E7A70"/>
+<rect x="1598.6666666666667" y="610" width="46.333333333333336" height="22" fill="#1B2536"/>
+<text x="1352" y="647" fill="#4E4C46" font-size="10" letter-spacing="1">SUPPORTING PALETTE</text>
+<line x1="48" y1="778" x2="1632" y2="778" stroke="#2A2E36"/>
+<text x="48" y="804" fill="#EAE0CC" font-size="19" font-weight="700" letter-spacing="2">WANIS — 5.25 HEADS · THE ONLY SATURATED THING IN THE FRAME</text>
+<text x="48" y="826" fill="#8A8578" font-size="12.5">DARK AT THE BOTTOM, HIGHEST CHROMA AT THE CHEST.  WORLD REDS ARE CAPPED AT HSV S 0.55 / V 0.72 IN HUE 340°–25° SO THE JACKET AND THE SRIRACHA OWN THAT BAND ALONE.</text>
+<rect x="48" y="842" width="112" height="66" fill="#EAE0CC" stroke="#2A2E36"/>
+<text x="48" y="926" fill="#9A9488" font-size="11.5">jard / tank</text>
+<text x="48" y="941" fill="#5E5A52" font-size="10" font-family="monospace">#EAE0CC 46%</text>
+<rect x="174" y="842" width="112" height="66" fill="#2E3A52" stroke="#2A2E36"/>
+<text x="174" y="926" fill="#9A9488" font-size="11.5">trousers</text>
+<text x="174" y="941" fill="#5E5A52" font-size="10" font-family="monospace">#2E3A52 28%</text>
+<rect x="300" y="842" width="112" height="66" fill="#C4392E" stroke="#2A2E36"/>
+<text x="300" y="926" fill="#9A9488" font-size="11.5">jacket</text>
+<text x="300" y="941" fill="#5E5A52" font-size="10" font-family="monospace">#C4392E 22%</text>
+<rect x="426" y="842" width="112" height="66" fill="#D9A93C" stroke="#2A2E36"/>
+<text x="426" y="926" fill="#9A9488" font-size="11.5">chain</text>
+<text x="426" y="941" fill="#5E5A52" font-size="10" font-family="monospace">#D9A93C 4%</text>
+<rect x="552" y="842" width="112" height="66" fill="#A9724B" stroke="#2A2E36"/>
+<text x="552" y="926" fill="#9A9488" font-size="11.5">skin</text>
+<text x="552" y="941" fill="#5E5A52" font-size="10" font-family="monospace">#A9724B </text>
+<rect x="678" y="842" width="112" height="66" fill="#1B1512" stroke="#2A2E36"/>
+<text x="678" y="926" fill="#9A9488" font-size="11.5">hair</text>
+<text x="678" y="941" fill="#5E5A52" font-size="10" font-family="monospace">#1B1512 </text>
+<rect x="804" y="842" width="112" height="66" fill="#8A5C3A" stroke="#2A2E36"/>
+<text x="804" y="926" fill="#9A9488" font-size="11.5">shibshib</text>
+<text x="804" y="941" fill="#5E5A52" font-size="10" font-family="monospace">#8A5C3A </text>
+<rect x="930" y="842" width="112" height="66" fill="#8E96A0" stroke="#2A2E36"/>
+<text x="930" y="926" fill="#9A9488" font-size="11.5">PRISON state</text>
+<text x="930" y="941" fill="#5E5A52" font-size="10" font-family="monospace">#8E96A0 </text>
+<rect x="1076" y="842" width="112" height="66" fill="#F03A16" stroke="#F03A16"/>
+<text x="1076" y="926" fill="#F03A16" font-size="11.5" font-weight="700">SRIRACHA</text>
+<text x="1076" y="941" fill="#5E5A52" font-size="10" font-family="monospace">#F03A16 emissive</text>
+<text x="1206" y="870" fill="#8A8578" font-size="12">The jacket is matte and large.</text>
+<text x="1206" y="890" fill="#8A8578" font-size="12">The bottle is small and glows.</text>
+<text x="1206" y="910" fill="#8A8578" font-size="12">They never read as the same object.</text>
+<line x1="48" y1="966" x2="1632" y2="966" stroke="#2A2E36"/>
+<text x="48" y="992" fill="#EAE0CC" font-size="19" font-weight="700" letter-spacing="2">DEPTH STACK — CAMERA Z=+16, FOV 34°, NEAR 0.5</text>
+<text x="48" y="1014" fill="#8A8578" font-size="12.5">PARALLAX IS 16/d AND PHYSICALLY FREE.  EVERY SCREEN MUST CARRY CONTENT IN AT LEAST SIX OF THE NINE LAYERS.</text>
+<rect x="48.0" y="1058" width="166.0" height="90" fill="#141820" stroke="#2A2E36" stroke-width="1"/>
+<text x="56.0" y="1078" fill="#C8C2B4" font-size="15" font-weight="700" font-family="monospace">Z +9</text>
+<text x="56.0" y="1096" fill="#C8C2B4" font-size="10.5" opacity="0.85">FG occluder</text>
+<text x="56.0" y="1112" fill="#C8C2B4" font-size="10.5" opacity="0.6" font-family="monospace">2.29×</text>
+<rect x="224.0" y="1058" width="166.0" height="90" fill="#1E242E" stroke="#2A2E36" stroke-width="1"/>
+<text x="232.0" y="1078" fill="#C8C2B4" font-size="15" font-weight="700" font-family="monospace">Z +5</text>
+<text x="232.0" y="1096" fill="#C8C2B4" font-size="10.5" opacity="0.85">FG frame</text>
+<text x="232.0" y="1112" fill="#C8C2B4" font-size="10.5" opacity="0.6" font-family="monospace">1.45×</text>
+<rect x="400.0" y="1030" width="166.0" height="118" fill="#E4DCC8" stroke="#F03A16" stroke-width="2"/>
+<text x="408.0" y="1050" fill="#0B0D11" font-size="15" font-weight="700" font-family="monospace">Z 0</text>
+<text x="408.0" y="1068" fill="#0B0D11" font-size="10.5" opacity="0.85">GAMEPLAY PLANE</text>
+<text x="408.0" y="1084" fill="#0B0D11" font-size="10.5" opacity="0.6" font-family="monospace">1.00×</text>
+<rect x="576.0" y="1058" width="166.0" height="90" fill="#B8AE98" stroke="#2A2E36" stroke-width="1"/>
+<text x="584.0" y="1078" fill="#C8C2B4" font-size="15" font-weight="700" font-family="monospace">Z −5</text>
+<text x="584.0" y="1096" fill="#C8C2B4" font-size="10.5" opacity="0.85">near BG</text>
+<text x="584.0" y="1112" fill="#C8C2B4" font-size="10.5" opacity="0.6" font-family="monospace">0.76×</text>
+<rect x="752.0" y="1058" width="166.0" height="90" fill="#9A9384" stroke="#2A2E36" stroke-width="1"/>
+<text x="760.0" y="1078" fill="#C8C2B4" font-size="15" font-weight="700" font-family="monospace">Z −14</text>
+<text x="760.0" y="1096" fill="#C8C2B4" font-size="10.5" opacity="0.85">mid BG</text>
+<text x="760.0" y="1112" fill="#C8C2B4" font-size="10.5" opacity="0.6" font-family="monospace">0.53×</text>
+<rect x="928.0" y="1058" width="166.0" height="90" fill="#807B70" stroke="#2A2E36" stroke-width="1"/>
+<text x="936.0" y="1078" fill="#C8C2B4" font-size="15" font-weight="700" font-family="monospace">Z −34</text>
+<text x="936.0" y="1096" fill="#C8C2B4" font-size="10.5" opacity="0.85">deep BG</text>
+<text x="936.0" y="1112" fill="#C8C2B4" font-size="10.5" opacity="0.6" font-family="monospace">0.32×</text>
+<rect x="1104.0" y="1058" width="166.0" height="90" fill="#6A675F" stroke="#2A2E36" stroke-width="1"/>
+<text x="1112.0" y="1078" fill="#C8C2B4" font-size="15" font-weight="700" font-family="monospace">Z −90</text>
+<text x="1112.0" y="1096" fill="#C8C2B4" font-size="10.5" opacity="0.85">far landscape</text>
+<text x="1112.0" y="1112" fill="#C8C2B4" font-size="10.5" opacity="0.6" font-family="monospace">0.15×</text>
+<rect x="1280.0" y="1058" width="166.0" height="90" fill="#585750" stroke="#2A2E36" stroke-width="1"/>
+<text x="1288.0" y="1078" fill="#C8C2B4" font-size="15" font-weight="700" font-family="monospace">Z −260</text>
+<text x="1288.0" y="1096" fill="#C8C2B4" font-size="10.5" opacity="0.85">horizon skyline</text>
+<text x="1288.0" y="1112" fill="#C8C2B4" font-size="10.5" opacity="0.6" font-family="monospace">0.058×</text>
+<rect x="1456.0" y="1058" width="166.0" height="90" fill="#454A56" stroke="#2A2E36" stroke-width="1"/>
+<text x="1464.0" y="1078" fill="#C8C2B4" font-size="15" font-weight="700" font-family="monospace">Z −900</text>
+<text x="1464.0" y="1096" fill="#C8C2B4" font-size="10.5" opacity="0.85">sky dome</text>
+<text x="1464.0" y="1112" fill="#C8C2B4" font-size="10.5" opacity="0.6" font-family="monospace">0.017×</text>
+</svg>
