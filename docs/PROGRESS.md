@@ -274,22 +274,52 @@ however irregular its outline, and what sells it is the edge going away.
 Levels that are not built yet are pinned and refuse entry with a red shudder
 rather than being hidden, because the shape of the world is the promise.
 
+### Added — the second benchmark pass
+
+**The plant exists now.** Two fifths of the benchmark frame used to be empty
+haze with a sun in it. `PropKit.column`, `PropKit.vessel` and
+`PropKit.drum_stack` build distillation columns with platform rings and caged
+ladders, horizontal vessels on saddles, and drum stacks; a stair tower throws
+diagonals against all those verticals, and pipe runs on sleepers walk off to
+the right along the ground. The bank has its own albedo step, darker than the
+tank farm behind it, because layer separation in a backlit frame comes from
+material value and not from more fog.
+
+**Three lights are still on** in a block that is supposed to be empty.
+`PropKit.lit_window` is the cheapest way to make a dark mass read as a building
+with people in it, and in a frame lit from behind it is the only warm accent
+the shadow side gets.
+
+**The handrail is a handrail.** It was balusters every 900 mm, which at
+gameplay distance is a smear of thin sticks with no shape. Now it is stanchions
+on a 1.85 m pitch with knee braces, a top rail, a mid rail and a toe plate —
+two long horizontals and a few uprights, which is a silhouette you can read.
+
+**The playable level and the title screen share the benchmark's colour
+script.** `BregaKit.mood` and `BregaKit.palette` were still on the old warm
+mid-grey numbers, so Level 1 looked like a different game from its own
+benchmark. They now match exactly.
+
 ### Weak — the honest list
 
-1. **The benchmark does not pass its own quality gate yet.** It splits into
-   "dark building on the left, bright haze on the right" without enough
-   transition between them. It is atmospheric and it is not yet a marketing
-   frame. Specific failures: the sun shafts the brief calls for are not
-   forming; the material detail is invisible at the distances the camera
-   actually uses, so surfaces read as flat colour; the panel joint grid is
-   mechanical; the crane holes read as polka dots; the awning cluster at lower
-   left is awkwardly placed.
+1. **The benchmark still does not pass its own quality gate.** It is much
+   closer: the block now sits low in the value range so the white thobe owns
+   the frame, the shadow side is cool against a warm key, a pole line and a
+   conveyor gantry bridge the middle ground that used to be empty, the plant
+   has columns, vessels, a stair tower and drum stacks instead of haze, and
+   one flare is still burning as a focal point. What is still wrong: the sun
+   is a bright blob doing no storytelling and it is the first thing the eye
+   goes to; the walkway rail reads as a tangle of thin sticks with no shape;
+   the block has no large-scale value incident (a repaired bay, a scorched
+   section, a balcony run) so at this distance it is one dark rectangle; and
+   the bottom-left corner is dead.
 2. **Motion is implemented but barely visible.** Wind, sway and dust all exist
    now; at the distances the benchmark camera uses, none of them read. Needs
    bigger amplitudes and more contrast against their backgrounds.
-3. **Wanis stands in the default idle.** The benchmark calls for authored
-   contrapposto with a hand on the broken rail post and the head turned 12°
-   past the shoulders. Levels cannot pose the character yet.
+3. **His hand does not land on the rail.** `WanisRig.beauty_pose` gives him
+   authored contrapposto with the head turned past the shoulders, but the arm
+   is posed by eye rather than solved to the rail, so the hand floats near it
+   rather than resting on it. No IK.
 4. **The rifle has nothing to shoot.** Tracers fly and vanish; there is no
    impact, no decal, no enemy, no damage. Recoil movement tech is implemented
    but untested against real level geometry.

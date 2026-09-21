@@ -13,18 +13,18 @@ const YARD_Y := -6.6
 
 static func palette() -> Dictionary:
 	var p := {
-		"slab": MaterialLab.plaster(Color(0.545, 0.518, 0.455), 1.0),
-		"joint": MaterialLab.concrete(Color(0.235, 0.215, 0.185), 1.0),
+		"slab": MaterialLab.plaster(Color(0.425, 0.402, 0.356), 1.0),
+		"joint": MaterialLab.concrete(Color(0.170, 0.156, 0.138), 1.0),
 		"dark": MaterialLab.concrete(Color(0.055, 0.050, 0.050), 0.2),
-		"wall": MaterialLab.plaster(Color(0.205, 0.196, 0.182), 1.0),
-		"deck": MaterialLab.concrete(Color(0.40, 0.385, 0.355), 1.0),
+		"wall": MaterialLab.plaster(Color(0.180, 0.172, 0.162), 1.0),
+		"deck": MaterialLab.concrete(Color(0.325, 0.312, 0.290), 1.0),
 		"rail": MaterialLab.rusted_metal(Color(0.40, 0.235, 0.145), 0.75),
 		"rebar": MaterialLab.rusted_metal(Color(0.757, 0.396, 0.165), 1.0),
 		"rust": MaterialLab.rusted_metal(Color(0.243, 0.133, 0.090), 1.0),
-		"tank": MaterialLab.plaster(Color(0.612, 0.592, 0.545), 1.0),
+		"tank": MaterialLab.plaster(Color(0.415, 0.398, 0.366), 1.0),
 		"tank_burnt": MaterialLab.concrete(Color(0.125, 0.098, 0.086), 1.0),
-		"bund": MaterialLab.concrete(Color(0.345, 0.329, 0.294), 1.0),
-		"tower": MaterialLab.concrete(Color(0.490, 0.475, 0.447), 1.0),
+		"bund": MaterialLab.concrete(Color(0.245, 0.233, 0.210), 1.0),
+		"tower": MaterialLab.concrete(Color(0.300, 0.290, 0.274), 1.0),
 		"steel": MaterialLab.painted_metal(Color(0.055, 0.055, 0.062), 0.9),
 		"sabkha": MaterialLab.sand(Color(0.576, 0.553, 0.502)),
 		"mud": MaterialLab.concrete(Color(0.271, 0.231, 0.180), 1.0),
@@ -32,7 +32,7 @@ static func palette() -> Dictionary:
 		"trunk": MaterialLab.plaster(Color(0.208, 0.200, 0.184), 1.0),
 		"leaf": PropKit.foliage_material(Color(0.212, 0.243, 0.180), YARD_Y, 9.0, 0.42),
 		"door": MaterialLab.painted_metal(Color(0.184, 0.365, 0.275), 0.7),
-		"green": MaterialLab.plaster(Color(0.259, 0.376, 0.278), 1.0),
+		"green": MaterialLab.plaster(Color(0.185, 0.268, 0.200), 1.0),
 		"shutter": MaterialLab.painted_metal(Color(0.420, 0.290, 0.196), 1.0),
 		"bag": MaterialLab.cloth(Color(0.678, 0.639, 0.545), 0.95),
 		"crate": MaterialLab.cloth(Color(0.44, 0.31, 0.19), 0.72),
@@ -54,19 +54,23 @@ static func mood() -> LightingRig.Mood:
 	m.sun_color = Color(1.0, 0.565, 0.251)      # 2200 K
 	m.sun_energy = 3.1
 	m.sun_angular_distance = 1.1
-	m.sun_fog_energy = 1.9
-	m.sun_disc_size = 3.2
+	m.sun_fog_energy = 3.0
+	m.sun_disc_size = 0.34
 
+	# Cool and weak: everything the key can reach is behind the geometry, so
+	# the playing field is in shade and has to stay there. He is the brightest
+	# value in the frame and that is the whole readability strategy. Matches
+	# the benchmark's colour script exactly — see BregaBeauty._mood.
 	m.fill_angles = Vector2(18.0, -28.0)
-	m.fill_color = Color(0.722, 0.690, 0.627)
-	m.fill_energy = 0.62
+	m.fill_color = Color(0.475, 0.545, 0.720)
+	m.fill_energy = 0.54
 
 	m.rim_angles = Vector2(-4.0, 128.0)
 	m.rim_color = Color(1.0, 0.722, 0.467)
-	m.rim_energy = 5.5
+	m.rim_energy = 8.0
 	m.rim_cull_mask = 2
 
-	m.hero_fill_energy = 2.1
+	m.hero_fill_energy = 2.5
 	m.hero_fill_color = Color(0.72, 0.78, 0.94)
 	m.hero_fill_angles = Vector2(-14.0, -30.0)
 
@@ -76,21 +80,21 @@ static func mood() -> LightingRig.Mood:
 	m.ground_bottom = Color(0.376, 0.345, 0.306)
 	m.sky_energy = 1.0
 	m.sky_curve = 0.11
-	m.ambient_energy = 0.34
+	m.ambient_energy = 0.29
 
 	m.fog_color = Color(0.835, 0.804, 0.741)
-	m.fog_density = 0.0013
-	m.fog_sun_scatter = 0.35
+	m.fog_density = 0.00052
+	m.fog_sun_scatter = 0.15
 	m.fog_emission = Color(0.06, 0.045, 0.035)
 	m.fog_anisotropy = 0.78
-	m.volumetric_density = 0.0014
+	m.volumetric_density = 0.00068
 
 	m.tonemap = Environment.TONE_MAPPER_AGX
-	m.exposure = 1.14
-	m.white = 8.0
-	m.glow_intensity = 0.30
-	m.glow_hdr_threshold = 1.45
-	m.adjustment_saturation = 1.08
+	m.exposure = 1.08
+	m.white = 8.5
+	m.glow_intensity = 0.12
+	m.glow_hdr_threshold = 2.2
+	m.adjustment_saturation = 1.14
 	m.adjustment_contrast = 1.06
 	m.dof_near_distance = 0.0
 	m.dof_distance = 0.0

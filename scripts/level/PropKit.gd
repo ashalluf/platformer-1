@@ -449,6 +449,133 @@ static func wall_services(parent: Node3D, left_x: float, base_y: float,
 	return root
 
 
+## A distillation column: a tall cylinder with platform rings, a caged ladder
+## running the whole way up one side, and a head at the top. Read at distance
+## it is a vertical with rungs in it, which is the only thing that separates a
+## refinery from a row of chimneys.
+static func column(parent: Node3D, base: Vector3, height: float, radius: float,
+		mat: Material, platform_mat: Material, platforms := 4) -> Node3D:
+	var root := Node3D.new()
+	root.name = "Column"
+	root.position = base
+	parent.add_child(root)
+
+	_mi(root, "Shell", _cyl(radius, height, 16), mat, Vector3(0, height * 0.5, 0))
+	_mi(root, "Head", _cyl(radius, radius * 1.1, 16, radius * 0.35), mat,
+		Vector3(0, height + radius * 0.5, 0))
+	_mi(root, "Skirt", _cyl(radius * 1.12, 1.2, 16), mat, Vector3(0, 0.6, 0))
+
+	for i in platforms:
+		var y := height * (0.22 + 0.74 * float(i) / float(maxi(platforms - 1, 1)))
+		_mi(root, "Platform%d" % i, _cyl(radius * 1.7, 0.10, 16), platform_mat,
+			Vector3(0, y, 0))
+		_mi(root, "Handrail%d" % i, _cyl(radius * 1.7, 0.05, 16), platform_mat,
+			Vector3(0, y + 0.95, 0))
+	# Caged ladder up the near face.
+	_mi(root, "Ladder", _box(Vector3(0.5, height, 0.10)), platform_mat,
+		Vector3(0, height * 0.5, radius + 0.1))
+	for r in int(height / 1.4):
+		_mi(root, "Rung%d" % r, _box(Vector3(0.62, 0.06, 0.06)), platform_mat,
+			Vector3(0, 0.8 + r * 1.4, radius + 0.24))
+	return root
+
+
+## A horizontal pressure vessel on saddles. Its dished ends are what say
+## "pressure" rather than "tank".
+static func vessel(parent: Node3D, at: Vector3, length: float, radius: float,
+		mat: Material, saddle_mat: Material) -> Node3D:
+	var root := Node3D.new()
+	root.name = "Vessel"
+	root.position = at
+	parent.add_child(root)
+	_mi(root, "Shell", _cyl(radius, length, 16), mat, Vector3.ZERO,
+		Vector3(0, 0, PI * 0.5))
+	for side: float in [-1.0, 1.0]:
+		var cap := _mi(root, "Cap%s" % ("A" if side < 0.0 else "B"),
+			_cyl(radius * 0.99, radius * 0.7, 16, radius * 0.45), mat,
+			Vector3(side * (length * 0.5 + radius * 0.35), 0, 0),
+			Vector3(0, 0, side * PI * 0.5))
+		cap.scale = Vector3(1.0, 1.0, 1.0)
+	for i in 2:
+		var x := (-0.28 + 0.56 * i) * length
+		_mi(root, "Saddle%d" % i, _box(Vector3(radius * 0.9, radius * 1.5, radius * 2.1)),
+			saddle_mat, Vector3(x, -radius * 1.05, 0))
+	return root
+
+
+## A stacked bank of oil drums. Cheap silhouette, and it says what the yard was
+## for better than any label.
+static func drum_stack(parent: Node3D, at: Vector3, cols: int, rows: int,
+		mat: Material) -> MultiMeshInstance3D:
+	var mm := _joint_multimesh(_cyl(0.30, 0.88, 12))
+	var xf: Array[Transform3D] = []
+	for r in rows:
+		for c in cols - r:
+			xf.append(Transform3D(Basis.IDENTITY,
+				at + Vector3(c * 0.66 + r * 0.33, 0.44 + r * 0.9, sin(c * 3.1 + r) * 0.2)))
+	_fill_multimesh(mm, xf)
+	return _mm_node(parent, "DrumStack", mm, mat)
+
+
+## A washing line between two points with cloth pegged along it. In a frame
+## whose subject is a dark building, three squares of colour on a wire are
+## worth more than any amount of surface detail — they say the place is lived
+## in, and they are the only saturated thing allowed on that wall.
+static func laundry_line(parent: Node3D, from: Vector3, to: Vector3, sag: float,
+		wire_mat: Material, colours: Array, seed_ := 11) -> Node3D:
+	var root := Node3D.new()
+	root.name = "LaundryLine"
+	parent.add_child(root)
+	cable(root, from, to, sag, wire_mat, 10, 0.022)
+
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_
+	var count := rng.randi_range(3, 5)
+	for i in count:
+		var t := (float(i) + 0.5) / float(count)
+		var p := from.lerp(to, t)
+		p.y -= sag * sin(t * PI)
+		var w := rng.randf_range(0.34, 0.62)
+		var h := rng.randf_range(0.42, 0.88)
+		var cloth := MaterialLab.cloth(colours[rng.randi() % colours.size()], 0.92)
+		cloth.cull_mode = BaseMaterial3D.CULL_DISABLED
+		var mi := _mi(root, "Cloth%d" % i, _box(Vector3(w, h, 0.02)), cloth,
+			p + Vector3(0.0, -h * 0.5 - 0.02, 0.02))
+		mi.rotation = Vector3(0.0, 0.0, rng.randf_range(-0.09, 0.09))
+	return root
+
+
+## A window with a light on behind it. The single cheapest way to make a dark
+## mass read as a building with people in it, and in a backlit frame it is the
+## only warm accent the shadow side gets.
+static func lit_window(parent: Node3D, pos: Vector3, size: Vector2,
+		frame_mat: Material, tint := Color(1.0, 0.72, 0.36),
+		energy := 2.4) -> Node3D:
+	var root := Node3D.new()
+	root.name = "LitWindow"
+	root.position = pos
+	parent.add_child(root)
+
+	_mi(root, "Reveal", _box(Vector3(size.x + 0.16, size.y + 0.16, 0.18)),
+		frame_mat, Vector3(0, 0, -0.06))
+	var pane := _mi(root, "Pane", _box(Vector3(size.x, size.y, 0.04)),
+		MaterialLab.emissive(tint, energy), Vector3(0, 0, 0.02))
+	pane.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	# A mullion, so the pane is a window and not a glowing tile.
+	_mi(root, "Mullion", _box(Vector3(0.05, size.y, 0.06)), frame_mat,
+		Vector3(0, 0, 0.05))
+
+	var spill := OmniLight3D.new()
+	spill.name = "Spill"
+	spill.light_color = tint
+	spill.light_energy = energy * 0.5
+	spill.omni_range = 3.4
+	spill.shadow_enabled = false
+	spill.position = Vector3(0, 0, 0.5)
+	root.add_child(spill)
+	return root
+
+
 ## Deep-set window with a bent louvred shutter. Placed on a rhythm by the caller.
 static func window(parent: Node3D, pos: Vector3, size: Vector2, reveal: float,
 		frame_mat: Material, dark_mat: Material, shutter_mat: Material,
@@ -806,14 +933,33 @@ static func walkway(parent: Node3D, left_x: float, top_y: float, width: float, z
 	var body := LevelKit.box(parent,
 		Vector3(left_x + width * 0.5, top_y - 0.16, z), Vector3(width, 0.32, 1.2),
 		deck_mat, "Walkway")
-	var n := int(width / 0.9)
+
+	# An industrial handrail is stanchions on a wide pitch carrying a top rail,
+	# a mid rail and a toe plate — NOT balusters every 900 mm. At gameplay
+	# distance a picket fence is a smear of thin sticks with no shape; two long
+	# horizontals and a few uprights is a silhouette you can read.
+	var pitch := 1.85
+	var n := maxi(2, int(width / pitch))
 	for i in n:
 		if missing.has(i):
 			continue
-		_mi(body, "Baluster%d" % i, _box(Vector3(0.06, 0.95, 0.06)), rail_mat,
-			Vector3(-width * 0.5 + 0.45 + i * 0.9, 0.64, 0.55))
-	_mi(body, "Rail", _cyl(0.045, width, 8), rail_mat, Vector3(0, 1.12, 0.55),
+		var sx := -width * 0.5 + width * (float(i) + 0.5) / float(n)
+		_mi(body, "Stanchion%d" % i, _box(Vector3(0.075, 1.12, 0.075)), rail_mat,
+			Vector3(sx, 0.72, 0.55))
+		# Knee brace back to the deck: the diagonal is most of the character.
+		var brace := _mi(body, "Brace%d" % i, _box(Vector3(0.05, 0.50, 0.05)),
+			rail_mat, Vector3(sx + 0.14, 0.34, 0.44))
+		brace.rotation = Vector3(0.52, 0.0, 0.36)
+
+	_mi(body, "RailTop", _cyl(0.048, width, 8), rail_mat, Vector3(0, 1.26, 0.55),
 		Vector3(0, 0, PI * 0.5))
+	_mi(body, "RailMid", _cyl(0.036, width, 8), rail_mat, Vector3(0, 0.74, 0.55),
+		Vector3(0, 0, PI * 0.5))
+	# Toe plate: the solid band along the deck edge that stops a dropped
+	# spanner, and the one continuous dark line the whole run needs.
+	_mi(body, "ToePlate", _box(Vector3(width, 0.16, 0.05)), rail_mat,
+		Vector3(0, 0.24, 0.57))
+
 	# Spalled leading edge with two exposed rebars and a rust halo under it.
 	_mi(body, "Spall", _box(Vector3(0.40, 0.14, 1.1)), rebar_mat,
 		Vector3(width * 0.5 - 0.20, 0.09, 0.0))

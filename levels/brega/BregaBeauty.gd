@@ -95,11 +95,11 @@ func _mood() -> LightingRig.Mood:
 	m.ground_bottom = Color(0.376, 0.345, 0.306)
 	m.sky_energy = 1.0
 	m.sky_curve = 0.11
-	m.volumetric_density = 0.0010
+	m.volumetric_density = 0.00068
 	m.ambient_energy = 0.29
 
 	m.fog_color = Color(0.835, 0.804, 0.741)
-	m.fog_density = 0.0009
+	m.fog_density = 0.00052
 	# 0.35 puts a hot bloom on everything within 40 degrees of the key and the
 	# whole right of frame goes to white paper.
 	m.fog_sun_scatter = 0.15
@@ -109,8 +109,8 @@ func _mood() -> LightingRig.Mood:
 	m.tonemap = Environment.TONE_MAPPER_AGX
 	m.exposure = 1.08
 	m.white = 8.5
-	m.glow_intensity = 0.17
-	m.glow_hdr_threshold = 1.85
+	m.glow_intensity = 0.12
+	m.glow_hdr_threshold = 2.2
 	m.adjustment_saturation = 1.14
 	m.adjustment_contrast = 1.06
 	return m
@@ -124,6 +124,7 @@ func _build_level() -> void:
 	_layer_mid_yard()
 	_layer_pipe_rack()
 	_layer_bridge()
+	_layer_plant()
 	_layer_flare()
 	_layer_facade()
 	_layer_gameplay()
@@ -300,6 +301,59 @@ func _layer_pipe_rack() -> void:
 
 
 # --- Layer 5: the cell block facade ----------------------------------------
+
+## Layer -26 to -40: the plant itself.
+##
+## Two fifths of this frame was empty haze with a sun in it. This is what fills
+## it: columns with platform rings and caged ladders, a horizontal vessel on
+## saddles, and drum stacks on the yard floor. Distance is carried by value
+## steps between the layers, not by piling on more fog — fog flattens
+## everything to the same paper white, which is exactly what it had done.
+func _layer_plant() -> void:
+	# Its own value step, darker than the tank farm behind it. Layer separation
+	# in a backlit frame comes from the materials, not from more fog — fog puts
+	# every layer on the same sheet of paper.
+	var shell := MaterialLab.plaster(Color(0.238, 0.226, 0.208), 1.0)
+	var frame: Material = mats["steel"]
+
+	PropKit.column(geometry, Vector3(19.0, YARD_Y, -33.0), 15.5, 1.5,
+		shell, frame, 4)
+	PropKit.column(geometry, Vector3(26.5, YARD_Y, -36.0), 20.5, 1.8,
+		shell, frame, 5)
+	PropKit.column(geometry, Vector3(32.0, YARD_Y, -31.0), 11.0, 1.2,
+		shell, frame, 3)
+	PropKit.column(geometry, Vector3(44.0, YARD_Y, -38.0), 17.0, 1.6,
+		shell, frame, 4)
+
+	PropKit.vessel(geometry, Vector3(13.0, YARD_Y + 3.2, -27.0), 11.0, 1.5,
+		shell, mats["bund"])
+	PropKit.vessel(geometry, Vector3(37.0, YARD_Y + 2.6, -25.0), 8.0, 1.2,
+		shell, mats["bund"])
+
+	# A stair tower: diagonals against all those verticals.
+	var tz := -29.0
+	for i in 8:
+		LevelKit.prop(geometry, Vector3(8.4 + (i % 2) * 2.0, YARD_Y + 0.9 + i * 1.35, tz),
+			Vector3(2.6, 0.16, 1.5), frame, "Flight%d" % i).rotation.z = \
+			deg_to_rad(-31.0 if i % 2 == 0 else 31.0)
+		LevelKit.prop(geometry, Vector3(9.4, YARD_Y + 1.6 + i * 1.35, tz),
+			Vector3(3.6, 0.10, 1.6), frame, "Landing%d" % i)
+	for i in 4:
+		LevelKit.prop(geometry, Vector3(7.7 + (i % 2) * 3.4, YARD_Y + 5.6, tz + (i / 2) * 1.4),
+			Vector3(0.20, 11.2, 0.20), frame, "TowerLegB%d" % i)
+
+	PropKit.drum_stack(geometry, Vector3(15.0, YARD_Y, -21.0), 6, 3, mats["rust"])
+	PropKit.drum_stack(geometry, Vector3(30.0, YARD_Y, -19.5), 4, 2, mats["rust"])
+	PropKit.drum_stack(geometry, Vector3(40.5, YARD_Y, -23.0), 5, 3, mats["rust"])
+
+	# Pipe runs on sleepers, walking off to the right along the ground.
+	for i in 3:
+		LevelKit.prop(geometry, Vector3(34.0, YARD_Y + 0.9 + i * 0.42, -20.0),
+			Vector3(52.0, 0.26, 0.26), frame, "GroundPipe%d" % i)
+	for i in 9:
+		LevelKit.prop(geometry, Vector3(10.0 + i * 5.6, YARD_Y + 0.45, -20.0),
+			Vector3(0.7, 0.9, 1.4), mats["bund"], "Sleeper%d" % i)
+
 
 ## The one thing burning in a plant that stopped running: a flare with a live
 ## tip and a plume that drifts across the empty half of the frame. It is the
@@ -496,6 +550,17 @@ func _layer_facade() -> void:
 	PropKit.wall_services(facade, -60.0, YARD_Y, 64.0, 10.4, -2.46,
 		mats["rust"], mats["steel"], 5)
 
+	# Three lights still on in a block that is supposed to be empty. They are
+	# the only warm accent the shadow side of this building gets, and the only
+	# thing in frame that says somebody is awake at this hour.
+	for spec: Array in [
+			[-5.6, YARD_Y + 8.55, Vector2(0.66, 0.92), 1.7],
+			[2.35, YARD_Y + 8.55, Vector2(0.66, 0.92), 1.3],
+			[-15.2, YARD_Y + 5.15, Vector2(0.62, 0.86), 1.5],
+		]:
+		PropKit.lit_window(facade, Vector3(spec[0], spec[1], -2.40), spec[2],
+			mats["joint"], Color(1.0, 0.68, 0.32), spec[3])
+
 	# The roofline is where this building gets to be lived in: aerials, dishes
 	# all pointed the same way, header tanks. Silhouette against a bright sky
 	# costs nothing and is most of what separates a set from a box.
@@ -690,14 +755,14 @@ func _atmosphere() -> void:
 	# pipe rack and the lens, not behind it — which is where it used to be, and
 	# why no shaft ever formed.
 	var shafts := _fog_volume(Vector3(14.0, 6.5, -13.0), Vector3(52.0, 15.0, 20.0),
-		0.020, "PipeRackShafts")
+		0.0045, "PipeRackShafts")
 	(shafts.material as FogMaterial).height_falloff = 0.0
 	(shafts.material as FogMaterial).edge_fade = 0.30
 	(shafts.material as FogMaterial).albedo = Color(1.0, 0.90, 0.76)
 
 	# A second, tighter one in the near yard, cut by the walkway and its legs.
 	var near := _fog_volume(Vector3(6.0, -2.4, -5.0), Vector3(26.0, 9.0, 12.0),
-		0.016, "YardShafts")
+		0.004, "YardShafts")
 	(near.material as FogMaterial).height_falloff = 0.0
 	(near.material as FogMaterial).edge_fade = 0.35
 

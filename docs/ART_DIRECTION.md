@@ -1136,6 +1136,56 @@ Anything less and it goes back. This frame sets the bar for four more levels and
 
 ---
 
+## Rules learned on the benchmark
+
+These came out of looking at captures and fixing what was wrong. They are
+binding on every level, not notes.
+
+**A backlit surface stays in shade.** In World 1 the key is always low and
+behind the geometry, so the whole playing field faces away from it. Do not
+"fix" a flat wall by lighting its front — it would be a lie and it would cost
+the hero his contrast. Put the wall low in the value range, make the fill cool
+and weak, and let him be the brightest thing in the frame. Warm key, cool
+shadow, and the only saturated colour on the shadow side is a light someone
+left on.
+
+**Detail on a shaded surface has to be silhouette.** Nothing on a wall in shade
+reads by its own value, so every piece of detail must stand off the face and
+break the outline: downpipes with shoes and brackets, conduit runs into
+junction boxes, split-unit condensers, aerials, dishes, header tanks, sagging
+cables. `PropKit.wall_services` and `PropKit.roof_clutter` exist for this.
+Anything under about 70 mm at gameplay distance disappears — build it thicker
+than is strictly right.
+
+**Layer separation comes from material value, not from fog.** Fog puts every
+layer on the same sheet of paper. Give each depth band its own albedo step and
+keep the fog thin enough that the steps survive. The plant bank at z −26…−40
+is darker than the tank farm at −75 behind it, and that is why it reads.
+
+**Weathering is generated, not authored.** `PropKit.gradient_decal` builds a
+64 px falloff image for three shapes: a run (strong at the top, fading down and
+off both sides), a band (strong at the bottom, fading up) and a blob. A
+one-dimensional gradient cannot fade on two axes, and a dirt run that does not
+fade sideways reads as a grey rectangle stuck to the wall.
+
+**A foreground prop is sized to the near frustum, not to the world.** At nine
+units from the camera the frame is about seven world units across. A beam the
+length of the walkway blacks out the image.
+
+**An additive flame above about 1.5 energy tonemaps to white** and stops being
+fire. Keep the energy low and let the colour carry it.
+
+**A polished metal in a dark room renders black,** because a mirror with
+nothing to reflect is black. Either give the room an environment the metal can
+reflect, or brush the metal: roughness around 0.38 and metallic around 0.5, so
+the key spreads into a sheen and there is real diffuse underneath.
+
+**A character in a marketing frame is never in the gameplay idle.** The
+gameplay idle is symmetrical, which is correct in play and is a mannequin in a
+still. `WanisRig.beauty_pose` is the authored alternative: weight on the back
+leg, hips tilted toward the free leg, spine counter-curved, shoulders against
+the hips, head turned past the shoulders.
+
 ## Terminology
 
 Volumetric light shafts are called **sun shafts** or **light shafts** in this
