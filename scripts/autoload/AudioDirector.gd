@@ -215,3 +215,17 @@ func set_ambience(id: String, volume_db := -12.0) -> void:
 
 func stop_ambience() -> void:
 	_ambience.stop()
+
+
+## A playing stream holds a playback reference that survives the tree teardown,
+## which shows up as leaked ObjectDB instances at exit. Release everything.
+func _exit_tree() -> void:
+	_ambience.stop()
+	_ambience.stream = null
+	for p in _pool3d:
+		p.stop()
+		p.stream = null
+	for p in _pool2d:
+		p.stop()
+		p.stream = null
+	_streams.clear()

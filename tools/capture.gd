@@ -29,6 +29,8 @@ class_name CaptureSession extends Node
 ##   --look=x,y,z      point a locked camera at a target
 ##   --fov=F           override camera FOV
 ##   --pause-at=N      stop simulating input after frame N (hold the pose)
+##   --cheat=ice       award the remaining ICE SRIRACHAS at frame 120, to shoot
+##                     and verify the chain reward without a perfect run
 ##   --spawn=X,Y       override the level's spawn point, to shoot any section
 ##                     of a long level without playing through to it
 
@@ -188,6 +190,10 @@ func _run(stage: Node) -> void:
 		if player:
 			player.accept_player_input = false
 			player.set_scripted_input(axis, jump_held)
+
+		if frame == 120 and str(opts.get("cheat", "")) == "ice":
+			Gx.add_ice_sriracha(Gx.ICE_SRIRACHA_TARGET - Gx.ice_sriracha)
+			print("  cheat: ice run completed at frame 120")
 
 		_apply_camera_override(stage)
 		await get_tree().process_frame
@@ -433,6 +439,8 @@ func _save_frame(frame: int, t: float, stage: Node) -> void:
 		entry["sriracha"] = Gx.sriracha
 		entry["lives"] = Gx.lives
 	entry["enemies"] = get_tree().get_nodes_in_group("enemy").size()
+	entry["ice"] = Gx.ice_sriracha
+	entry["chains"] = Gx.chain_count()
 	manifest.append(entry)
 	print("  f%04d t=%.2fs %s" % [frame, t, entry.get("state", "-")])
 

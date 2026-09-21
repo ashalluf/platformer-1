@@ -36,9 +36,11 @@ func _ready() -> void:
 func palette() -> Dictionary:
 	match variant:
 		Variant.ICE:
-			return {"sauce": Color(0.42, 0.86, 1.0), "cap": Color(0.80, 0.94, 1.0),
-				"band": Color(0.90, 0.97, 1.0), "mark": Color(0.16, 0.52, 0.78),
-				"glass": Color(0.72, 0.92, 1.0)}
+			# Deep cyan with a dark cap and band: on an ice level everything
+			# else is white, so the collectible has to be the dark thing.
+			return {"sauce": Color(0.06, 0.62, 0.92), "cap": Color(0.07, 0.16, 0.28),
+				"band": Color(0.12, 0.26, 0.42), "mark": Color(0.55, 0.92, 1.0),
+				"glass": Color(0.30, 0.70, 0.95)}
 		Variant.ICED_OUT:
 			return {"sauce": Color(1.0, 0.96, 0.98), "cap": Color(0.92, 0.94, 1.0),
 				"band": Color(1.0, 1.0, 1.0), "mark": Color(0.60, 0.82, 1.0),
@@ -60,6 +62,14 @@ func _on_collected(_by: Node3D) -> void:
 			Gx.add_ice_sriracha(1)
 		Variant.ICED_OUT:
 			Gx.find_iced_out()
+			var scene_path := ""
+			var stage := get_tree().current_scene
+			if stage and stage.scene_file_path != "":
+				scene_path = stage.scene_file_path
+			var at := global_position
+			if _by is Node3D:
+				at = (_by as Node3D).global_position
+			SceneFlow.warp_to_bonus(scene_path, at, Gx.current_level_id)
 		_:
 			Gx.add_sriracha(1)
 	Audio.play_collect(global_position)
@@ -68,7 +78,8 @@ func _on_collected(_by: Node3D) -> void:
 func _build() -> void:
 	var p := palette()
 
-	var sauce := MaterialLab.emissive(p["sauce"], glow_energy)
+	var sauce := MaterialLab.emissive(p["sauce"],
+		glow_energy * (1.6 if variant == Variant.ICE else 1.0))
 	sauce.roughness = 0.22
 	var cap := MaterialLab.cloth(p["cap"], 0.38)
 	var band := MaterialLab.cloth(p["band"], 0.85)

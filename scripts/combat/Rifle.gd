@@ -39,11 +39,6 @@ func _ready() -> void:
 	eject = _model.get_node("Eject")
 	_build_flash()
 	_build_shells()
-	# The pool lives at the scene root: tracers must not inherit the skeleton's
-	# transform, which is scaled by the squash-and-stretch node.
-	_tracers = TracerPool.new()
-	_tracers.name = "TracerPool"
-	call_deferred("_attach_tracers")
 
 
 func _build_flash() -> void:
@@ -86,19 +81,20 @@ func _build_flash() -> void:
 	_flash_mesh.add_child(cross)
 
 
-## The attach is deferred, so the rifle can be freed (on respawn) before it
-## runs. If that happens the pool would never enter the tree and never be
-## freed — an intermittent two-object leak at exit.
-func _attach_tracers() -> void:
-	if not is_instance_valid(_tracers):
-		return
-	if not is_inside_tree():
-		_tracers.queue_free()
-		_tracers = null
+## Created on the first shot, not in _ready. A pool built up front and attached
+## deferred can outlive the rifle that owns it — the rifle gets freed on respawn
+## before the deferred call runs, and the pool leaks. Lazily, that cannot happen.
+##
+## It lives at the scene root because tracers must not inherit the skeleton's
+## transform, which is scaled by the squash-and-stretch node.
+func _ensure_tracers() -> void:
+	if is_instance_valid(_tracers) or not is_inside_tree():
 		return
 	var root := get_tree().current_scene
 	if root == null:
 		root = get_tree().root
+	_tracers = TracerPool.new()
+	_tracers.name = "TracerPool"
 	root.add_child(_tracers)
 
 
@@ -177,6 +173,7 @@ func try_fire_dir(aim: Vector3, _grounded: bool) -> bool:
 	_shells.restart()
 	_shells.emitting = true
 
+	_ensure_tracers()
 	_hitscan(muzzle.global_position, dir)
 	fired.emit(muzzle.global_position, dir)
 	return true

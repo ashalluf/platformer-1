@@ -174,6 +174,29 @@ set; an eight-unit gap with a rise that no jump clears; and a glide armed at a
 ledge *above* the player, which sank him into the pit in front of it. A full run
 now reaches the gate with 51 Sriracha collected.
 
+**THE ICED OUT SYSTEM IS COMPLETE.** Find the hidden bottle, warp, collect 100,
+earn the chain, come back.
+
+- `SceneFlow` owns transitions. Every one is authored: frost crawls in from the
+  edges and from crystal seeds, with a brighter rime on the leading edge. A fade
+  says "loading"; this says "you touched the thing and now you are somewhere
+  else". The warp out and the warp back are the same effect run in opposite
+  directions, which makes the round trip feel like one move.
+- `shaders/ice.gdshader`: a deep core colour that brightens toward silhouette
+  edges by Fresnel, a frost rind on up-facing surfaces broken by noise, and
+  sparse hard glints on a hashed lattice offset by the view vector, so they wink
+  as the camera moves rather than sitting there like dirt.
+- `levels/ice/IceBonus01` — GLACIER RUN. A short, bright, cold place built out
+  of one material the rest of the game never uses: ice spires, frozen sea,
+  aurora curtains (their own shader — a flat additive quad reads as a pane of
+  glass), drifting snow, and a 50-second clock.
+- Exactly 100 ICE SRIRACHAS on a legible serpentine route, in deep cyan because
+  on an ice level the collectible has to be the dark thing.
+- `IceHUD`: a count inside a closing timer ring, because a bar would need a
+  label to say what it measures and a ring does not.
+- All 100 stops the world, flashes the screen, and drops the chain in on a
+  halo light. Verified: `chains=1` in the capture manifest.
+
 **Two more silent bugs fixed.** `StandardMaterial3D.specular` is a Godot 3
 property name — every specular tweak in the project was a no-op that also
 spammed the log. And collect bursts were rendering as large red squares. The
@@ -212,8 +235,8 @@ with a pitfall list, and the benchmark build order.
    chain collection screen. The HUD is the only UI.
 8. **Checkpoints are a data structure with no scene.** `Stage` tracks them;
    nothing places or triggers them.
-9. **The Iced Out warp and ice bonus levels do not exist** beyond `Gx` counters
-   and a bottle variant.
+9. **One ice level, and no collection screen.** The pool the canon calls for is
+   a pool of one, and the chains you earn can only be seen as HUD pips.
 10. **Corner correction is implemented but untested** — the lab has the lip, but
     no capture has driven a jump into it at the right angle.
 11. **Performance is unprofiled** on real hardware. Software-renderer timings say

@@ -7,6 +7,7 @@ class_name MaterialLab
 ## material family with different inputs.
 
 const SURFACE_SHADER := preload("res://shaders/surface_weathered.gdshader")
+const ICE_SHADER := preload("res://shaders/ice.gdshader")
 
 static var _cache: Dictionary = {}
 
@@ -232,6 +233,21 @@ static func glass(tint := Color(0.55, 0.68, 0.72, 0.30)) -> StandardMaterial3D:
 	m.roughness = 0.08
 	m.refraction_enabled = false
 	m.cull_mode = BaseMaterial3D.CULL_DISABLED
+	return m
+
+
+## Ice. `clarity` 0 is packed snow, 1 is a clean block you can see into.
+static func ice(clarity := 1.0, tint := Color(0.10, 0.34, 0.52)) -> ShaderMaterial:
+	var m := ShaderMaterial.new()
+	m.shader = ICE_SHADER
+	m.set_shader_parameter("ice_deep", tint)
+	m.set_shader_parameter("ice_bright", Color(0.46, 0.76, 0.94))
+	m.set_shader_parameter("depth_gain", lerpf(0.6, 1.9, clarity))
+	m.set_shader_parameter("roughness_value", lerpf(0.55, 0.08, clarity))
+	m.set_shader_parameter("internal_glow", lerpf(0.04, 0.22, clarity))
+	m.set_shader_parameter("frost_amount", lerpf(0.95, 0.42, clarity))
+	m.set_shader_parameter("frost_noise", NoiseBank.grain(61))
+	m.set_shader_parameter("sparkle_amount", lerpf(0.8, 3.2, clarity))
 	return m
 
 
