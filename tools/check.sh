@@ -10,6 +10,6 @@ OUT=$(cd "$ROOT" && timeout 300 tools/capture.sh --level="$LEVEL" --input=auto \
   --frames=90 --shots=89 --res=320x180 --quality=0 --warmup=2 --out=captures/_check 2>&1)
 
 echo "$OUT" | grep -viE "ALSA|libpulse|audio|pcm|snd_|Condition \"status" \
-  | grep -iE "SCRIPT ERROR|Parse Error|^ERROR|Invalid|Nonexistent|null value" && {
+  | grep -iE "SCRIPT ERROR|SHADER ERROR|Parse Error|^ERROR|Invalid|Nonexistent|null value" && {
     echo "--- CHECK FAILED"; exit 1; }
 echo "--- CHECK CLEAN ($LEVEL)"
