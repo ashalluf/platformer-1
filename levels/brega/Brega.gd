@@ -357,7 +357,9 @@ func _atmosphere() -> void:
 	fv.size = Vector3(X_END - X_START + 120.0, 3.2, 40.0)
 	fv.position = Vector3((X_START + X_END) * 0.5, YARD_Y + 0.4, -18.0)
 	var fm := FogMaterial.new()
-	fm.density = 0.026
+	# 0.026 with the old bright palette read as ground haze; against the new
+	# one it is a white sheet across the bottom third of every frame.
+	fm.density = 0.005
 	fm.albedo = Color(1.0, 0.93, 0.82)
 	fm.emission = Color(0.06, 0.045, 0.035)
 	fm.height_falloff = 1.2

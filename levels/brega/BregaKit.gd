@@ -54,7 +54,10 @@ static func mood() -> LightingRig.Mood:
 	m.sun_color = Color(1.0, 0.565, 0.251)      # 2200 K
 	m.sun_energy = 3.1
 	m.sun_angular_distance = 1.1
-	m.sun_fog_energy = 3.0
+	# 3.0 is a beauty-frame number. In gameplay the camera spends its life
+	# looking along the key, and at that energy the volumetrics put a hot white
+	# wash across the bottom right of every frame.
+	m.sun_fog_energy = 1.3
 	m.sun_disc_size = 0.34
 
 	# Cool and weak: everything the key can reach is behind the geometry, so
@@ -90,7 +93,7 @@ static func mood() -> LightingRig.Mood:
 	m.fog_sun_scatter = 0.15
 	m.fog_emission = Color(0.06, 0.045, 0.035)
 	m.fog_anisotropy = 0.78
-	m.volumetric_density = 0.00068
+	m.volumetric_density = 0.00040
 
 	m.tonemap = Environment.TONE_MAPPER_AGX
 	m.exposure = 1.08
@@ -221,7 +224,105 @@ static func mid_layers(parent: Node3D, mats: Dictionary, x_from: float, x_to: fl
 		Vector3(x_to + 30.0, YARD_Y + 4.7, -16.0), 0.20,
 		mats["rust"], int(span / 3.0) + 10)
 
+	plant_band(parent, mats, x_from, x_to)
+	foreground_band(parent, mats, x_from, x_to)
+
 	for i in int(span / 9.0) + 1:
 		PropKit.eucalyptus(parent, Vector3(x_from + i * 9.0 + fmod(float(i) * 3.1, 2.0),
 			YARD_Y, -21.0 - fmod(float(i) * 1.7, 3.0)),
 			8.6 + fmod(float(i) * 2.7, 3.0), mats["trunk"], mats["leaf"], i % 2 == 1, i)
+
+
+## A band of near-black junk between the camera and the play plane. Every frame
+## in World 1 was landing with an empty bottom third; a foreground silhouette
+## is what gives an image a floor to stand on, and the yard of a working plant
+## has plenty lying about.
+##
+## Sized to the near frustum, not to the world: at z = +7 the frame is about
+## six units across, so these are small and there are a lot of them.
+static func foreground_band(parent: Node3D, mats: Dictionary,
+		x_from: float, x_to: float) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 4409
+	var x := x_from
+	while x < x_to:
+		x += rng.randf_range(6.0, 12.0)
+		var z := rng.randf_range(5.2, 8.6)
+		var y := YARD_Y + rng.randf_range(0.0, 0.6)
+		match rng.randi() % 5:
+			0:
+				var t := LevelKit.prop(parent, Vector3(x, y + 0.30, z),
+					Vector3(1.00, 0.36, 1.00), mats["dark"], "FgTyre")
+				t.rotation = Vector3(rng.randf_range(-0.3, 0.3), 0.0,
+					rng.randf_range(-0.2, 0.2))
+			1:
+				var d := LevelKit.prop(parent, Vector3(x, y + 0.44, z),
+					Vector3(0.62, 0.88, 0.62), mats["dark"], "FgDrum")
+				d.rotation.z = 1.57 if rng.randf() < 0.4 else 0.0
+			2:
+				LevelKit.prop(parent, Vector3(x, y + 0.14, z),
+					Vector3(2.60, 0.28, 1.20), mats["dark"], "FgPallet")
+			3:
+				var p := LevelKit.prop(parent, Vector3(x, y + 0.85, z),
+					Vector3(0.18, 1.70, 0.18), mats["dark"], "FgPost")
+				p.rotation.z = rng.randf_range(-0.42, 0.42)
+			_:
+				# A low kerb run: a horizontal that crosses the bottom of the
+				# frame instead of another object sitting in it.
+				LevelKit.prop(parent, Vector3(x + 3.0, y + 0.16, z),
+					Vector3(rng.randf_range(5.0, 11.0), 0.32, 0.5),
+					mats["dark"], "FgKerb")
+
+
+## The working plant, behind the perimeter wall. Level 1 is a walk past a
+## petrochemical complex and until now the band between the wall and the
+## horizon was empty, so every gameplay frame fell into "stuff at the front,
+## haze at the back" with nothing in between.
+##
+## Laid out on a long rhythm — a column group, then a vessel, then a gantry
+## run — so the parallax never repeats within a screen.
+static func plant_band(parent: Node3D, mats: Dictionary,
+		x_from: float, x_to: float) -> void:
+	var shell := MaterialLab.plaster(Color(0.238, 0.226, 0.208), 1.0)
+	var frame: Material = mats["steel"]
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7723
+	var x := x_from - 20.0
+	var beat := 0
+	while x < x_to + 20.0:
+		match beat % 3:
+			0:
+				for i in 3:
+					PropKit.column(parent,
+						Vector3(x + i * 6.5, YARD_Y, -32.0 - rng.randf_range(0.0, 6.0)),
+						rng.randf_range(10.0, 20.0), rng.randf_range(1.1, 1.8),
+						shell, frame, rng.randi_range(3, 5))
+				PropKit.drum_stack(parent, Vector3(x + 4.0, YARD_Y, -22.0),
+					rng.randi_range(4, 6), rng.randi_range(2, 3), mats["rust"])
+				x += 26.0
+			1:
+				PropKit.vessel(parent, Vector3(x + 6.0, YARD_Y + 3.0, -26.0),
+					rng.randf_range(8.0, 13.0), rng.randf_range(1.1, 1.6),
+					shell, mats["bund"])
+				# Stair tower: diagonals against all those verticals.
+				for i in 7:
+					var fl := LevelKit.prop(parent,
+						Vector3(x + 16.0 + (i % 2) * 2.0, YARD_Y + 0.9 + i * 1.35, -29.0),
+						Vector3(2.6, 0.16, 1.5), frame, "Flight")
+					fl.rotation.z = deg_to_rad(-31.0 if i % 2 == 0 else 31.0)
+					LevelKit.prop(parent,
+						Vector3(x + 17.0, YARD_Y + 1.6 + i * 1.35, -29.0),
+						Vector3(3.6, 0.10, 1.6), frame, "Landing")
+				x += 30.0
+			_:
+				# A conveyor gantry on legs, running out of frame both ways.
+				var gy := YARD_Y + 8.7
+				LevelKit.prop(parent, Vector3(x + 18.0, gy, -19.5),
+					Vector3(40.0, 1.5, 2.0), mats["bund"], "ConveyorCase")
+				LevelKit.prop(parent, Vector3(x + 18.0, gy + 0.85, -19.5),
+					Vector3(40.0, 0.22, 2.3), frame, "ConveyorLid")
+				for i in 6:
+					LevelKit.prop(parent, Vector3(x + i * 7.6, YARD_Y + 3.3, -19.5),
+						Vector3(0.42, 6.6, 0.42), frame, "GantryLeg")
+				x += 42.0
+		beat += 1

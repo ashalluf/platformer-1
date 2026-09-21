@@ -173,9 +173,13 @@ func _build() -> void:
 	# it is sitting on. This is what makes a trail read at distance.
 	_light = OmniLight3D.new()
 	_light.name = "Glow"
-	_light.light_color = p["sauce"]
-	_light.light_energy = 1.1 if variant == Variant.NORMAL else 1.8
-	_light.omni_range = 2.2
+	# Warm amber rather than the sauce red: a saturated red omni sitting 160 mm
+	# above a dark deck pools on it and reads as a stain, which is the last
+	# thing this game should be putting on the floor.
+	_light.light_color = Color(1.0, 0.62, 0.30) if variant == Variant.NORMAL \
+		else Color(0.55, 0.86, 1.0)
+	_light.light_energy = 0.7 if variant == Variant.NORMAL else 1.2
+	_light.omni_range = 1.5
 	# The level went a stop and a half darker in the colour-script pass, so
 	# every accent light in it is now relatively brighter. This was blowing a
 	# glowing ball around each bottle.
@@ -192,5 +196,5 @@ func _process(delta: float) -> void:
 	_mesh.rotation.y = _t * spin_speed
 	_mesh.position.y = sin(_t * bob_speed) * bob_height
 	if _light:
-		_light.light_energy = (0.75 if variant == Variant.NORMAL else 1.4) \
+		_light.light_energy = (0.55 if variant == Variant.NORMAL else 1.0) \
 			* (0.88 + 0.12 * sin(_t * bob_speed * 2.0))

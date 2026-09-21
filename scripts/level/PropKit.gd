@@ -690,7 +690,49 @@ static func storage_tank(parent: Node3D, center: Vector3, radius: float, height:
 	_mi(root, "Bund", _cyl(radius * 1.55, height * 0.33, 24), bund_mat,
 		Vector3(0, height * 0.165, 0))
 
-	# Ladder brackets — the source of every vertical rust streak on the shell.
+	# Shell courses: a tank is welded up from plate about 2.4 m tall, and the
+	# horizontal line at every course is the thing that says "storage tank"
+	# rather than "cylinder" at any distance.
+	var courses := maxi(2, int(height / 2.4))
+	var course_mm := _joint_multimesh(_cyl(radius * 1.006, 0.06, 28))
+	var course_xf: Array[Transform3D] = []
+	for i in range(1, courses):
+		course_xf.append(Transform3D(Basis.IDENTITY,
+			Vector3(0, height * float(i) / float(courses), 0)))
+	_fill_multimesh(course_mm, course_xf)
+	_mm_node(root, "Courses", course_mm, rust_mat)
+
+	# Wind girder near the top, and a handrail ring on the roof.
+	_mi(root, "WindGirder", _cyl(radius * 1.05, 0.16, 28), rust_mat,
+		Vector3(0, height * 0.82, 0))
+	_mi(root, "RoofRail", _cyl(radius * 0.94, 0.05, 28), rust_mat,
+		Vector3(0, height + height * 0.09 + 0.9, 0))
+	for i in 10:
+		var ra := TAU * float(i) / 10.0
+		_mi(root, "RoofPost%d" % i, _box(Vector3(0.07, 0.95, 0.07)), rust_mat,
+			Vector3(cos(ra) * radius * 0.94, height + height * 0.09 + 0.45,
+				sin(ra) * radius * 0.94))
+
+	# Rust running off the brackets, on the camera-facing side only. The shell
+	# is a cylinder and a decal cannot wrap it, but in a side-on game the far
+	# half is never seen.
+	var streaks: Array[Transform3D] = []
+	var rng := RandomNumberGenerator.new()
+	rng.seed = int(absf(center.x) * 131.0 + radius * 17.0)
+	for i in maxi(4, int(radius)):
+		var sx := rng.randf_range(-0.82, 0.82) * radius
+		var sh := rng.randf_range(height * 0.25, height * 0.7)
+		var top := height * rng.randf_range(0.45, 0.95)
+		streaks.append(Transform3D(
+			Basis.IDENTITY.scaled(Vector3(rng.randf_range(0.3, 0.9), sh, 1.0)),
+			Vector3(sx, top - sh * 0.5,
+				sqrt(maxf(radius * radius - sx * sx, 0.01)) + 0.04)))
+	var sm := _joint_multimesh(_unit_quad())
+	_fill_multimesh(sm, streaks)
+	_mm_node(root, "ShellStreaks", sm,
+		gradient_decal(Color(0.20, 0.105, 0.065), 0.62, "streak"))
+
+	# Ladder brackets — the source of every one of those streaks.
 	for i in 6:
 		var a := TAU * float(i) / 6.0
 		_mi(root, "Bracket%d" % i, _box(Vector3(0.22, 0.10, 0.10)), rust_mat,

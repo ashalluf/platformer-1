@@ -150,7 +150,10 @@ static func corrugated(tint := Color(0.46, 0.45, 0.43), period := 26.0) -> Shade
 static func sand(tint := Color(0.78, 0.68, 0.50)) -> ShaderMaterial:
 	return surface({
 		"color": tint,
-		"variation": Color(0.70, 0.61, 0.45),
+		# Derived from the tint, not fixed: a fixed bright variation colour means
+		# a dark sand still comes out with bright patches in it, which is what
+		# was keeping the yard floor the lightest thing in every frame.
+		"variation": tint.lightened(0.14),
 		"variation_strength": 0.45,
 		"roughness_min": 0.85, "roughness_max": 1.0,
 		"mask": NoiseBank.grain(19),
@@ -165,7 +168,7 @@ static func sand(tint := Color(0.78, 0.68, 0.50)) -> ShaderMaterial:
 static func asphalt(tint := Color(0.20, 0.20, 0.21)) -> ShaderMaterial:
 	return surface({
 		"color": tint,
-		"variation": Color(0.26, 0.25, 0.24),
+		"variation": tint.lightened(0.10),
 		"variation_strength": 0.6,
 		"roughness_min": 0.55, "roughness_max": 0.90,
 		"mask": NoiseBank.pits(43),
