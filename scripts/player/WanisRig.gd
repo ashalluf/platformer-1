@@ -10,6 +10,10 @@ const B := WanisBuilder.B
 
 @export var outfit: WanisBuilder.Outfit = WanisBuilder.Outfit.STREET
 
+## Beauty frames and the title screen swap the symmetrical gameplay idle for an
+## authored contrapposto stance. See _pose_beauty.
+var beauty_pose := false
+
 var controller: PlayerController
 var yaw: Node3D
 var squash: Node3D
@@ -84,15 +88,17 @@ func _build() -> void:
 	chain_pivot.bone_name = "Chest"
 
 	var chain_mesh := TorusMesh.new()
-	chain_mesh.inner_radius = 0.095
-	chain_mesh.outer_radius = 0.132
+	# Halved: at the old size it was wider than his chest and read as a hoop
+	# rather than as a chain.
+	chain_mesh.inner_radius = 0.052
+	chain_mesh.outer_radius = 0.074
 	chain_mesh.rings = 24
 	chain_mesh.ring_segments = 8
 	var chain := MeshInstance3D.new()
 	chain.name = "Chain"
 	chain.mesh = chain_mesh
 	chain.material_override = MaterialLab.gold()
-	chain.position = Vector3(0.0, -0.030, 0.222)
+	chain.position = Vector3(0.0, -0.012, 0.206)
 	chain.rotation_degrees = Vector3(74.0, 0.0, 0.0)
 	chain_pivot.add_child(chain)
 
@@ -207,6 +213,12 @@ func _process(delta: float) -> void:
 
 	if _weapon_blend > 0.25 and controller.state != PlayerController.State.DASH:
 		_pose_rifle(delta)
+		_drive_torso(delta, vx, accel, grounded)
+		skel.position.y = _hip_y
+		return
+
+	if beauty_pose and controller.state == PlayerController.State.IDLE:
+		_pose_beauty(delta)
 		_drive_torso(delta, vx, accel, grounded)
 		skel.position.y = _hip_y
 		return
@@ -396,6 +408,56 @@ func _pose_run(delta: float, speed: float) -> void:
 
 	# Two bounces per stride.
 	_hip_y = lerpf(_hip_y, -absf(s) * lerpf(0.018, 0.070, speed), _ease(delta, 18.0))
+
+
+## An authored stance for beauty frames and the title screen. The default idle
+## is a symmetrical standing pose, which is correct for gameplay and is the
+## single most amateur thing a marketing frame can contain.
+##
+## Contrapposto: the weight goes on the back leg, the hip on that side lifts,
+## the spine counter-curves, the shoulders tilt against the hips, and the head
+## turns past the shoulders. Every one of those is a small number; together
+## they are the difference between a character and a mannequin.
+func _pose_beauty(delta: float) -> void:
+	_breath += delta * 1.05
+	var k := _ease(delta, 5.0)
+	var b := sin(_breath)
+
+	# Weight on the back leg (screen-left when he faces right); the front leg
+	# is relaxed, knee soft, heel lifted.
+	_pose(B.THIGH_L, Vector3(0.10, 0.0, 0.0), k)
+	_pose(B.SHIN_L, Vector3(0.02, 0.0, 0.0), k)
+	_pose(B.FOOT_L, Vector3(-0.06, 0.0, 0.0), k)
+	_pose(B.THIGH_R, Vector3(-0.30, 0.10, 0.0), k)
+	_pose(B.SHIN_R, Vector3(0.34, 0.0, 0.0), k)
+	_pose(B.FOOT_R, Vector3(-0.22, 0.0, 0.0), k)
+
+	# Hips tilt toward the free leg; the spine takes it back the other way.
+	_pose(B.HIPS, Vector3(0.0, 0.0, -0.085), k)
+	_pose(B.SPINE, Vector3(-0.045 + b * 0.016, 0.0, 0.070), k)
+	_pose(B.CHEST, Vector3(0.030 + b * 0.022, 0.0, 0.045), k)
+
+	# Near arm up on the rail: shoulder back, elbow out, forearm forward so the
+	# cuff clears the robe in profile.
+	_pose(B.ARM_R, Vector3(-0.58 - b * 0.02, 0.0, -0.42), k)
+	_pose(B.FOREARM_R, Vector3(-0.86, 0.0, 0.10), k)
+	_pose(B.HAND_R, Vector3(-0.18, 0.0, 0.0), k)
+	_pose(B.SHOULDER_R, Vector3(0.0, 0.0, -0.16), k)
+
+	# Far arm hangs, hand just off the thigh, thumb toward the robe.
+	_pose(B.ARM_L, Vector3(-0.06 + b * 0.03, 0.0, 0.14), k)
+	_pose(B.FOREARM_L, Vector3(-0.28 - b * 0.03, 0.0, 0.0), k)
+	_pose(B.HAND_L, Vector3(-0.08, 0.0, 0.0), k)
+	_pose(B.SHOULDER_L, Vector3(0.0, 0.0, 0.10), k)
+
+	# Head turned past the shoulders and lifted a few degrees: he is looking at
+	# the distance he still has to cover, which is the whole point of the shot.
+	_pose(B.NECK, Vector3(-0.09 + b * 0.014, 0.21, 0.030), k)
+	_pose(B.HEAD, Vector3(-0.06, 0.13, 0.020), k)
+
+	_hip_y = lerpf(_hip_y, -0.035 + b * 0.008, _ease(delta, 4.0))
+	_cycle = 0.0
+	_idle_timer = 0.0
 
 
 func _pose_idle(delta: float) -> void:

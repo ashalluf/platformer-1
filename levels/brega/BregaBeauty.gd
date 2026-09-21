@@ -44,6 +44,12 @@ func _ready() -> void:
 	camera.lateral_offset = 3.3
 	camera.distance = 16.0
 	camera.base_fov = 34.0
+	# The written brief calls for authored contrapposto with the head turned
+	# past the shoulders. The gameplay idle is symmetrical, which is right in
+	# play and is a mannequin in a marketing frame.
+	var rig := player.get_node_or_null("Rig") as WanisRig
+	if rig != null:
+		rig.beauty_pose = true
 
 
 func _mood() -> LightingRig.Mood:

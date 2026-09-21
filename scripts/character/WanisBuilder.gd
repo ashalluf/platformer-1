@@ -372,23 +372,37 @@ static func _build_hair(outfit: Outfit) -> MeshForge.Builder:
 	var hair_shape := func(t: float, y: float) -> Dictionary:
 		var base: Dictionary = HEAD_SHAPE.call(t, y)
 		# Thicker toward the crown, thinning to nothing at the nape.
-		var thick := 1.0 + lerpf(0.02, 0.14, smoothstep(0.30, 0.95, t))
+		# 0.14 at the crown made the skull a helmet. Real hair on a man who has
+		# been in a cell is a few millimetres of mass, not a few centimetres.
+		var thick := 1.0 + lerpf(0.012, 0.055, smoothstep(0.30, 0.95, t))
 		return {
 			"sx": base["sx"] * thick,
 			"sz": base["sz"] * thick,
 			"offset": base["offset"] + Vector3(0.0, 0.0, -0.012 * smoothstep(0.4, 1.0, t)),
 		}
 	b.blob(HEAD_CENTER, HEAD_RADIUS, head_b, head_w, 12, 24, 2.25,
-		hair_shape, PI * 0.78, TAU * 0.745, 0.34, 1.0)
+		# The hairline sits high at the temples. Starting it at a third of the
+		# way up the skull put hair across his cheekbone.
+		hair_shape, PI * 0.78, TAU * 0.745, 0.395, 1.0)
 
-	# Three curls only, large and sunk into the shell. More than this and the
-	# head reads as a bunch of grapes at any distance.
+	# The shell is open across a 92-degree arc so the face can exist, and that
+	# gap runs all the way to the crown — which left him with a forehead half
+	# the height of his head. This is the hairline: a flat mass laid across the
+	# brow, closing the gap at the front only.
+	b.blob(Vector3(0.0, 1.700, 0.104), Vector3(0.152, 0.036, 0.098),
+		head_b, head_w, 6, 14, 2.7)
+	b.blob(Vector3(0.0, 1.724, 0.070), Vector3(0.160, 0.040, 0.132),
+		head_b, head_w, 6, 14, 2.5)
+
+	# Three small lifts in the crown, breaking the shell's outline without
+	# leaving it. Anything approaching the head's own radius turns the whole
+	# silhouette into a bunch of grapes, which is exactly what happened before.
 	for lump: Array in [
-			[Vector3(-0.010, 1.766, -0.048), Vector3(0.124, 0.086, 0.120)],
-			[Vector3(0.076, 1.700, -0.184), Vector3(0.098, 0.088, 0.092)],
-			[Vector3(-0.076, 1.628, -0.200), Vector3(0.100, 0.092, 0.088)],
+			[Vector3(-0.006, 1.706, -0.034), Vector3(0.068, 0.030, 0.066)],
+			[Vector3(0.050, 1.686, -0.118), Vector3(0.056, 0.038, 0.052)],
+			[Vector3(-0.052, 1.652, -0.132), Vector3(0.054, 0.040, 0.050)],
 		]:
-		b.blob(lump[0], lump[1], head_b, head_w, 7, 12, 2.15)
+		b.blob(lump[0], lump[1], head_b, head_w, 6, 10, 2.15)
 
 	if outfit == Outfit.STREET:
 		# Beard: follows the jaw, squared off at the chin.
@@ -396,25 +410,42 @@ static func _build_hair(outfit: Outfit) -> MeshForge.Builder:
 			var low := 1.0 - smoothstep(0.0, 0.5, t)
 			return {"sx": 1.0 - 0.18 * low, "sz": 1.0 - 0.10 * low,
 				"offset": Vector3(0.0, 0.0, 0.016 * low)}
-		b.blob(Vector3(0.0, 1.500, 0.044), Vector3(0.158, 0.118, 0.184),
-			head_b, head_w, 9, 16, 2.5, beard_shape)
+		# Flat and low: it follows the jaw and stops at the cheekbone. The old
+		# one was a sphere the size of the skull and it ate the whole face.
+		b.blob(Vector3(0.0, 1.492, 0.038), Vector3(0.150, 0.068, 0.166),
+			head_b, head_w, 8, 16, 2.6, beard_shape)
+		# Moustache, separate so the mouth line survives.
+		b.blob(Vector3(0.0, 1.542, 0.142), Vector3(0.050, 0.015, 0.048),
+			head_b, head_w, 5, 10, 2.4)
 	else:
 		# Prison: heavier, unkempt.
-		b.blob(Vector3(0.0, 1.500, 0.036), Vector3(0.156, 0.124, 0.180),
-			head_b, head_w, 9, 16, 2.3)
+		b.blob(Vector3(0.0, 1.494, 0.034), Vector3(0.152, 0.080, 0.170),
+			head_b, head_w, 8, 16, 2.4)
 	return b
 
 
+## The dark surface: eyes, brows, and the aviators pushed up on the forehead.
+##
+## He had no face at all before this. At the distance the gameplay camera uses
+## a face is two dark marks and a brow — but without them the head is a ball,
+## and in a close frame it is the first thing anyone looks for.
 static func _build_shades() -> MeshForge.Builder:
-	## Aviators pushed up on the forehead — never over the eyes, because the
-	## audience has to read his expression.
 	var b := MeshForge.Builder.new()
 	b.begin()
 	var head_b := [B.HEAD]
 	var head_w := [1.0]
-	b.loft([
-		MeshForge.ring(Vector3(0.0, 1.666, 0.132), 0.150, 0.060, head_b, head_w, 3.4),
-		MeshForge.ring(Vector3(0.0, 1.696, 0.134), 0.156, 0.064, head_b, head_w, 3.4),
-		MeshForge.ring(Vector3(0.0, 1.724, 0.126), 0.146, 0.058, head_b, head_w, 3.4),
-	], 14, true, true)
+
+	for side: float in [-1.0, 1.0]:
+		# Eye: a flattened almond set into the socket, not sitting on the face.
+		# Set INTO the socket: a sphere on the surface of the face reads as a
+		# bolt-on eye, which is worse than no eye at all.
+		b.blob(Vector3(side * 0.066, 1.612, 0.138),
+			Vector3(0.030, 0.017, 0.012), head_b, head_w, 5, 10, 2.8)
+		# Brow: heavy and close to the eye. It is the whole expression.
+		b.blob(Vector3(side * 0.070, 1.652, 0.140),
+			Vector3(0.043, 0.011, 0.015), head_b, head_w, 4, 10, 3.0)
+
+	# The aviators are gone. Front-on they stacked a third horizontal black bar
+	# above the brow and the hairline, and a face reading as three dark bands
+	# is not a face. If they come back they go on the chest pocket.
 	return b
