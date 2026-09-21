@@ -300,6 +300,32 @@ script.** `BregaKit.mood` and `BregaKit.palette` were still on the old warm
 mid-grey numbers, so Level 1 looked like a different game from its own
 benchmark. They now match exactly.
 
+### Added — enemies and the first hazard
+
+**SENTRY, the wall turret.** The drone teaches that enemies telegraph; the
+turret teaches that the telegraph is the whole fight. It sweeps a lazy arc,
+locks on with a light you can see across the yard, holds long enough to get
+behind something, then fires three slow bolts you can walk between. It cannot
+move and cannot follow past its arc, so the answer is always position.
+
+**HARRAS, the heavy walker.** Carries a shield plate on the face it walks
+toward: shots into that plate do a quarter damage and ring off it, visibly, so
+soaking is information rather than a silent nerf. The answer is to get behind
+it, and the whole design exists to make the player want to dash *through* a
+thing rather than back away from it. Slow on purpose — nothing about it is a
+reaction test.
+
+**Steam vents.** The plant's own hazards rather than placed spikes: a relief
+valve that hisses, spits a warning wisp, then blasts a column of steam. Fixed
+cycle, always warns, and a row of them is staggered by phase so it ripples
+instead of firing as a wall. The collar uses the same "about to" language as
+the turret's lens on purpose — one vocabulary for danger.
+
+**Enemy fire is slow and visible.** `Bolt` is a projectile, not a hitscan. The
+player's rifle is instant because it is his; everything shot at him travels
+slowly enough to be read, stepped around or jumped over, which is what makes a
+turret a platforming problem rather than a damage tax.
+
 ### Weak — the honest list
 
 1. **The benchmark still does not pass its own quality gate.** It is much
@@ -326,13 +352,14 @@ benchmark. They now match exactly.
 5. **Two themes and one arrangement.** Brega and the ice level have a score;
    the other four World 1 levels do not, there are no transitions between
    themes, and no stinger for a beat like the transformation.
-6. **One enemy type, in the greybox only.** The turret and the heavy walker
-   from the enemy plan do not exist, no enemy appears in Brega, and there are
-   no hazards — no spikes, no crushers, no fire, no water.
-7. **No level-complete or game-over screen.** Title, world map, chain
-   collection, pause and settings all exist and are drawn in the game's own
-   shapes. Finishing a level still just cuts back; dying out of lives still
-   just resets.
+6. **Three enemies and one hazard, all in Level 1.** Drone, wall turret and
+   heavy walker are built and placed through Brega, and steam vents give the
+   level its first environmental threat. Still missing: anything that attacks
+   from below, anything that changes the geometry (a crusher, a collapsing
+   floor), and water.
+7. **The UI suite is complete for World 1.** Title, world map, chain
+   collection, pause, settings and a result card for cleared / out-of-lives.
+   What is missing is a controls screen and any kind of first-run tutorial.
 8. **Checkpoints are a data structure with no scene.** `Stage` tracks them;
    nothing places or triggers them.
 9. **One ice level.** The pool the canon calls for is a pool of one, so the

@@ -57,6 +57,9 @@ var errors := []
 
 
 func _ready() -> void:
+	# A paused tree (the result card pauses the game) must not stall the
+	# capture loop, or every shot after the pause is lost.
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	_parse_args()
 	print_rich("[b]capture[/b] level=%s input=%s frames=%d -> %s" % [
 		opts["level"], opts["input"], int(opts["frames"]), opts["out"]])

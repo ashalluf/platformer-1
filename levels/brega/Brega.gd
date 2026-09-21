@@ -131,6 +131,9 @@ func _section_b_yard() -> void:
 	TrailBuilder.jump_arc(geometry, Vector3(84.5, YARD_Y + 2.2, 0.0), 1.0, 1.0, 8)
 	TrailBuilder.cluster(geometry, Vector3(98.5, YARD_Y + 6.4, 0.0), 0.85, 8)
 
+	# The first hazard in the game, alone, on flat ground with nothing else
+	# happening: learn the collar.
+	_vent(Vector3(52.0, YARD_Y + 0.08, 0.0), 0.0, 3.6)
 	_drone(Vector3(63.0, YARD_Y + 5.2, 0.0), 4.5)
 	_drone(Vector3(88.0, YARD_Y + 6.6, 0.0), 5.5)
 
@@ -167,6 +170,12 @@ func _section_c_pipe_rack() -> void:
 	geometry.add_child(sandwich)
 	sandwich.position = Vector3(163.5, YARD_Y + 11.0, 0.0)
 
+	# First sentry of the level, high and alone, with a long run of cover under
+	# it: the player meets the telegraph before they meet two of them.
+	# Three on a stagger: a ripple you walk through, not a wall.
+	for i in 3:
+		_vent(Vector3(104.0 + i * 3.4, YARD_Y + 0.08, 0.0), float(i) * 0.9, 4.2)
+	_turret(Vector3(126.0, YARD_Y + 12.6, 0.0))
 	_drone(Vector3(132.0, YARD_Y + 9.0, 0.0), 5.0)
 	_drone(Vector3(156.0, YARD_Y + 16.0, 0.0), 6.0)
 
@@ -210,6 +219,7 @@ func _on_cage_opened() -> void:
 	# the trail turns into a firing range.
 	for i in 3:
 		_drone(Vector3(230.0 + i * 12.0, YARD_Y + 7.0 + i * 1.4, 0.0), 4.0)
+	_turret(Vector3(224.0, YARD_Y + 8.4, 0.0))
 
 
 # --- E — THE TANK FARM ------------------------------------------------------
@@ -238,6 +248,14 @@ func _section_e_tank_farm() -> void:
 
 	_drone(Vector3(243.0, YARD_Y + 10.4, 0.0), 5.0)
 	_drone(Vector3(274.0, YARD_Y + 11.2, 0.0), 6.5)
+	_turret(Vector3(266.0, YARD_Y + 7.2, 0.0))
+	# The first heavy, on open ground with a turret above it: the player has to
+	# choose which telegraph to answer first.
+	_walker(Vector3(258.0, YARD_Y + 0.2, 0.0), 6.5)
+	for i in 4:
+		_vent(Vector3(282.0 + i * 3.0, YARD_Y + 0.08, 0.0),
+			float(i % 2) * 1.4, 4.6)
+	_turret(Vector3(292.0, YARD_Y + 13.0, 0.0))
 	_drone(Vector3(300.0, YARD_Y + 9.4, 0.0), 4.0)
 
 	_checkpoint(Vector3(269.0, YARD_Y + 3.4, 0.0), 2)
@@ -279,6 +297,10 @@ func _section_f_fence() -> void:
 
 	_drone(Vector3(340.0, YARD_Y + 11.0, 0.0), 5.5)
 	_drone(Vector3(356.0, YARD_Y + 10.0, 0.0), 4.5)
+	_turret(Vector3(348.0, YARD_Y + 6.6, 0.0))
+	_turret(Vector3(368.0, YARD_Y + 9.8, 0.0))
+	_walker(Vector3(344.0, YARD_Y + 0.2, 0.0), 8.0)
+	_walker(Vector3(372.0, YARD_Y + 0.2, 0.0), 5.0)
 
 	# The gate out.
 	PropKit.deck(geometry, 366.0, YARD_Y + 6.4, 16.0, 0.0, mats["deck"], mats["rust"], YARD_Y - 1.2, "GateDeck")
@@ -331,6 +353,35 @@ func _crate_stack(base: Vector3, count: int) -> void:
 			Vector3(1.5, 1.05, 1.3), mats["crate"], "Crate%d" % i)
 		c.rotation.z = fmod(float(i) * 0.13, 0.09) - 0.045
 		c.add_to_group("surface_wood")
+
+
+## A relief valve on a cycle. `phase` staggers a row so it ripples rather than
+## firing as a wall, which is the difference between a rhythm and a hit.
+func _vent(at: Vector3, phase := 0.0, h := 4.2) -> SteamVent:
+	var v := SteamVent.new()
+	geometry.add_child(v)
+	v.global_position = at
+	v.phase = phase
+	v.height = h
+	return v
+
+
+## The heavy. Only where there is flat ground and room to get behind it.
+func _walker(at: Vector3, span: float) -> HeavyWalker:
+	var w := HeavyWalker.new()
+	geometry.add_child(w)
+	w.global_position = at
+	w.patrol_span = span
+	return w
+
+
+## A wall-mounted sentry. Facing is always -x here: everything in this level
+## is shooting at a man running east.
+func _turret(at: Vector3) -> WallTurret:
+	var t := WallTurret.new()
+	geometry.add_child(t)
+	t.global_position = at
+	return t
 
 
 func _drone(at: Vector3, span: float) -> SnitchDrone:

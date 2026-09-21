@@ -65,7 +65,7 @@ func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, view), Color(0.03, 0.028, 0.038, 0.82 * ease))
 
 	var card := Rect2(Vector2(cx - 340.0, view.y * 0.20 - (1.0 - ease) * 26.0),
-		Vector2(680.0, view.y * 0.58))
+		Vector2(680.0, view.y * 0.515))
 	var pts := UIKit.slab(self, card, Color(0.065, 0.060, 0.072, 0.94 * ease), 26.0, 14.0)
 	var edge := UIKit.GOLD if kind == Kind.CLEARED else Color(0.72, 0.20, 0.16)
 	UIKit.slab_outline(self, pts, Color(edge.r, edge.g, edge.b, 0.75 * ease), 2.4)
@@ -117,8 +117,11 @@ func _draw() -> void:
 			HORIZONTAL_ALIGNMENT_LEFT, -1, 17, Color(tint.r, tint.g, tint.b, ra))
 		y += 38.0
 
+	# The prompt holds a dim baseline before the card is armed, so the bottom of
+	# the card is never empty and the brightening reads as "now you may".
+	var a := 0.14
 	if _armed:
-		var a := 0.40 + 0.34 * sin(_t * 2.4)
-		var prompt := "JUMP TO CONTINUE" if kind == Kind.CLEARED else "JUMP TO TRY AGAIN"
-		UIKit.spaced(self, _font, Vector2(cx, card.position.y + card.size.y - 34.0),
-			prompt, 14, Color(UIKit.CREAM.r, UIKit.CREAM.g, UIKit.CREAM.b, a), 4.0, true)
+		a = 0.40 + 0.34 * sin(_t * 2.4)
+	var prompt := "JUMP TO CONTINUE" if kind == Kind.CLEARED else "JUMP TO TRY AGAIN"
+	UIKit.spaced(self, _font, Vector2(cx, card.position.y + card.size.y - 34.0),
+		prompt, 14, Color(UIKit.CREAM.r, UIKit.CREAM.g, UIKit.CREAM.b, a), 4.0, true)

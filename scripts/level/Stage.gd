@@ -33,7 +33,10 @@ var checkpoints: Array[Vector3] = []
 var active_checkpoint := -1
 
 var _respawning := false
-## Wall-clock time in the level, for the result card. Stops when it is shown.
+## Wall-clock time in the level, for the result card. Taken from the clock
+## rather than accumulated in _process, because subclasses override _process
+## to drive their own music and lighting and none of them call super.
+var _started_msec := 0
 var elapsed := 0.0
 var _result: ResultScreen
 var _result_layer: CanvasLayer
@@ -59,6 +62,7 @@ func _ready() -> void:
 		layer.add_child(HUD_SCENE.instantiate())
 	GraphicsDirector.apply_all()
 	level_complete.connect(_on_level_complete)
+	_started_msec = Time.get_ticks_msec()
 
 
 ## Override: the level's lighting identity.
@@ -129,11 +133,6 @@ func reach_checkpoint(index: int) -> void:
 	checkpoint_reached.emit(index)
 
 
-func _process(delta: float) -> void:
-	if show_hud and _result == null:
-		elapsed += delta
-
-
 func _on_player_died() -> void:
 	if _respawning or _result != null:
 		return
@@ -172,6 +171,7 @@ func _show_result(kind: ResultScreen.Kind) -> void:
 	_result.sriracha = Gx.sriracha
 	_result.iced_out = Gx.iced_out_found.has(level_id)
 	_result.chain = Gx.chains.has(level_id)
+	elapsed = float(Time.get_ticks_msec() - _started_msec) * 0.001
 	_result.elapsed = elapsed
 	_result.dismissed.connect(_on_result_dismissed)
 	_result_layer.add_child(_result)
