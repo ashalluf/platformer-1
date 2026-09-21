@@ -1,0 +1,13 @@
+# Godot
+.godot/
+.import/
+export.cfg
+export_presets.cfg
+*.translation
+
+# Capture output (screenshots worth keeping live in docs/screenshots/)
+captures/
+
+# OS / editor
+.DS_Store
+*.swp

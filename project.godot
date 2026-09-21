@@ -1,0 +1,63 @@
+; LIBYAN GANGSTAS — Godot 4 project configuration
+; Input actions are defined in code (scripts/autoload/InputDirector.gd) so they
+; stay remappable and readable. Rendering quality is tuned in GraphicsDirector.
+
+config_version=5
+
+[application]
+
+config/name="LIBYAN GANGSTAS"
+config/description="A 2.5D platformer love letter to eastern Libya."
+config/version="0.1.0"
+run/main_scene="res://scenes/core/Boot.tscn"
+config/features=PackedStringArray("4.7", "Forward Plus")
+boot_splash/bg_color=Color(0.04, 0.035, 0.045, 1)
+boot_splash/show_image=false
+
+[autoload]
+
+Gx="*res://scripts/autoload/Gx.gd"
+InputDirector="*res://scripts/autoload/InputDirector.gd"
+GraphicsDirector="*res://scripts/autoload/GraphicsDirector.gd"
+FX="*res://scripts/autoload/FXDirector.gd"
+CaptureRunner="*res://scripts/autoload/CaptureRunner.gd"
+
+[debug]
+
+gdscript/warnings/untyped_declaration=1
+gdscript/warnings/unsafe_property_access=0
+gdscript/warnings/unsafe_method_access=0
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/size/window_width_override=1280
+window/size/window_height_override=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/vsync/vsync_mode=1
+
+[physics]
+
+3d/default_gravity=0.0
+common/physics_ticks_per_second=60
+common/max_physics_steps_per_frame=4
+
+[rendering]
+
+renderer/rendering_method="forward_plus"
+textures/default_filters/anisotropic_filtering_level=3
+anti_aliasing/quality/msaa_3d=2
+anti_aliasing/quality/screen_space_aa=1
+lights_and_shadows/directional_shadow/size=4096
+lights_and_shadows/directional_shadow/soft_shadow_filter_quality=3
+lights_and_shadows/positional_shadow/soft_shadow_filter_quality=3
+global_illumination/gi/use_half_resolution=true
+environment/ssao/quality=2
+environment/ssil/quality=1
+environment/screen_space_reflection/roughness_quality=1
+environment/subsurface_scattering/subsurface_scattering_quality=2
+environment/volumetric_fog/volume_size=96
+environment/volumetric_fog/volume_depth=128
+camera/depth_of_field/depth_of_field_bokeh_quality=1
