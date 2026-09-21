@@ -113,15 +113,11 @@ func _section_a_walkway() -> void:
 # SNITCH patrolling a beat the player can watch before committing.
 
 func _section_b_yard() -> void:
-	LevelKit.platform(geometry, 44.0, YARD_Y + 1.2, 22.0, mats["sabkha"], 8.0, 3.4, "YardA")
+	PropKit.deck(geometry, 44.0, YARD_Y + 1.2, 22.0, 0.0, mats["sabkha"], mats["rust"], YARD_Y - 1.2, "YardA")
 	LevelKit.platform(geometry, 40.0, YARD_Y + 3.0, 5.0, mats["sabkha"], 9.0, 3.4, "YardStep")
-	LevelKit.platform(geometry, 72.0, YARD_Y + 1.2, 12.0, mats["sabkha"], 8.0, 3.4, "YardB")
-	LevelKit.platform(geometry, 92.0, YARD_Y + 2.6, 9.0, mats["deck"], 9.0, 3.4, "YardLedge")
-	LevelKit.platform(geometry, 105.0, YARD_Y + 4.4, 8.0, mats["deck"], 11.0, 3.4, "YardHigh")
-
-	for x: float in [44.0, 72.0, 92.0, 105.0]:
-		LevelKit.box(geometry, Vector3(x + 1.0, YARD_Y - 2.0, -1.4), Vector3(2.0, 4.0, 1.4),
-			mats["rust"], "Strut")
+	PropKit.deck(geometry, 72.0, YARD_Y + 1.2, 12.0, 0.0, mats["sabkha"], mats["rust"], YARD_Y - 1.2, "YardB")
+	PropKit.deck(geometry, 92.0, YARD_Y + 2.6, 9.0, 0.0, mats["deck"], mats["rust"], YARD_Y - 1.2, "YardLedge")
+	PropKit.deck(geometry, 105.0, YARD_Y + 4.4, 8.0, 0.0, mats["deck"], mats["rust"], YARD_Y - 1.2, "YardHigh")
 
 	_crate_stack(Vector3(58.0, YARD_Y + 1.2, 0.0), 3)
 	_crate_stack(Vector3(80.0, YARD_Y + 1.2, 0.0), 2)
@@ -150,19 +146,19 @@ func _section_c_pipe_rack() -> void:
 
 	var heights := [3.0, 5.0, 7.0, 9.0, 11.0]
 	for i in heights.size():
-		LevelKit.platform(geometry, 114.0 + i * 6.0, YARD_Y + heights[i], 5.4,
-			mats["rust"], 0.6, 3.0, "Sleeper%d" % i)
+		PropKit.deck(geometry, 114.0 + i * 6.0, YARD_Y + heights[i], 5.4, 0.0,
+			mats["rust"], mats["steel"], YARD_Y - 1.2, "Sleeper%d" % i)
 		TrailBuilder.line(geometry,
 			Vector3(115.2 + i * 6.0, YARD_Y + heights[i] + 0.9, 0.0),
 			Vector3(118.2 + i * 6.0, YARD_Y + heights[i] + 0.9, 0.0), 4)
 
-	LevelKit.platform(geometry, 144.0, YARD_Y + 12.4, 12.0, mats["deck"], 1.0, 3.2, "RackTop")
+	PropKit.deck(geometry, 144.0, YARD_Y + 12.4, 12.0, 0.0, mats["deck"], mats["steel"], YARD_Y - 1.2, "RackTop")
 	LevelKit.prop(geometry, Vector3(150.0, YARD_Y + 13.7, -1.4), Vector3(12.0, 2.6, 0.5),
 		mats["corrugated"], "RackScreen")
 
 	# The glide. The catwalk on the far side is 22 units across and 9 down: a
 	# jump falls short by a mile, a glide arrives with room.
-	LevelKit.platform(geometry, 168.0, YARD_Y + 4.6, 18.0, mats["deck"], 10.0, 3.2, "GlideLanding")
+	PropKit.deck(geometry, 168.0, YARD_Y + 4.6, 18.0, 0.0, mats["deck"], mats["rust"], YARD_Y - 1.2, "GlideLanding")
 	TrailBuilder.line(geometry, Vector3(157.0, YARD_Y + 12.2, 0.0),
 		Vector3(167.0, YARD_Y + 6.2, 0.0), 10)
 
@@ -178,7 +174,7 @@ func _section_c_pipe_rack() -> void:
 # The beat. A dead-end store room, lit warm, with his own clothes on a shelf.
 
 func _section_d_cage() -> void:
-	LevelKit.platform(geometry, 186.0, YARD_Y + 4.6, 38.0, mats["deck"], 10.0, 3.4, "StoreFloor")
+	PropKit.deck(geometry, 186.0, YARD_Y + 4.6, 38.0, 0.0, mats["deck"], mats["rust"], YARD_Y - 1.2, "StoreFloor")
 	PropKit.prefab_facade(geometry, 186.0, YARD_Y + 4.6, 38.0, 7.0, -4.6, mats["slab"], {
 		"name": "StoreWall", "joint_mat": mats["joint"], "dark_mat": mats["dark"],
 		"hole_mat": mats["joint"], "depth": 4.0, "open_holes": 1,
@@ -211,19 +207,15 @@ func _section_e_tank_farm() -> void:
 	# Gaps here are all inside a plain running jump (about 6 units). This is the
 	# section where he is newly armed and should feel powerful, not the section
 	# that tests precision.
-	LevelKit.platform(geometry, 228.0, YARD_Y + 4.6, 16.0, mats["deck"], 10.0, 3.4, "FarmA")
-	LevelKit.platform(geometry, 249.0, YARD_Y + 6.2, 12.0, mats["deck"], 11.0, 3.4, "FarmB")
-	LevelKit.platform(geometry, 266.0, YARD_Y + 3.4, 14.0, mats["deck"], 9.0, 3.4, "FarmC")
-	LevelKit.platform(geometry, 284.0, YARD_Y + 5.0, 5.0, mats["deck"], 11.0, 3.4, "FarmStep")
-	LevelKit.platform(geometry, 295.0, YARD_Y + 6.8, 9.0, mats["deck"], 12.0, 3.4, "Catwalk")
-
-	for x: float in [228.0, 249.0, 266.0, 284.0, 295.0]:
-		LevelKit.box(geometry, Vector3(x + 1.2, YARD_Y - 1.0, -1.4), Vector3(1.6, 8.0, 1.2),
-			mats["rust"], "FarmStrut")
+	PropKit.deck(geometry, 228.0, YARD_Y + 4.6, 16.0, 0.0, mats["deck"], mats["rust"], YARD_Y - 1.2, "FarmA")
+	PropKit.deck(geometry, 249.0, YARD_Y + 6.2, 12.0, 0.0, mats["deck"], mats["rust"], YARD_Y - 1.2, "FarmB")
+	PropKit.deck(geometry, 266.0, YARD_Y + 3.4, 14.0, 0.0, mats["deck"], mats["rust"], YARD_Y - 1.2, "FarmC")
+	PropKit.deck(geometry, 284.0, YARD_Y + 5.0, 5.0, 0.0, mats["deck"], mats["rust"], YARD_Y - 1.2, "FarmStep")
+	PropKit.deck(geometry, 295.0, YARD_Y + 6.8, 9.0, 0.0, mats["deck"], mats["rust"], YARD_Y - 1.2, "Catwalk")
 
 	# A near tank the player runs past — depth in the gameplay band, not just
 	# behind it.
-	PropKit.storage_tank(geometry, Vector3(262.0, YARD_Y - 1.0, -14.0), 11.0, 15.0,
+	PropKit.storage_tank(geometry, Vector3(258.0, YARD_Y - 1.0, -44.0), 15.0, 19.0,
 		mats["tank"], mats["bund"], mats["rust"], true, mats["tank_burnt"])
 
 	TrailBuilder.jump_arc(geometry, Vector3(243.0, YARD_Y + 5.5, 0.0), 1.0, 1.0, 8)
@@ -240,7 +232,7 @@ func _section_e_tank_farm() -> void:
 	# The secret. Visible for about a second on the approach to the catwalk,
 	# reachable only by gliding past the landing instead of onto it.
 	# The obvious path steps across at height.
-	LevelKit.platform(geometry, 308.0, YARD_Y + 6.2, 6.0, mats["deck"], 11.0, 3.4, "FarmD")
+	PropKit.deck(geometry, 308.0, YARD_Y + 6.2, 6.0, 0.0, mats["deck"], mats["rust"], YARD_Y - 1.2, "FarmD")
 
 	# The secret sits well below that step, in the shadow of the burnt tank.
 	# On the approach it is visible for about a second through the gap; getting
@@ -262,10 +254,8 @@ func _section_f_fence() -> void:
 	var xs := [317.0, 330.0, 343.0, 356.0]
 	var ys := [6.0, 7.2, 5.2, 6.6]
 	for i in xs.size():
-		LevelKit.platform(geometry, xs[i], YARD_Y + ys[i], 7.0, mats["deck"], 9.0, 3.2,
-			"FencePad%d" % i)
-		LevelKit.box(geometry, Vector3(xs[i] + 1.0, YARD_Y - 1.0, -1.4),
-			Vector3(1.4, 8.0, 1.0), mats["rust"], "PadStrut")
+		PropKit.deck(geometry, xs[i], YARD_Y + ys[i], 7.0, 0.0, mats["deck"], mats["rust"],
+			YARD_Y - 1.2, "FencePad%d" % i)
 		if i < xs.size() - 1:
 			TrailBuilder.curve(geometry,
 				Vector3(xs[i] + 7.5, YARD_Y + ys[i] + 1.4, 0.0),
@@ -278,7 +268,7 @@ func _section_f_fence() -> void:
 	_drone(Vector3(356.0, YARD_Y + 10.0, 0.0), 4.5)
 
 	# The gate out.
-	LevelKit.platform(geometry, 366.0, YARD_Y + 6.4, 16.0, mats["deck"], 12.0, 3.4, "GateDeck")
+	PropKit.deck(geometry, 366.0, YARD_Y + 6.4, 16.0, 0.0, mats["deck"], mats["rust"], YARD_Y - 1.2, "GateDeck")
 	LevelKit.prop(geometry, Vector3(376.0, YARD_Y + 9.4, -1.6), Vector3(6.0, 6.0, 0.4),
 		mats["rust"], "GateLeaf")
 	for i in 10:
@@ -351,10 +341,10 @@ func _atmosphere() -> void:
 	var fv := FogVolume.new()
 	fv.name = "YardMist"
 	fv.shape = RenderingServer.FOG_VOLUME_SHAPE_BOX
-	fv.size = Vector3(X_END - X_START + 120.0, 4.2, 40.0)
-	fv.position = Vector3((X_START + X_END) * 0.5, YARD_Y + 1.6, -18.0)
+	fv.size = Vector3(X_END - X_START + 120.0, 3.2, 40.0)
+	fv.position = Vector3((X_START + X_END) * 0.5, YARD_Y + 0.4, -18.0)
 	var fm := FogMaterial.new()
-	fm.density = 0.055
+	fm.density = 0.026
 	fm.albedo = Color(1.0, 0.93, 0.82)
 	fm.emission = Color(0.06, 0.045, 0.035)
 	fm.height_falloff = 1.2

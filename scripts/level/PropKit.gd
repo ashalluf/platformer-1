@@ -338,8 +338,9 @@ static func razor_coil(parent: Node3D, from: Vector3, to: Vector3, radius: float
 
 ## Dead or dying eucalyptus. The windbreak rows are planted dead straight, and
 ## that straightness is what says "someone put these here" rather than "desert".
-## `foliage_mat` is expected to be a wind material from `foliage_material()`
-## configured for this plant's base height.
+##
+## Canopies are elongated and drooping, never spherical: a eucalyptus reads by
+## its hanging strands, and a ball on a stick reads as a lollipop.
 static func eucalyptus(parent: Node3D, base: Vector3, height: float,
 		trunk_mat: Material, foliage_mat: Material, alive := false,
 		seed_ := 0) -> Node3D:
@@ -350,26 +351,95 @@ static func eucalyptus(parent: Node3D, base: Vector3, height: float,
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_ * 7919 + 13
 
-	_mi(root, "Trunk", _cyl(height * 0.035, height, 10, height * 0.016), trunk_mat,
-		Vector3(0, height * 0.5, 0), Vector3(0, 0, rng.randf_range(-0.03, 0.03)))
-	var branches := 5 if alive else 4
+	# Trunk tapers hard and leans a little — a straight cylinder reads as a pole.
+	var trunk := _cyl(height * 0.032, height, 8, height * 0.011)
+	var tm := _mi(root, "Trunk", trunk, trunk_mat, Vector3(0, height * 0.5, 0),
+		Vector3(0, rng.randf_range(0.0, TAU), rng.randf_range(-0.035, 0.035)))
+	tm.rotation.z += rng.randf_range(-0.02, 0.02)
+
+	# Branches sweep up and out, thinning as they go.
+	var branches := 6 if alive else 5
 	for i in branches:
-		var t := 0.45 + 0.13 * i
-		var a := rng.randf_range(0.0, TAU)
-		var len_ := height * rng.randf_range(0.16, 0.30)
-		var b := _mi(root, "Branch%d" % i, _cyl(height * 0.012, len_, 6, height * 0.004),
-			trunk_mat, Vector3(0, height * t, 0))
-		b.rotation = Vector3(0, a, rng.randf_range(0.5, 1.0))
-		b.position += Vector3(cos(a), 0.0, sin(a)) * len_ * 0.30
-		if alive:
-			var s := SphereMesh.new()
-			s.radius = height * rng.randf_range(0.055, 0.085)
-			s.height = s.radius * 1.7
-			s.radial_segments = 8
-			s.rings = 5
-			_mi(root, "Canopy%d" % i, s, foliage_mat,
-				Vector3(cos(a), 0.0, sin(a)) * len_ * 0.75 + Vector3(0, height * (t + 0.10), 0))
+		var t := 0.42 + 0.11 * i
+		var side := 1.0 if i % 2 == 0 else -1.0
+		var len_ := height * rng.randf_range(0.15, 0.26) * (1.0 - t * 0.35)
+		var b := _mi(root, "Branch%d" % i,
+			_cyl(height * 0.011, len_, 5, height * 0.004), trunk_mat,
+			Vector3(0, height * t, 0))
+		b.rotation = Vector3(0.0, rng.randf_range(-0.5, 0.5), side * rng.randf_range(0.55, 0.95))
+		b.position += Vector3(side * 0.35, 0.0, 0.0) * len_ * 0.5
+
+		if not alive:
+			continue
+		# Two hanging strands per branch, squashed flat in Z so they read as
+		# foliage from the side rather than as beads.
+		for k in 2:
+			var hang := SphereMesh.new()
+			hang.radius = height * rng.randf_range(0.030, 0.046)
+			hang.height = hang.radius * rng.randf_range(3.4, 5.2)
+			hang.radial_segments = 7
+			hang.rings = 4
+			var f := _mi(root, "Strand%d_%d" % [i, k], hang, foliage_mat,
+				Vector3(side * len_ * rng.randf_range(0.7, 1.05),
+					height * (t + 0.06) - hang.height * 0.35,
+					rng.randf_range(-0.25, 0.25)))
+			f.rotation.z = side * rng.randf_range(0.1, 0.32)
+			f.scale = Vector3(1.0, 1.0, 0.55)
+
+	if alive:
+		# A crown mass, also elongated, sitting over the top branches.
+		var crown := SphereMesh.new()
+		crown.radius = height * 0.085
+		crown.height = height * 0.30
+		crown.radial_segments = 9
+		crown.rings = 5
+		var cm := _mi(root, "Crown", crown, foliage_mat,
+			Vector3(rng.randf_range(-0.2, 0.2), height * 0.96, 0.0))
+		cm.scale = Vector3(1.0, 1.0, 0.6)
 	return root
+
+
+## Industrial catwalk: deck, a front edge beam, legs down to the ground, and
+## diagonal braces that actually connect the two. The braces are what stop a
+## platform reading as a floating slab.
+##
+## `floor_y` is where the legs land, so a level passes its ground height once
+## instead of computing a drop per platform and getting it wrong.
+static func deck(parent: Node3D, left_x: float, top_y: float, width: float, z: float,
+		deck_mat: Material, beam_mat: Material, floor_y := -7.8,
+		name_ := "Deck") -> StaticBody3D:
+	var body := LevelKit.platform(parent, left_x, top_y, width, deck_mat, 0.55, 3.2, name_)
+	var cx := left_x + width * 0.5
+	var under := top_y - 0.55
+
+	_mi(parent, name_ + "Beam", _box(Vector3(width, 0.24, 0.18)), beam_mat,
+		Vector3(cx, under + 0.06, z + 1.62))
+	_mi(parent, name_ + "Kick", _box(Vector3(width, 0.16, 0.10)), beam_mat,
+		Vector3(cx, top_y + 0.08, z + 1.60))
+
+	var drop := under - floor_y
+	if drop <= 0.6:
+		return body
+
+	var legs := maxi(2, int(width / 5.5))
+	for i in legs:
+		var lx := left_x + width * (float(i) + 0.5) / float(legs)
+		_mi(parent, name_ + "Leg%d" % i, _box(Vector3(0.22, drop, 0.22)), beam_mat,
+			Vector3(lx, under - drop * 0.5, z - 0.6))
+
+		# Brace: from the leg, `run` across and `rise` up, so it meets the deck
+		# underside. Length and angle both come from those two numbers.
+		var run := minf(width * 0.22, 2.2)
+		var rise := minf(drop * 0.6, 3.2)
+		if rise < 0.5:
+			continue
+		for dir: float in [-1.0, 1.0]:
+			var length := sqrt(run * run + rise * rise)
+			var brace := _mi(parent, name_ + "Brace%d" % i,
+				_box(Vector3(0.13, length, 0.13)), beam_mat,
+				Vector3(lx + dir * run * 0.5, under - rise * 0.5, z - 0.6))
+			brace.rotation.z = dir * atan2(run, rise)
+	return body
 
 
 # --- Industrial run ---------------------------------------------------------

@@ -16,7 +16,7 @@ static func palette() -> Dictionary:
 		"slab": MaterialLab.plaster(Color(0.545, 0.518, 0.455), 1.0),
 		"joint": MaterialLab.concrete(Color(0.235, 0.215, 0.185), 1.0),
 		"dark": MaterialLab.concrete(Color(0.055, 0.050, 0.050), 0.2),
-		"wall": MaterialLab.plaster(Color(0.255, 0.243, 0.224), 1.0),
+		"wall": MaterialLab.plaster(Color(0.205, 0.196, 0.182), 1.0),
 		"deck": MaterialLab.concrete(Color(0.40, 0.385, 0.355), 1.0),
 		"rail": MaterialLab.rusted_metal(Color(0.40, 0.235, 0.145), 0.75),
 		"rebar": MaterialLab.rusted_metal(Color(0.757, 0.396, 0.165), 1.0),
@@ -161,6 +161,28 @@ static func mid_layers(parent: Node3D, mats: Dictionary, x_from: float, x_to: fl
 		LevelKit.prop(parent, Vector3(x_from + i * 26.0, YARD_Y + 0.02, -18.0 + float(i % 3) * 2.4),
 			Vector3(15.0, 0.06, 1.3), mats["mud"], "TyreRut%d" % i)
 
+	# Debris on the yard floor. Without it the lower third of every frame is an
+	# empty band of haze.
+	for i in int(span / 11.0) + 1:
+		var x := x_from + i * 11.0 + fmod(float(i) * 4.3, 6.0)
+		var z := -12.0 - fmod(float(i) * 5.1, 12.0)
+		match i % 4:
+			0:
+				var c := LevelKit.prop(parent, Vector3(x, YARD_Y + 0.55, z),
+					Vector3(1.5, 1.1, 1.3), mats["crate"], "YardCrate")
+				c.rotation.y = fmod(float(i) * 0.9, 1.2)
+			1:
+				var d := LevelKit.prop(parent, Vector3(x, YARD_Y + 0.42, z),
+					Vector3(0.7, 0.9, 0.7), mats["rust"], "YardDrum")
+				d.rotation.z = 1.57 if i % 8 == 1 else 0.0
+			2:
+				LevelKit.prop(parent, Vector3(x, YARD_Y + 0.10, z),
+					Vector3(3.4, 0.18, 1.1), mats["rust"], "YardPlate")
+			_:
+				var p := LevelKit.prop(parent, Vector3(x, YARD_Y + 0.9, z),
+					Vector3(0.24, 1.8, 0.24), mats["steel"], "YardPost")
+				p.rotation.z = fmod(float(i) * 0.31, 0.5) - 0.25
+
 	PropKit.prefab_facade(parent, x_from - 10.0, YARD_Y, span + 60.0, 8.4, -38.0,
 		mats["slab"], {
 			"name": "BlockTwo", "joint_mat": mats["wall"], "dark_mat": mats["wall"],
@@ -173,6 +195,7 @@ static func mid_layers(parent: Node3D, mats: Dictionary, x_from: float, x_to: fl
 		Vector3(x_to + 30.0, YARD_Y + 4.7, -16.0), 0.20,
 		mats["rust"], int(span / 3.0) + 10)
 
-	for i in int(span / 5.4) + 1:
-		PropKit.eucalyptus(parent, Vector3(x_from + i * 5.4, YARD_Y, -21.0),
-			8.2 + fmod(float(i) * 2.7, 2.4), mats["trunk"], mats["leaf"], i % 3 == 2, i)
+	for i in int(span / 9.0) + 1:
+		PropKit.eucalyptus(parent, Vector3(x_from + i * 9.0 + fmod(float(i) * 3.1, 2.0),
+			YARD_Y, -21.0 - fmod(float(i) * 1.7, 3.0)),
+			8.6 + fmod(float(i) * 2.7, 3.0), mats["trunk"], mats["leaf"], i % 4 == 1, i)
