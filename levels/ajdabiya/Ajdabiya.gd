@@ -81,7 +81,7 @@ func _ready() -> void:
 	level_title = "AJDABIYA CROSSROADS"
 	spawn_point = Vector3(-8.0, STREET_Y + 1.2, 0.0)
 	kill_plane_y = STREET_Y - 24.0
-	music_theme = "brega"
+	music_theme = "ajdabiya"
 	player_outfit = WanisBuilder.Outfit.STREET
 	super._ready()
 	Audio.set_ambience("wind", -20.0)

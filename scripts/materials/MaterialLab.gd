@@ -39,13 +39,23 @@ static var _cache: Dictionary = {}
 #     law is about what a surface reflects.
 # Everything else in the world goes through `world_tint()`.
 
-## HSV saturation ceiling for world albedo outside the reserved band. A little
-## above the document's 0.55 because outside the red sector nothing is competing
-## with the hero, and Libyan shutter paint genuinely is vivid.
-const WORLD_CHROMA_CAP := 0.58
-## Inside the reserved band, the document's numbers apply verbatim.
-const HERO_BAND_CAP_S := 0.55
-const HERO_BAND_CAP_V := 0.72
+## HSV saturation ceiling for world albedo outside the reserved band.
+##
+## This was 0.58, and it was the single reason the game looked dusty. A cap that
+## low means no wall, no shutter, no leaf and no tile can ever be a colour --
+## everything resolves to the same sun-bleached ochre, and no amount of lighting
+## or grading gets it back, because the albedo it is working from was already
+## flattened. The direction is now a bright, saturated, green-mountain Libya, so
+## the ceiling goes up to where paint and foliage can actually sing.
+##
+## Hero readability does not come from holding the world down. It comes from
+## value separation and the rim light, both of which LightingRig already does on
+## every scene, and from the reserved red band below, which is still reserved.
+const WORLD_CHROMA_CAP := 0.88
+## Inside the reserved band the hero still gets first claim on red, but the old
+## numbers pushed every oxide and terracotta surface into mud to get there.
+const HERO_BAND_CAP_S := 0.62
+const HERO_BAND_CAP_V := 0.82
 const HERO_BAND_LO := 340.0
 const HERO_BAND_HI := 25.0
 ## Feathered rather than a hard sector test. Iron oxide lands at hue ~23deg, one

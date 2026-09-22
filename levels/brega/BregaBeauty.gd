@@ -137,19 +137,19 @@ func _mood() -> LightingRig.Mood:
 	m.dof_near_distance = 0.0
 	m.dof_distance = 0.0
 
-	m.sky_top = Color(0.141, 0.196, 0.310)      # colder zenith; see fill note
-	m.sky_horizon = Color(0.788, 0.482, 0.271)  # #C97B45
+	m.sky_top = Color(0.090, 0.298, 0.667)      # colder zenith; see fill note
+	m.sky_horizon = Color(0.980, 0.729, 0.420)  # #C97B45
 	m.ground_horizon = Color(0.835, 0.804, 0.741)
 	m.ground_bottom = Color(0.376, 0.345, 0.306)
-	m.sky_energy = 1.0
+	m.sky_energy = 1.30
 	m.sky_curve = 0.11
 	# Halved. Volumetric density is a global and it was doing the job of eight
 	# local volumes badly — everything past 30 units went to one value.
 	m.volumetric_density = 0.00034
-	m.ambient_energy = 0.32
+	m.ambient_energy = 0.60
 
 	m.fog_color = Color(0.835, 0.804, 0.741)
-	m.fog_density = 0.00038
+	m.fog_density = 0.00026
 	# 0.35 puts a hot bloom on everything within 40 degrees of the key and the
 	# whole right of frame goes to white paper.
 	m.fog_sun_scatter = 0.10
@@ -175,19 +175,19 @@ func _mood() -> LightingRig.Mood:
 	# is made up with bounce, which is light that has been somewhere first.
 	m.agx_white = 9.5
 	m.agx_contrast = 1.45
-	m.bounce_energy = 0.30
+	m.bounce_energy = 0.46
 	m.bounce_color = Color(0.98, 0.80, 0.62)
 
 	# Cool the shadows, keep the highlights warm. This is the one lever that
 	# stops five levels sliding into a single orange, and it is the lever
 	# `adjustment_saturation` structurally cannot pull: saturation scales what
 	# is already there, it cannot put blue into a shadow that has none.
-	m.grade_shadow_tint = Color(0.40, 0.46, 0.62)
-	m.grade_highlight_tint = Color(0.58, 0.52, 0.44)
+	m.grade_shadow_tint = Color(0.30, 0.45, 0.76)
+	m.grade_highlight_tint = Color(0.74, 0.64, 0.46)
 	m.grade_strength = 0.80
-	m.glow_intensity = 0.14
+	m.glow_intensity = 0.20
 	m.glow_hdr_threshold = 2.2
-	m.adjustment_saturation = 1.14
+	m.adjustment_saturation = 1.40
 	m.adjustment_contrast = 1.10
 	return m
 

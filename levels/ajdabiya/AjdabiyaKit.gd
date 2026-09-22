@@ -210,20 +210,20 @@ static func mood() -> LightingRig.Mood:
 	# WARM: this is a Saharan dust load, not temperate haze, and it is the most
 	# location-specific lighting fact in the game. The town bands have to sit
 	# back into something the colour of the dust they stand on.
-	m.sky_top = Color(0.190, 0.320, 0.530)
-	m.sky_horizon = Color(0.700, 0.662, 0.572)
+	m.sky_top = Color(0.118, 0.380, 0.780)
+	m.sky_horizon = Color(0.870, 0.910, 0.950)
 	m.ground_horizon = Color(0.520, 0.470, 0.396)
 	m.ground_bottom = Color(0.270, 0.240, 0.205)
-	m.sky_energy = 1.0
+	m.sky_energy = 1.35
 	m.sky_curve = 0.20
-	m.ambient_energy = 0.42
+	m.ambient_energy = 0.66
 
 	# Depth fog carries the four town bands apart. At 0.00055 they all sat on
 	# the same plane and the skyline read as a decal; this is still gentle
 	# (about a third of the way to the fog colour at the far ridge) but it is
 	# the difference between a backdrop and a distance.
 	m.fog_color = Color(0.762, 0.700, 0.588)
-	m.fog_density = 0.0016
+	m.fog_density = 0.0010
 	m.fog_sun_scatter = 0.10
 	m.fog_emission = Color(0.05, 0.05, 0.055)
 	m.fog_anisotropy = 0.55
@@ -242,20 +242,20 @@ static func mood() -> LightingRig.Mood:
 	# A white-rendered street at ten in the morning throws a lot of light back
 	# up. Without the bounce the undersides of the awnings and the stall tops go
 	# to a flat shadow value and the hero reads as a sticker on the frame.
-	m.bounce_energy = 0.34
+	m.bounce_energy = 0.50
 	m.bounce_color = Color(0.96, 0.88, 0.74)
 
 	# The daytime level takes the grade further than Brega does: this is the one
 	# frame in World 1 with real sky in it, and the sky is the only cool thing
 	# available to put into the shadows.
-	m.grade_shadow_tint = Color(0.38, 0.46, 0.66)
-	m.grade_highlight_tint = Color(0.58, 0.53, 0.45)
+	m.grade_shadow_tint = Color(0.28, 0.46, 0.78)
+	m.grade_highlight_tint = Color(0.76, 0.68, 0.50)
 	m.grade_strength = 0.85
-	m.glow_intensity = 0.10
+	m.glow_intensity = 0.18
 	m.glow_hdr_threshold = 2.4
 	# The town now supplies its own colour in the mids, so the global boost
 	# comes down — it was pushing the sky before it pushed the shutters.
-	m.adjustment_saturation = 1.06
+	m.adjustment_saturation = 1.38
 	m.adjustment_contrast = 1.12
 	m.dof_near_distance = 0.0
 	m.dof_distance = 0.0

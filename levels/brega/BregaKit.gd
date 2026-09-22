@@ -140,16 +140,16 @@ static func mood() -> LightingRig.Mood:
 	m.hero_fill_color = Color(0.82, 0.83, 0.90)
 	m.hero_fill_angles = Vector2(-14.0, -30.0)
 
-	m.sky_top = Color(0.169, 0.227, 0.333)
-	m.sky_horizon = Color(0.788, 0.482, 0.271)
+	m.sky_top = Color(0.106, 0.325, 0.694)
+	m.sky_horizon = Color(0.980, 0.729, 0.420)
 	m.ground_horizon = Color(0.835, 0.804, 0.741)
 	m.ground_bottom = Color(0.376, 0.345, 0.306)
-	m.sky_energy = 1.0
+	m.sky_energy = 1.30
 	m.sky_curve = 0.11
-	m.ambient_energy = 0.29
+	m.ambient_energy = 0.58
 
 	m.fog_color = Color(0.835, 0.804, 0.741)
-	m.fog_density = 0.00052
+	m.fog_density = 0.00034
 	m.fog_sun_scatter = 0.15
 	m.fog_emission = Color(0.06, 0.045, 0.035)
 	m.fog_anisotropy = 0.78
@@ -172,19 +172,19 @@ static func mood() -> LightingRig.Mood:
 	# is made up with bounce, which is light that has been somewhere first.
 	m.agx_white = 9.5
 	m.agx_contrast = 1.45
-	m.bounce_energy = 0.30
+	m.bounce_energy = 0.46
 	m.bounce_color = Color(0.98, 0.80, 0.62)
 
 	# Cool the shadows, keep the highlights warm. This is the one lever that
 	# stops five levels sliding into a single orange, and it is the lever
 	# `adjustment_saturation` structurally cannot pull: saturation scales what
 	# is already there, it cannot put blue into a shadow that has none.
-	m.grade_shadow_tint = Color(0.40, 0.46, 0.62)
-	m.grade_highlight_tint = Color(0.58, 0.52, 0.44)
+	m.grade_shadow_tint = Color(0.30, 0.45, 0.76)
+	m.grade_highlight_tint = Color(0.74, 0.64, 0.46)
 	m.grade_strength = 0.80
-	m.glow_intensity = 0.12
+	m.glow_intensity = 0.18
 	m.glow_hdr_threshold = 2.2
-	m.adjustment_saturation = 1.04
+	m.adjustment_saturation = 1.34
 	m.adjustment_contrast = 1.06
 	m.dof_near_distance = 0.0
 	m.dof_distance = 0.0

@@ -118,7 +118,7 @@ var _bird_wait := 0.0
 func _ready() -> void:
 	# Set before super, because Stage reads these while it builds.
 	show_hud = false
-	music_theme = "brega"
+	music_theme = "title"
 	super._ready()
 	level_id = "title"
 	level_title = "LIBYAN GANGSTAS"
