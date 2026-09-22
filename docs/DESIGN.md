@@ -62,28 +62,39 @@ made in his aunt's kitchen in Ajdabiya. He is not actually a gangster. He carrie
 himself like one because he believes presentation is everything, and because a man
 with a gold chain gets served first.
 
-**Look.** Broad shoulders, narrow waist, light on his feet. Short beard, curly
-black hair, aviator shades pushed up on his forehead — never over his eyes,
-because the audience needs to read his expression. A red jacket, sleeves shoved
-up. A cream tank underneath. A gold chain. A shemagh knotted at the waist as a
-sash that trails behind him, which is where all the follow-through lives.
-And sandals — *shibshib*. He does the entire game in sandals. This is the joke
-and it is also the point: he is exactly as unbothered as he looks.
+**Look.** Broad shoulders, narrow waist, light on his feet. Short beard, a
+moustache, short curly black hair. A **white thobe** — the full-length robe, and
+it is the single most important decision in the character: he is the brightest
+value in every frame he appears in, and that is the whole readability strategy
+of the game. A deep-red **shemagh** over one shoulder, trailing, which is where
+all the follow-through lives. A gold chain. And sandals — *shibshib*. He does
+the entire game in sandals. This is the joke and it is also the point: he is
+exactly as unbothered as he looks.
+
+He carries a **full-auto AK-pattern rifle** — an original design, never a
+licensed one, and pointed at machines rather than people, which is what keeps
+the game playful.
+
+(The aviators are gone. Front-on they stacked a third horizontal black bar above
+the brow and the hairline, and a face reading as three dark bands is not a face.
+If they come back they go on the chest, not the forehead.)
 
 **Two states.** Level 1 opens with him in a grey prison uniform, stripped of
 everything. Midway through Brega he breaks open the confiscated-property cage and
 gets his gear back. That is the level's unforgettable moment: a full costume
 transformation that is *also* the mechanic unlock, in one beat.
 
-**Silhouette rule.** Shoulder line, chain, trailing sash. If a frame is reduced to
-pure black, those three things must still say who he is.
+**Silhouette rule.** The robe's A-line, the trailing shemagh, the chain and the
+slung rifle. If a frame is reduced to pure black, those four things must still
+say who he is.
 
 **Idle personality.** He does not stand still. He checks his chain. He looks off
-at something. He adjusts the sash. He is bored, and being bored is a performance.
+at something. He shifts his weight. He is bored, and being bored is a
+performance.
 
 ### Signature mechanics
 
-Two, and only two, that belong to nobody else.
+Four now, and each belongs to nobody else.
 
 **1. HEAT DASH.** A committed horizontal dash, on the ground and in the air, one
 air-dash per airtime, refunded on landing. It preserves momentum on exit rather
@@ -101,6 +112,17 @@ Level 1 teaches it and the rest of World 1 escalates it.
 
 Nothing else ships unless a level's design genuinely needs it.
 
+
+**3. THE DOUBLE JUMP.** One extra jump in the air at 92% of the first one's
+height. It exists so that the glide has something to be launched from, and so
+that a missed edge is a recoverable mistake rather than a death.
+
+**4. THE THOBE GLIDE.** Hold jump while falling and the wind gets under the robe:
+he drops at a fraction of terminal velocity and keeps horizontal control. It is
+DKC's Dixie Kong logic in Libyan cotton, and it turns every rooftop in the game
+into a launch point. The robe is the reason the mechanic exists and the mechanic
+is the reason the robe reads — they were designed together.
+
 ### Collectible rules
 - 100 Sriracha bottles → one extra life. The count persists across a run, not a level.
 - 30 Sriracha → one full HEAT gauge. Heat is spent, lives are not.
@@ -113,7 +135,8 @@ Boss **Taher** runs freight on the eastern coast road and decided Wanis's sauce 
 a business he wanted. When Wanis refused to sell, a shipment went missing, some
 paperwork appeared, and Wanis went to prison in Brega.
 
-1. **Brega Prison Breakout** — he gets out, and he gets his jacket back.
+1. **Brega Prison Breakout** — he gets out, and he gets his own clothes, his
+   chain and his rifle back.
 2. **Ajdabiya** — his aunt's kitchen. The recipe. The first crates.
 3. **Highway to Benghazi** — Taher's convoy, and a car that should not be doing this speed.
 4. **Garyounis University** — the operation is running out of a campus building, because nobody searches a campus.
@@ -144,7 +167,7 @@ The three decisions that govern everything else:
 2. **Each level owns exactly one unique hue**, and the five occupy five different hue
    families: regime green, sabkha terra rossa, oleander pink, the gold dome, copper patina.
 3. **Wanis is the only saturated thing in the frame.** World-surface albedo is capped at
-   HSV S 0.55 / V 0.72 inside hue 340°–25°; that band belongs to the jacket and the
+   HSV S 0.55 / V 0.72 inside hue 340°–25°; that band belongs to the shemagh and the
    Sriracha alone. Danger is signalled with hazard chevrons and a white flash, never red.
 
 Colour script board: `docs/screenshots/2026-09-21_world1-colour-script.svg`

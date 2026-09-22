@@ -50,6 +50,9 @@ func _ready() -> void:
 	_apply_spawn_override()
 	Gx.current_level_id = level_id
 	world_env = LightingRig.build(self, _mood())
+	var preset := _sky_preset()
+	if preset != "":
+		SkyForge.apply(world_env.environment, preset)
 	_build_level()
 	_spawn_camera()
 	_spawn_player(_current_spawn())
@@ -84,6 +87,18 @@ func _apply_spawn_override() -> void:
 
 func _mood() -> LightingRig.Mood:
 	return LightingRig.neutral_studio()
+
+
+## Override: which SkyForge preset this level's sky uses. An empty string keeps
+## the plain [ProceduralSkyMaterial] LightingRig installs.
+##
+## It is a hook on Stage rather than a line in each level's _mood because the
+## sky is not part of the mood: SkyForge reads the scene's own key light for the
+## sun, so the disc, the warm band around it and the aerial haze all follow
+## wherever the rig aimed, and a level that re-times its sun gets a correct sky
+## for free. Presets: brega_dawn, ajdabiya_morning, ice_twilight, studio.
+func _sky_preset() -> String:
+	return ""
 
 
 ## Override: build geometry, props, collectibles under `geometry`.

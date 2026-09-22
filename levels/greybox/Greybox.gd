@@ -23,6 +23,13 @@ func _mood() -> LightingRig.Mood:
 	return LightingRig.neutral_studio()
 
 
+## Real clouds even on the calibration range. A capture of an unfinished level
+## has to still read as a sky and not as a backdrop, or every judgement made
+## against it is a judgement about the backdrop.
+func _sky_preset() -> String:
+	return "studio"
+
+
 func _build_level() -> void:
 	_pal = {
 		"floor": LevelKit.material(Color(0.255, 0.265, 0.285), 0.88),

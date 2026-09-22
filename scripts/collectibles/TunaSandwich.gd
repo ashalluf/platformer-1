@@ -104,6 +104,61 @@ func _build_visual() -> Node3D:
 	em.rotation = Vector3(PI * 0.5, 0.0, 0.0)
 	root.add_child(em)
 
+	# The TOP half of the baguette, sitting on the filling and tipped back a few
+	# degrees so the cut face and a sliver of filling still show. Without it
+	# this is an open sandwich, and an open sandwich in profile is a plank.
+	var tb := MeshForge.Builder.new()
+	tb.begin()
+	var top_rings := []
+	for i in steps:
+		var t := float(i) / float(steps - 1)
+		var fat := sin(PI * t)
+		top_rings.append(MeshForge.ring(
+			Vector3(0.0, -LENGTH * 0.5 + LENGTH * t, 0.0),
+			0.050 + 0.028 * fat, 0.044 + 0.024 * fat, [0], [1.0], 2.6))
+	tb.loft(top_rings, 12, true, true)
+	var lid := MeshInstance3D.new()
+	lid.name = "Lid"
+	lid.mesh = tb.commit()
+	lid.material_override = crust
+	lid.rotation = Vector3(0.0, 0.0, PI * 0.5)
+	lid.position = Vector3(0.0, 0.098, -0.012)
+	lid.rotation.x = -0.10
+	root.add_child(lid)
+
+	# Diagonal slashes across the top. Every baguette has them, they are the
+	# thing that says "bread" at any size, and three ridges cost nothing.
+	for i in 4:
+		var slash := LevelKit.chamfer_mesh(Vector3(0.016, 0.014, 0.095))
+		var sl := MeshInstance3D.new()
+		sl.name = "Slash%d" % i
+		sl.mesh = slash
+		sl.material_override = crumb
+		sl.position = Vector3(-0.13 + i * 0.086, 0.148, -0.012)
+		sl.rotation = Vector3(-0.10, 0.0, 0.52)
+		root.add_child(sl)
+
+	# A twist of greaseproof paper round one end. It is how this sandwich is
+	# actually handed to you on that coast, it gives the prop a second
+	# material, and the cone is a silhouette break at the end of a long tube.
+	var wrap := MeshForge.Builder.new()
+	wrap.begin()
+	var wrap_rings := []
+	for i in 6:
+		var t := float(i) / 5.0
+		wrap_rings.append(MeshForge.ring(
+			Vector3(0.0, t * 0.13, 0.0),
+			lerpf(0.086, 0.020, t * t), lerpf(0.078, 0.018, t * t),
+			[0], [1.0], lerpf(2.6, 3.4, t)))
+	wrap.loft(wrap_rings, 10, true, true)
+	var wr := MeshInstance3D.new()
+	wr.name = "Wrap"
+	wr.mesh = wrap.commit()
+	wr.material_override = MaterialLab.cloth(Color(0.88, 0.86, 0.80), 0.92)
+	wr.rotation = Vector3(0.0, 0.0, PI * 0.5)
+	wr.position = Vector3(-LENGTH * 0.46, 0.052, 0.0)
+	root.add_child(wr)
+
 	var glow := OmniLight3D.new()
 	glow.light_color = Color(1.0, 0.74, 0.34)
 	glow.light_energy = 1.1

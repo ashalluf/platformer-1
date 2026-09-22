@@ -1,6 +1,10 @@
-; LIBYAN GANGSTAS — Godot 4 project configuration
-; Input actions are defined in code (scripts/autoload/InputDirector.gd) so they
-; stay remappable and readable. Rendering quality is tuned in GraphicsDirector.
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
 
 config_version=5
 
@@ -27,10 +31,7 @@ CaptureRunner="*res://scripts/autoload/CaptureRunner.gd"
 
 [debug]
 
-gdscript/warnings/untyped_declaration=0
 gdscript/warnings/inference_on_variant=1
-gdscript/warnings/unsafe_property_access=0
-gdscript/warnings/unsafe_method_access=0
 
 [display]
 
@@ -40,28 +41,22 @@ window/size/window_width_override=1280
 window/size/window_height_override=720
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
-window/vsync/vsync_mode=1
 
 [physics]
 
-3d/default_gravity=0.0
-common/physics_ticks_per_second=60
 common/max_physics_steps_per_frame=4
+3d/default_gravity=0.0
 
 [rendering]
 
-renderer/rendering_method="forward_plus"
-textures/default_filters/anisotropic_filtering_level=3
-anti_aliasing/quality/msaa_3d=2
-anti_aliasing/quality/screen_space_aa=1
-lights_and_shadows/directional_shadow/size=4096
 lights_and_shadows/directional_shadow/soft_shadow_filter_quality=3
 lights_and_shadows/positional_shadow/soft_shadow_filter_quality=3
 global_illumination/gi/use_half_resolution=true
-environment/ssao/quality=2
+textures/default_filters/anisotropic_filtering_level=3
 environment/ssil/quality=1
-environment/screen_space_reflection/roughness_quality=1
+anti_aliasing/quality/msaa_3d=2
 environment/subsurface_scattering/subsurface_scattering_quality=2
 environment/volumetric_fog/volume_size=96
 environment/volumetric_fog/volume_depth=128
-camera/depth_of_field/depth_of_field_bokeh_quality=1
+anti_aliasing/quality/screen_space_aa=1
+environment/screen_space_reflection/roughness_quality=1

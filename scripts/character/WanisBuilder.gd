@@ -145,7 +145,11 @@ static func materials(outfit: Outfit) -> Dictionary:
 		"shemagh": shemagh_material(),
 		"shoe": MaterialLab.cloth(p["shoe"], 0.55),
 		"gold": MaterialLab.gold(),
-		"dark": MaterialLab.cloth(Color(0.04, 0.04, 0.05), 0.25),
+		# The dark surface carries the eyes AND the brows, so its roughness is a
+		# compromise: low enough that the eye takes a hard catchlight off the key
+		# — which is the single cheapest thing that turns a black bead into a
+		# living eye — and not so low that the brows read as wet.
+		"dark": MaterialLab.cloth(Color(0.045, 0.042, 0.050), 0.17),
 	}
 
 
@@ -179,6 +183,51 @@ static func _append(mesh: ArrayMesh, names: Array[String], key: String,
 	names.append(key)
 
 
+# --- Surface placement helpers ----------------------------------------------
+
+## A point on a lofted blob's surface, in the same parameters `Builder.blob`
+## sweeps: `t` runs 0 at the bottom pole to 1 at the top, `theta` runs round the
+## cross-section with PI/2 facing forward (+Z) and 0 at +X.
+##
+## Detail masses go on through this rather than through hand-guessed world
+## coordinates. Guessing is how the hair ended up as a helmet: a lump authored by
+## eye at the head's centre depth sits entirely INSIDE the mass it was meant to
+## disturb and contributes nothing but triangles, and there is no way to tell
+## from the numbers that it happened.
+static func _on_blob(center: Vector3, radius: Vector3, shape: Callable,
+		roundness: float, t: float, theta: float) -> Vector3:
+	var phi := PI * t
+	var rx := radius.x * sin(phi)
+	var rz := radius.z * sin(phi)
+	var off := Vector3.ZERO
+	if shape.is_valid():
+		var m: Dictionary = shape.call(t, -cos(phi))
+		rx *= float(m.get("sx", 1.0))
+		rz *= float(m.get("sz", 1.0))
+		off = m.get("offset", Vector3.ZERO)
+	var c := cos(theta)
+	var s := sin(theta)
+	var e := 2.0 / roundness
+	return center + off + Vector3(
+		signf(c) * pow(absf(c), e) * rx,
+		-cos(phi) * radius.y,
+		signf(s) * pow(absf(s), e) * rz)
+
+
+## Sink a detail mass into its parent so exactly `stand` metres of it protrude.
+## `reach` is the ellipsoid's support along the outward direction, so an elongated
+## lump laid flat against a surface still clears it by the amount asked for
+## instead of disappearing.
+static func _lump(b: MeshForge.Builder, anchor: Vector3, parent: Vector3,
+		radius: Vector3, stand: float, bones: Array, weights: Array,
+		rings := 5, segs := 9, roundness := 2.2) -> void:
+	var out := (anchor - parent).normalized()
+	var reach := sqrt(pow(out.x * radius.x, 2.0) + pow(out.y * radius.y, 2.0)
+		+ pow(out.z * radius.z, 2.0))
+	b.blob(anchor - out * maxf(reach - stand, 0.0), radius, bones, weights,
+		rings, segs, roundness)
+
+
 # --- Head, neck, arms, hands ------------------------------------------------
 
 static func _build_skin() -> MeshForge.Builder:
@@ -187,15 +236,12 @@ static func _build_skin() -> MeshForge.Builder:
 	var head_b := [B.HEAD]
 	var head_w := [1.0]
 
-	b.blob(HEAD_CENTER, HEAD_RADIUS, head_b, head_w, 12, 22, 2.25, HEAD_SHAPE)
-
-	# Nose — small, but it is most of the silhouette's personality.
-	b.blob(Vector3(0.0, 1.572, 0.176), Vector3(0.042, 0.058, 0.066),
-		head_b, head_w, 6, 10, 2.0)
-	# Ears, visible in profile.
-	for side: float in [-1.0, 1.0]:
-		b.blob(Vector3(side * 0.156, 1.594, -0.022), Vector3(0.028, 0.052, 0.044),
-			head_b, head_w, 5, 8, 2.2)
+	# 14 rings rather than 12: at 12 the skull had no cross-section at all
+	# between y 1.669 and y 1.714, which is exactly the forehead — the one
+	# stretch of the head with no feature on it to hide a 45 mm shading gap.
+	b.blob(HEAD_CENTER, HEAD_RADIUS, head_b, head_w, 14, 24, 2.25, HEAD_SHAPE)
+	_face(b, head_b, head_w)
+	_ears(b, head_b, head_w)
 
 	# Neck — short and thick. A long neck reads as fragile at this size.
 	b.loft([
@@ -211,10 +257,159 @@ static func _build_skin() -> MeshForge.Builder:
 		var x := side * 0.205
 		b.loft([
 			MeshForge.ring(Vector3(x, 0.96, 0), 0.052, 0.054, [fa], [1.0], 2.3),
-			MeshForge.ring(Vector3(x, 0.88, 0), 0.045, 0.047, [fa, hd], [0.5, 0.5], 2.3),
+			MeshForge.ring(Vector3(x, 0.895, 0), 0.045, 0.047, [fa, hd], [0.5, 0.5], 2.3),
 		], 12, true, false)
-		b.blob(Vector3(x, 0.815, 0.008), Vector3(0.048, 0.062, 0.056), [hd], [1.0], 7, 12, 2.4)
+		_hand(b, x, side, hd)
 	return b
+
+
+## The face.
+##
+## Nothing here is subtracted — the whole character is additive lofts — so an eye
+## socket is not a hole cut in the skull. It is the untouched skull left standing
+## between a brow ridge, a nose bridge and a cheekbone that have all been pushed
+## forward around it. Build the walls and the hollow appears for free.
+##
+## Read the depth ladder at the eye line as a list, because every number below is
+## tuned against it: bare skull 0.185, eyeball 0.194, brow ridge 0.199, lower lid
+## 0.199, upper lid 0.202, brow hair 0.207.
+##
+## The gaps used to be 4 mm and the first render came back with the whole midface
+## covered in black speckle. Two large, nearly parallel surfaces sitting 4 mm
+## apart do not read as two planes — they graze, and every crevice between them
+## fills with contact shadow and ambient occlusion until the face looks like it
+## has been sprayed with soot. A mass either clears its neighbour by 8 mm or more
+## and reads as its own plane, or it stays decisively inside and is not built at
+## all. There is no useful middle, and tangency is the failure mode to design
+## against on an additive character.
+static func _face(b: MeshForge.Builder, hb: Array, hw: Array) -> void:
+	for side: float in [-1.0, 1.0]:
+		# Brow ridge. The most valuable mass on the head and the only feature up
+		# here that survives a pure PROFILE view, where it is the step between
+		# forehead and nose root. Wide in X and thin in Y: a ridge, not a lump.
+		# With the key light at -28 degrees it drops a shadow into the socket,
+		# which is where the whole expression comes from.
+		b.blob(Vector3(side * 0.070, 1.650, 0.171), Vector3(0.056, 0.020, 0.028),
+			hb, hw, 5, 8, 2.9)
+		# Cheekbone. This one is honest about being a three-quarter feature — it
+		# runs across X and profile barely sees it. It earns its place anyway: it
+		# is the outer wall of the socket and the thing that stops the midface
+		# reading as a balloon under any light that moves.
+		b.blob(Vector3(side * 0.092, 1.577, 0.155), Vector3(0.043, 0.032, 0.035),
+			hb, hw, 5, 8, 2.6)
+		# Lids. A bead on its own is a bead in a hole; these overhang it top and
+		# bottom so what shows is a 12 mm almond with a lash line. The upper lid
+		# is the heavier and the more forward of the two, which is true of every
+		# real eye and is what makes the gaze read as level rather than startled.
+		b.blob(Vector3(side * 0.068, 1.629, 0.179), Vector3(0.036, 0.013, 0.023),
+			hb, hw, 4, 8, 2.7)
+		b.blob(Vector3(side * 0.067, 1.590, 0.177), Vector3(0.034, 0.012, 0.022),
+			hb, hw, 4, 8, 2.7)
+		# Nose wing. Gives the nose a base instead of letting it taper away into
+		# the cheek, and it is the only thing on the head casting a nostril
+		# shadow — which in profile is what separates nose from lip.
+		b.blob(Vector3(side * 0.038, 1.552, 0.178), Vector3(0.025, 0.022, 0.032),
+			hb, hw, 4, 7, 2.5)
+		# Nasolabial. The fold is the VALLEY where this meets the muzzle below,
+		# not a line on either of them. Additive geometry cannot cut a crease, so
+		# both walls get built and the crease is what is left between them.
+		b.blob(Vector3(side * 0.059, 1.532, 0.164), Vector3(0.026, 0.034, 0.030),
+			hb, hw, 4, 7, 2.4)
+
+	# Nose bridge, brow to tip. Four millimetres proud of the forehead is enough:
+	# all a bridge has to do at this scale is keep the two sockets apart.
+	b.blob(Vector3(0.0, 1.634, 0.176), Vector3(0.024, 0.030, 0.026), hb, hw, 4, 7, 2.6)
+	b.blob(Vector3(0.0, 1.604, 0.181), Vector3(0.027, 0.030, 0.030), hb, hw, 4, 7, 2.6)
+	# Nose — small, but it is most of the silhouette's personality.
+	#
+	# Shorter and higher than it was. At centre 1.572 with a 58 mm half-height it
+	# reached down to y 1.514, which is BELOW the upper lip, so the tip hung out
+	# over the moustache and hid it everywhere except the last centimetre at each
+	# end. A front-on ray-cast of the head is what caught it — a nose is the one
+	# feature you cannot judge from its own numbers, because it is always the
+	# frontmost thing on the face and always wins whatever it overlaps.
+	b.blob(Vector3(0.0, 1.585, 0.176), Vector3(0.040, 0.050, 0.062), hb, hw, 6, 10, 2.0)
+
+	# The muzzle: one barrel carrying both lips, so they sit on a mass instead of
+	# being stuck flat onto the front of the skull.
+	b.blob(Vector3(0.0, 1.527, 0.174), Vector3(0.054, 0.024, 0.028), hb, hw, 5, 10, 2.5)
+	# Upper and lower lip as separate masses. Where the two meet is the mouth
+	# line, and a seam between two forms holds up under a moving light in a way
+	# that a painted line never does. Both sit proud of the beard by 7 mm so the
+	# mouth stays a skin island instead of being swallowed.
+	b.blob(Vector3(0.0, 1.5215, 0.188), Vector3(0.036, 0.0105, 0.024), hb, hw, 4, 10, 2.6)
+	b.blob(Vector3(0.0, 1.5005, 0.185), Vector3(0.032, 0.012, 0.023), hb, hw, 4, 10, 2.5)
+	# Chin. Mostly buried under the beard, but it gives the beard something to sit
+	# on so the jaw does not read as a bag hanging off the mouth.
+	b.blob(Vector3(0.0, 1.476, 0.163), Vector3(0.048, 0.027, 0.026), hb, hw, 4, 9, 2.7)
+
+
+## The ear.
+##
+## Side-on this lands in the middle of the head's silhouette, which makes it the
+## most-looked-at secondary form on the character. A featureless bump there is the
+## cheapest-looking thing on the model, and it is directly in the eyeline.
+static func _ears(b: MeshForge.Builder, hb: Array, hw: Array) -> void:
+	for side: float in [-1.0, 1.0]:
+		# The plate — flattened against the skull, not a ball stuck to it, and set
+		# 6 mm further out than it was so it still clears the hair shell by 13 mm
+		# rather than 8. The ear is a silhouette feature; it cannot be a bump
+		# that the hair nearly swallows.
+		b.blob(Vector3(side * 0.164, 1.596, -0.022), Vector3(0.025, 0.052, 0.042),
+			hb, hw, 5, 8, 2.4)
+		# Helix, as four beads round the rim. MeshForge sweeps rings in the XZ
+		# plane, so a rim that loops through Y and Z cannot be lofted at all;
+		# four small masses buy the same read for the same triangle count.
+		for p: Array in [
+				[Vector3(side * 0.172, 1.634, -0.004), Vector3(0.013, 0.015, 0.017)],
+				[Vector3(side * 0.170, 1.630, -0.046), Vector3(0.013, 0.014, 0.018)],
+				[Vector3(side * 0.166, 1.606, -0.062), Vector3(0.013, 0.019, 0.014)],
+				[Vector3(side * 0.163, 1.578, -0.052), Vector3(0.012, 0.017, 0.013)],
+			]:
+			b.blob(p[0], p[1], hb, hw, 4, 6, 2.3)
+		# Tragus and lobe. Two small notches, and between them they are the only
+		# thing that tells a viewer which way the ear is facing.
+		b.blob(Vector3(side * 0.157, 1.592, 0.010), Vector3(0.015, 0.014, 0.013),
+			hb, hw, 4, 6, 2.4)
+		b.blob(Vector3(side * 0.159, 1.556, -0.030), Vector3(0.017, 0.017, 0.017),
+			hb, hw, 4, 6, 2.6)
+
+
+## One hand.
+##
+## At the gameplay camera's distance four separate fingers are wasted triangles.
+## The thumb and the knuckle break are not: those two are the entire difference
+## between a hand and a mitten in PROFILE, where the palm's width across X is
+## invisible and only the front-to-back outline survives.
+static func _hand(b: MeshForge.Builder, x: float, side: int, hd: int) -> void:
+	var bn := [hd]
+	var wt := [1.0]
+	# Palm, ending in a bulge ring followed immediately by a pinch. That pair is
+	# the whole trick — one notch in the outline exactly where fingers begin.
+	b.loft([
+		MeshForge.ring(Vector3(x, 0.870, 0.004), 0.023, 0.043, bn, wt, 2.8),
+		MeshForge.ring(Vector3(x, 0.834, 0.008), 0.026, 0.050, bn, wt, 3.0),
+		MeshForge.ring(Vector3(x, 0.800, 0.010), 0.027, 0.053, bn, wt, 3.2),
+		MeshForge.ring(Vector3(x, 0.789, 0.011), 0.023, 0.046, bn, wt, 3.0),
+	], 10, true, false)
+	# Fused finger mass, curled forward the way a relaxed hand hangs. Tapered to
+	# a soft end rather than a flat cap, which catches a hard specular and is the
+	# giveaway on every procedural hand.
+	b.loft([
+		MeshForge.ring(Vector3(x, 0.789, 0.011), 0.024, 0.048, bn, wt, 3.0),
+		MeshForge.ring(Vector3(x, 0.760, 0.017), 0.023, 0.046, bn, wt, 3.0),
+		MeshForge.ring(Vector3(x, 0.736, 0.025), 0.021, 0.040, bn, wt, 2.8),
+		MeshForge.ring(Vector3(x, 0.722, 0.031), 0.015, 0.027, bn, wt, 2.6),
+	], 10, false, true)
+	# Thumb — forward and inboard, deliberately clear of the finger mass so a
+	# sliver of background shows between the two. Negative space inside the
+	# silhouette is what the art direction asks for everywhere else on him and
+	# the hand is where it is cheapest to get.
+	b.loft([
+		MeshForge.ring(Vector3(x - float(side) * 0.005, 0.826, 0.030), 0.014, 0.016, bn, wt, 2.4),
+		MeshForge.ring(Vector3(x - float(side) * 0.009, 0.804, 0.044), 0.013, 0.015, bn, wt, 2.4),
+		MeshForge.ring(Vector3(x - float(side) * 0.012, 0.782, 0.050), 0.010, 0.012, bn, wt, 2.4),
+	], 8, true, true)
 
 
 # --- Thobe ------------------------------------------------------------------
@@ -337,8 +532,16 @@ static func _build_trousers() -> MeshForge.Builder:
 	return b
 
 
-## Bare feet in sandals. The sole is deliberately a readable slab: below a white
-## hem, it is the only thing separating him from the ground in silhouette.
+## Sandals (shibshib), at the art direction's one permitted exaggeration of
+## 1.35x scale. Below a near-white hem these are the only thing separating Wanis
+## from the ground in silhouette, so the sole gets a real welt rather than fading
+## into the contact shadow under him.
+##
+## Both straps are built as raised RINGS in the sweep rather than as bars laid
+## across the instep. A bar has to be aimed at a cone whose surface moves forward
+## as it descends, and getting that wrong buries it; a ring cannot miss. Seen
+## side-on the two read identically anyway — each is one hard horizontal notch in
+## the foot's top line with its own shadow under it, which is the whole point.
 static func _build_feet() -> MeshForge.Builder:
 	var b := MeshForge.Builder.new()
 	b.begin()
@@ -346,16 +549,38 @@ static func _build_feet() -> MeshForge.Builder:
 		var ft: int = B.FOOT_L if side < 0 else B.FOOT_R
 		var sn: int = B.SHIN_L if side < 0 else B.SHIN_R
 		var x := side * 0.072
+		var bn := [ft]
+		var wt := [1.0]
+		# Ankle down to the instep, through two strap bands. The 5-6 mm radius
+		# steps are deliberately abrupt: smoothed normals turn each one into a
+		# tight bevel, which is exactly what the edge of a leather strap is.
 		b.loft([
-			MeshForge.ring(Vector3(x, 0.125, 0.004), 0.050, 0.058, [sn, ft], [0.4, 0.6], 2.4),
-			MeshForge.ring(Vector3(x, 0.075, 0.012), 0.050, 0.070, [ft], [1.0], 2.6),
-			MeshForge.ring(Vector3(x, 0.042, 0.030), 0.052, 0.098, [ft], [1.0], 3.0),
+			MeshForge.ring(Vector3(x, 0.128, 0.002), 0.050, 0.057, [sn, ft], [0.4, 0.6], 2.4),
+			MeshForge.ring(Vector3(x, 0.104, 0.006), 0.049, 0.062, bn, wt, 2.5),
+			MeshForge.ring(Vector3(x, 0.099, 0.007), 0.055, 0.070, bn, wt, 2.7),
+			MeshForge.ring(Vector3(x, 0.087, 0.010), 0.056, 0.073, bn, wt, 2.7),
+			MeshForge.ring(Vector3(x, 0.082, 0.012), 0.050, 0.068, bn, wt, 2.6),
+			MeshForge.ring(Vector3(x, 0.069, 0.018), 0.051, 0.077, bn, wt, 2.7),
+			MeshForge.ring(Vector3(x, 0.064, 0.020), 0.057, 0.086, bn, wt, 2.9),
+			MeshForge.ring(Vector3(x, 0.052, 0.025), 0.058, 0.090, bn, wt, 2.9),
+			MeshForge.ring(Vector3(x, 0.047, 0.028), 0.052, 0.086, bn, wt, 2.8),
+			MeshForge.ring(Vector3(x, 0.042, 0.031), 0.053, 0.086, bn, wt, 3.0),
 		], 12, true, false)
+		# Footbed and sole. The third ring is the widest by 4 mm and sits 10 mm
+		# off the ground: that overhang is the welt, and it is the line that says
+		# "sandal" instead of "foot-shaped lump".
 		b.loft([
-			MeshForge.ring(Vector3(x, 0.036, 0.028), 0.055, 0.115, [ft], [1.0], 3.6),
-			MeshForge.ring(Vector3(x, 0.014, 0.030), 0.058, 0.122, [ft], [1.0], 3.8),
-			MeshForge.ring(Vector3(x, 0.003, 0.030), 0.054, 0.118, [ft], [1.0], 3.8),
+			MeshForge.ring(Vector3(x, 0.040, 0.030), 0.055, 0.112, bn, wt, 3.6),
+			MeshForge.ring(Vector3(x, 0.027, 0.032), 0.058, 0.121, bn, wt, 3.8),
+			MeshForge.ring(Vector3(x, 0.021, 0.032), 0.062, 0.127, bn, wt, 3.8),
+			MeshForge.ring(Vector3(x, 0.011, 0.031), 0.059, 0.123, bn, wt, 3.8),
+			MeshForge.ring(Vector3(x, 0.002, 0.030), 0.054, 0.117, bn, wt, 3.8),
 		], 12, false, true)
+		# Toe break. The instep sweep above stops short at rz 0.086 so that this
+		# pad stands ahead of it with a waist between the two — a transverse
+		# groove across the front of the foot. Without it the sandal is one
+		# continuous nose from ankle to toe, which is what a slipper looks like.
+		b.blob(Vector3(x, 0.034, 0.116), Vector3(0.048, 0.021, 0.038), bn, wt, 5, 10, 3.0)
 	return b
 
 
@@ -383,52 +608,149 @@ static func _build_hair(outfit: Outfit) -> MeshForge.Builder:
 	b.blob(HEAD_CENTER, HEAD_RADIUS, head_b, head_w, 12, 24, 2.25,
 		# The hairline sits high at the temples. Starting it at a third of the
 		# way up the skull put hair across his cheekbone.
-		hair_shape, PI * 0.78, TAU * 0.745, 0.395, 1.0)
+		# ...and it stops ABOVE the ear, not level with the jaw. At 0.395 the
+		# shell ran down to y 1.53, so the black mass came past the ear on both
+		# sides and squeezed the face into a narrow vertical slot between hair
+		# and beard. The widest readable thing on a head is the face; nothing is
+		# allowed to narrow it.
+		hair_shape, PI * 0.78, TAU * 0.745, 0.445, 1.0)
 
 	# The shell is open across a 92-degree arc so the face can exist, and that
 	# gap runs all the way to the crown — which left him with a forehead half
-	# the height of his head. This is the hairline: a flat mass laid across the
-	# brow, closing the gap at the front only.
-	b.blob(Vector3(0.0, 1.700, 0.104), Vector3(0.152, 0.036, 0.098),
-		head_b, head_w, 6, 14, 2.7)
-	b.blob(Vector3(0.0, 1.724, 0.070), Vector3(0.160, 0.040, 0.132),
-		head_b, head_w, 6, 14, 2.5)
+	# the height of his head. These four masses close the gap at the front only.
+	#
+	# They are NOT one arc. A low centre, a higher corner at each temple, the
+	# right carried further forward than the left, and the whole thing set 10 mm
+	# off centre. A hairline that is a clean symmetric curve is the single
+	# clearest tell that a head was generated rather than sculpted, and it is
+	# read instantly even by someone who could not say why. Bottom edge is held
+	# at y 1.686 so there is a real 20 mm of forehead above the brow ridge —
+	# hair landing on the brow ages him twenty years and hides the expression.
+	b.blob(Vector3(-0.012, 1.726, 0.094), Vector3(0.112, 0.030, 0.090),
+		head_b, head_w, 6, 13, 2.4)
+	b.blob(Vector3(0.070, 1.736, 0.074), Vector3(0.074, 0.027, 0.082),
+		head_b, head_w, 5, 10, 2.3)
+	b.blob(Vector3(-0.084, 1.730, 0.068), Vector3(0.068, 0.027, 0.078),
+		head_b, head_w, 5, 10, 2.3)
+	# The crown. The first render came back with a flat-topped black cap that
+	# read as a beret, because the mass closing the hairline was wide, squared
+	# off at roundness 2.5 and sat BELOW the top of the skull, so the highest
+	# thing on his head was a horizontal slab. This one is domed, rounder than
+	# the skull it sits on, and clears the crown by 20 mm — the hair has to be
+	# the top of the silhouette or it is a hat.
+	b.blob(Vector3(0.004, 1.748, 0.034), Vector3(0.146, 0.048, 0.126),
+		head_b, head_w, 7, 14, 2.05)
+	b.blob(Vector3(0.010, 1.756, -0.026), Vector3(0.120, 0.046, 0.108),
+		head_b, head_w, 6, 12, 2.0)
 
-	# Three small lifts in the crown, breaking the shell's outline without
-	# leaving it. Anything approaching the head's own radius turns the whole
-	# silhouette into a bunch of grapes, which is exactly what happened before.
-	for lump: Array in [
-			[Vector3(-0.006, 1.706, -0.034), Vector3(0.068, 0.030, 0.066)],
-			[Vector3(0.050, 1.686, -0.118), Vector3(0.056, 0.038, 0.052)],
-			[Vector3(-0.052, 1.652, -0.132), Vector3(0.054, 0.040, 0.050)],
+	# Comb direction. Five masses riding the shell, placed through `_on_blob` so
+	# each one is guaranteed to break the outline by the millimetre given rather
+	# than sinking into the shell unnoticed.
+	#
+	# Every one is long in Z and shallow in Y, and they sit low on the back of
+	# the head where the shell is widest. Long is the entire point: in PROFILE a
+	# round lump is a bump and a long one is a sweep, and profile is the view
+	# that ships. Placing them near the crown instead, where the shell narrows to
+	# nothing, makes a 12 cm ellipsoid jut 4 cm off the back of his skull.
+	# Unequal sizes at unequal heights, because a symmetric pair reads as horns.
+	# Each stands 17-22 mm off the shell, not the 10-13 mm it was: at 10 mm a
+	# long flat mass lying on a curved one is tangent over most of its length,
+	# and tangency is what put soot all over the first render.
+	for sweep: Array in [
+			[0.78, 1.56, Vector3(0.050, 0.030, 0.062), 0.022],
+			[0.70, 1.30, Vector3(0.044, 0.034, 0.054), 0.020],
+			[0.72, 1.76, Vector3(0.042, 0.036, 0.052), 0.018],
+			[0.60, 1.50, Vector3(0.052, 0.042, 0.046), 0.019],
+			[0.84, 1.40, Vector3(0.046, 0.024, 0.048), 0.017],
 		]:
-		b.blob(lump[0], lump[1], head_b, head_w, 6, 10, 2.15)
+		var a := _on_blob(HEAD_CENTER, HEAD_RADIUS, hair_shape, 2.25,
+			float(sweep[0]), float(sweep[1]) * PI)
+		_lump(b, a, HEAD_CENTER, sweep[2], float(sweep[3]), head_b, head_w, 5, 9, 2.15)
 
 	if outfit == Outfit.STREET:
-		# Beard: follows the jaw, squared off at the chin.
+		# Beard: follows the jaw, squared off at the chin, and pulled back at the
+		# front so the lips stay a skin island in it. It is a jaw shape, not a
+		# chin sphere — the old one was a sphere the size of the skull and it ate
+		# the whole face.
+		var beard_c := Vector3(0.0, 1.492, 0.026)
+		var beard_r := Vector3(0.150, 0.068, 0.170)
 		var beard_shape := func(t: float, _y: float) -> Dictionary:
 			var low := 1.0 - smoothstep(0.0, 0.5, t)
-			return {"sx": 1.0 - 0.18 * low, "sz": 1.0 - 0.10 * low,
-				"offset": Vector3(0.0, 0.0, 0.016 * low)}
-		# Flat and low: it follows the jaw and stops at the cheekbone. The old
-		# one was a sphere the size of the skull and it ate the whole face.
-		b.blob(Vector3(0.0, 1.492, 0.038), Vector3(0.150, 0.068, 0.166),
-			head_b, head_w, 8, 16, 2.6, beard_shape)
-		# Moustache, separate so the mouth line survives.
-		b.blob(Vector3(0.0, 1.542, 0.142), Vector3(0.050, 0.015, 0.048),
-			head_b, head_w, 5, 10, 2.4)
+			# Thin toward the top so the beard runs OUT at the cheek rather than
+			# ending on a hard line — a full-thickness mass ending on its own
+			# silhouette edge is a strap-on mask.
+			#
+			# But taper it FAST. The first version faded over 38% of the sweep,
+			# which meant the beard surface ran a hair's breadth outside the
+			# cheek for two centimetres before it finally went under, and that
+			# tangent band is what covered the midface in black speckle. Over
+			# 0.76-0.92 it crosses the skin steeply and is either clearly on top
+			# or clearly buried, with almost nothing in between.
+			var high := smoothstep(0.76, 0.92, t)
+			return {
+				"sx": (1.0 - 0.18 * low) * (1.0 - 0.34 * high),
+				"sz": (1.0 - 0.10 * low) * (1.0 - 0.30 * high),
+				"offset": Vector3(0.0, 0.0, 0.016 * low - 0.006 * high),
+			}
+		b.blob(beard_c, beard_r, head_b, head_w, 9, 16, 2.6, beard_shape)
+		# Break the jaw edge. Five unequal masses at five different heights: the
+		# edge of a beard is a shape, and an unbroken arc along the jaw is the
+		# first place a procedural head gives itself away. These read in PROFILE
+		# — the jaw edge is the silhouette down there.
+		for e: Array in [
+				[0.34, 0.34, Vector3(0.030, 0.026, 0.030)],
+				[0.46, 0.14, Vector3(0.026, 0.030, 0.026)],
+				[0.30, 0.72, Vector3(0.034, 0.024, 0.032)],
+				[0.52, 0.92, Vector3(0.024, 0.030, 0.024)],
+				[0.40, 0.50, Vector3(0.036, 0.022, 0.034)],
+			]:
+			var a := _on_blob(beard_c, beard_r, beard_shape, 2.6,
+				float(e[0]), float(e[1]) * PI)
+			_lump(b, a, beard_c, e[2], 0.017, head_b, head_w, 4, 8, 2.3)
+		# Sideburns. Without these the beard stops in mid-cheek with bare skin
+		# between it and the hair, which no beard does. Anchored a third of the
+		# way up the skull and standing 18 mm off it — a sideburn laid flat
+		# against the cheek is tangent to it down its whole length, and tangent
+		# is the one thing nothing on this head is allowed to be.
+		for side: float in [-1.0, 1.0]:
+			var a := _on_blob(HEAD_CENTER, HEAD_RADIUS, HEAD_SHAPE, 2.25, 0.415,
+				(0.15 if side > 0.0 else 0.85) * PI)
+			_lump(b, a, HEAD_CENTER, Vector3(0.026, 0.058, 0.040), 0.018,
+				head_b, head_w, 5, 8, 2.4)
+		# Moustache, separate so the mouth line survives. Its front face used to
+		# land at z 0.210 — the upper lip's front face exactly — and two coplanar
+		# surfaces at the middle of the face is the worst possible place to put
+		# one. 8 mm clear now, which also gets it a shadow onto the lip.
+		b.blob(Vector3(0.0, 1.5435, 0.182), Vector3(0.052, 0.017, 0.036),
+			head_b, head_w, 5, 11, 2.4)
 	else:
-		# Prison: heavier, unkempt.
-		b.blob(Vector3(0.0, 1.494, 0.034), Vector3(0.152, 0.080, 0.170),
-			head_b, head_w, 8, 16, 2.4)
+		# Prison: heavier, unkempt, and it comes further up the cheek.
+		var rough := func(t: float, _y: float) -> Dictionary:
+			var low := 1.0 - smoothstep(0.0, 0.5, t)
+			var high := smoothstep(0.80, 0.95, t)
+			return {
+				"sx": (1.0 - 0.14 * low) * (1.0 - 0.24 * high),
+				"sz": (1.0 - 0.08 * low) * (1.0 - 0.20 * high),
+				"offset": Vector3(0.0, 0.0, 0.014 * low - 0.004 * high),
+			}
+		var pc := Vector3(0.0, 1.494, 0.024)
+		var pr := Vector3(0.152, 0.080, 0.172)
+		b.blob(pc, pr, head_b, head_w, 9, 16, 2.4, rough)
+		for e: Array in [
+				[0.36, 0.26, Vector3(0.034, 0.032, 0.034)],
+				[0.44, 0.78, Vector3(0.030, 0.036, 0.030)],
+				[0.28, 0.50, Vector3(0.038, 0.028, 0.036)],
+			]:
+			var a := _on_blob(pc, pr, rough, 2.4, float(e[0]), float(e[1]) * PI)
+			_lump(b, a, pc, e[2], 0.018, head_b, head_w, 4, 8, 2.3)
 	return b
 
 
-## The dark surface: eyes, brows, and the aviators pushed up on the forehead.
+## The dark surface: the eyes and the brows.
 ##
-## He had no face at all before this. At the distance the gameplay camera uses
-## a face is two dark marks and a brow — but without them the head is a ball,
-## and in a close frame it is the first thing anyone looks for.
+## At the distance the gameplay camera uses a face is two dark marks and a brow —
+## but without them the head is a ball, and in a close frame it is the first thing
+## anyone looks for.
 static func _build_shades() -> MeshForge.Builder:
 	var b := MeshForge.Builder.new()
 	b.begin()
@@ -436,14 +758,23 @@ static func _build_shades() -> MeshForge.Builder:
 	var head_w := [1.0]
 
 	for side: float in [-1.0, 1.0]:
-		# Eye: a flattened almond set into the socket, not sitting on the face.
-		# Set INTO the socket: a sphere on the surface of the face reads as a
-		# bolt-on eye, which is worse than no eye at all.
-		b.blob(Vector3(side * 0.066, 1.612, 0.138),
-			Vector3(0.030, 0.017, 0.012), head_b, head_w, 5, 10, 2.8)
-		# Brow: heavy and close to the eye. It is the whole expression.
-		b.blob(Vector3(side * 0.070, 1.652, 0.140),
-			Vector3(0.043, 0.011, 0.015), head_b, head_w, 4, 10, 3.0)
+		# The eye. It has to sit BETWEEN the lids, not behind them. These were at
+		# z 0.138 against a face surface at z 0.185 — three centimetres inside the
+		# skull, invisible from every angle, and the head read as blank because it
+		# WAS blank.
+		#
+		# Small and tight, because the dark surface is very nearly black and a
+		# large patch of it in a shadowed socket is a hole, not an eye. What
+		# makes it an eye is the 12 mm aperture the two lids leave and the
+		# specular the material takes across the curve — so the bead is kept
+		# round in Z rather than flattened onto the face.
+		b.blob(Vector3(side * 0.067, 1.6085, 0.176),
+			Vector3(0.025, 0.0145, 0.021), head_b, head_w, 5, 10, 2.4)
+		# Brow hair riding the ridge. Heavy and close to the eye: it is the whole
+		# expression, and in PROFILE it is the only dark mark left on the face
+		# once the eye itself turns away.
+		b.blob(Vector3(side * 0.070, 1.6555, 0.178),
+			Vector3(0.048, 0.012, 0.029), head_b, head_w, 4, 10, 3.0)
 
 	# The aviators are gone. Front-on they stacked a third horizontal black bar
 	# above the brow and the hairline, and a face reading as three dark bands

@@ -13,6 +13,7 @@ const WIPE_SHADER := preload("res://shaders/frost_wipe.gdshader")
 const ICE_LEVELS := [
 	"res://levels/ice/IceBonus01.tscn",
 	"res://levels/ice/IceBonus02.tscn",
+	"res://levels/ice/IceBonus03.tscn",
 ]
 
 var _rect: ColorRect

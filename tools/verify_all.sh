@@ -21,6 +21,7 @@ SCENES=(
   res://levels/ajdabiya/Ajdabiya.tscn
   res://levels/ice/IceBonus01.tscn
   res://levels/ice/IceBonus02.tscn
+  res://levels/ice/IceBonus03.tscn
   res://levels/greybox/Greybox.tscn
   res://levels/lab/MaterialShowcase.tscn
   res://levels/lab/CharacterShowcase.tscn

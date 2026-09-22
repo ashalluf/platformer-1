@@ -1,277 +1,434 @@
-# LIBYAN GANGSTAS — WORLD 1 ART DIRECTION
+# LIBYAN GANGSTAS — ART DIRECTION (WORLD 1)
 
-**Status: CANON.** This document is not a mood board and not a menu. Every value in
-it is a decision. Build from it. If you disagree with something here, change the
-document first and say why — do not quietly build something else.
+**Status: CANON.** Every number in this document is a decision. Numbers marked
+**SHIPPED** are in the repo right now and you match them. Numbers marked **TARGET**
+belong to a level that does not exist yet and are the brief for whoever builds it.
+If you disagree with something here, change this document first and say why. Do not
+quietly build something else.
 
-Authority: supersedes any art guidance in `DESIGN.md` Part III. Defers to
-`DESIGN.md` Part IV (technical canon) on camera geometry and controller feel.
+Authority: supersedes any art guidance in `DESIGN.md` Part III. Defers to `DESIGN.md`
+Part IV (technical canon) on camera geometry and controller feel.
+
+**How to read it.** §1–§6 before you build anything. §7 if you touch the hero, §8 if
+you touch the UI. §9 when Godot fights you — most of it is a list of engine defaults
+that are wrong for this game. §10 is one banned word. §11 is the standard, and nothing
+is finished until it passes §11.
 
 ---
 
-## Visual pillars
+## 1. Pillars
 
-**One: this is the Mediterranean, not the Sahara.** World 1 is a coastal, salt-eaten,
-Italian-and-Soviet-inflected, sun-bleached pastel world — bone white, oatmeal, apricot,
-faded mint, chalky sky-blue — sitting on pale calcareous ground with red interior sand
-bleeding into it. The palette is *drained*, not *brown*. Anyone who reaches for dune
-ochre, camel silhouettes or a generic desert filter has misunderstood the game.
+**One: this is the Mediterranean, not the Sahara.** World 1 is coastal, salt-eaten,
+Italian-and-Soviet-inflected, sun-bleached pastel — bone white, oatmeal, apricot, faded
+mint, chalky sky-blue — on pale calcareous ground with red interior sand bleeding into
+it. The palette is *drained*, not *brown*. Anyone reaching for dune ochre, camel
+silhouettes or a generic desert filter has misunderstood the game.
 
-**Two: it is always the hour that flatters.** Midday does not exist in World 1 except
-as a deliberate hostility in Level 3. Every other level is lit at a raking angle —
-sunrise, golden hour, blue hour, sodium night — because low sun is what turns flat
-prefab concrete into architecture, and because a 15%-of-screen-height hero needs a rim.
+**Two: it is always the hour that flatters.** Midday exists in World 1 only as a
+deliberate hostility in Level 3. Every other level is lit at a raking angle — sunrise,
+mid-morning, golden hour, sodium night — because low sun is what turns flat prefab
+concrete into architecture, and because an 18%-of-screen-height hero needs a rim.
 
 **Three: density behind, silence in front.** Backgrounds are ferociously detailed and
-atmospherically compressed; the gameplay plane is comparatively sparse, higher-contrast,
-sharper, and lit by its own light rig. The player never has to hunt for the floor.
+atmospherically compressed. The gameplay plane is comparatively sparse, higher in
+contrast, sharper, and lit by its own rig. The player never hunts for the floor.
 
 **Four: surfaces carry history, not just age.** Weathering here is political and
-climatic archaeology — regime green under a Green Book slogan under a crossing-out
-under a 2011 tricolour, all sun-faded together; salt spalling that exposes rebar; sand
-drift that maps who still lives here. A wall states what happened to it.
+climatic archaeology — regime green under a slogan under a crossing-out under a 2011
+tricolour, all sun-faded together; salt spalling that exposes rebar; sand drift that
+maps who still lives here. A wall states what happened to it.
 
-**Five: Wanis is the only saturated thing in the frame.** The world is capped in chroma
-and the hero is not. That single rule does more for readability than every post-process
-in the engine combined, and it is enforced numerically in the palette section below.
-
----
-
-## Colour script
-
-World 1 is **one day**, running forward across five levels. That is the cohesion device:
-sunrise → mid-morning → hard afternoon → golden hour → night. Nothing else needs to tie
-the levels together, and nothing is allowed to violate it.
-
-The constant across all five: **ground is always in the pale calcareous family**
-(`#D6CEBC` → `#EFE6D2`) with red interior "Heix" sand (`#B5784A`) drifting into it, and
-**shadow is never neutral and never black** — `#6B5F55` warm ochre-violet by day,
-`#2A3A56` cool by night.
-
-Chroma law, enforced project-wide: **no world-surface albedo may exceed HSV S 0.55 /
-V 0.72 within hue 340°–25° (the red sector).** That band is reserved for Wanis's jacket
-and the Sriracha. Damage and danger are signalled with hazard yellow-black chevrons and
-a white hit-flash, never red.
+**Five: Wanis owns the top of the value range.** He wears a white thobe; the world is
+capped below it and spends its saturation on mid values. **Value contrast, not hue
+contrast, is the readability strategy.** This rule does more than every post-process in
+the engine combined, and §2 enforces it numerically.
 
 ---
 
-### Level 1 — BREGA PRISON BREAKOUT
-*05:52 → 06:40. Pre-dawn blue cracking into first direct sun. The transformation beat
-lands on the exact frame the sun clears the horizon.*
+## 2. Colour script
+
+World 1 is **one day**, running forward across five levels: sunrise → mid-morning →
+hard afternoon → golden hour → night. That is the cohesion device. Nothing else needs
+to tie the levels together and nothing may violate it.
+
+Two constants across all five:
+
+- **Ground stays in the pale calcareous family** (`#D6CEBC` → `#EFE6D2`) with red
+  interior "Heix" sand (`#B5784A`) drifting into it.
+- **Shadow is never neutral and never black** — warm ochre-violet `#6B5F55` by day,
+  cool navy `#2A3A56` by night.
+
+### The chroma law, and where it is enforced
+
+**No world-surface albedo may exceed HSV S 0.55 / V 0.72 inside hue 340°–25°** — the red
+sector. That band belongs to Wanis's shemagh and to the Sriracha. Outside the band the
+ceiling is S 0.58, because nothing out there competes with the hero and Libyan shutter
+paint genuinely is vivid. Damage and danger are signalled with hazard yellow-black
+chevrons and a white hit-flash, never red.
+
+**This is not an honour system.** `MaterialLab.world_tint()` clamps it, and every world
+preset runs its tint through it, because a level author in a hurry types a punchy red for
+a shutter once and never thinks about it again. The band edge is feathered over 10°
+rather than being a hard sector test: iron oxide lands at hue ~23°, one degree inside,
+and a hard edge there would either wash every rust run in Brega into mud or leave a
+crimson wall legal at 26°.
+
+Four exemptions exist in code and no others may be invented:
+
+1. **`cloth()` and `skin()`** — they build Wanis's costume and the Sriracha's cap and
+   band, which are precisely what the band is reserved for.
+2. **`emissive()` and `ice()`** — light and fantasy, not albedo. The law is about what a
+   surface reflects.
+
+World fabric does **not** use `cloth()`. Awnings, sacks and tarpaulins use `canvas()` and
+`sacking()`, which are clamped like everything else. One live loophole to know about: a
+`MultiMesh` that drives colour through `vertex_color_use_as_albedo` — the market stall
+awning does — passes no tint through the clamp at all, so those colours are governed by
+the law **by hand**. Author them inside the cap. A market awning is allowed to be the
+most colourful thing in the street; it is never allowed to out-value the thobe, and it
+only appears where the stall itself is in shade.
+
+### Level 1 — BREGA PRISON BREAKOUT — SHIPPED
+
+*05:52. Pre-dawn blue cracking into first direct sun. The transformation beat lands on
+the frame the sun clears the horizon.*
+
+Built in `levels/brega/BregaKit.gd` (`mood()`, `palette()`) and matched exactly by
+`BregaBeauty` and by `levels/menu/TitleScreen.gd`. If you change one, change all three.
 
 | | |
 |---|---|
-| **Sun altitude** | 2° at spawn → 11° at level end |
-| **Sun azimuth** | 101° ESE — screen-right and 22° behind the camera plane. He is back-lit and rim-lit for the whole level. |
-| **Colour temp** | 1950 K `#FF8A2E` at spawn → 2850 K `#FFA657` at the transformation |
-| **Key** | `DirectionalLight3D`, energy 0.35 → 1.45 ramped over the level, `light_angular_distance` 1.1, `shadow_opacity` 0.82 |
-| **Fill** | Sabkha/sky bounce. Second directional from below-front, energy 0.30, `#A7B6C8` pre-dawn → `#CBBBA2` after sunrise. No shadows. |
-| **Rim** | Character cull-mask only, from behind-right, energy 2.6, `#FFB877` |
-| **Fog** | Depth fog `#3A4152` pre-dawn → `#C9B394` post-sunrise. `fog_depth_begin` 22, `fog_depth_end` 380, `fog_depth_curve` 1.4, `fog_aerial_perspective` 1.0. Volumetric density 0.016, anisotropy 0.78. |
-| **Level-unique colour** | **REGIME GREEN `#2E7A3F`**, faded to `#5E8A5C` on sun faces. The crossed-out Green Book wall. It appears in this level and in no other level of World 1. |
+| **Key** | `sun_angles = (-3.5, 150.0)` — 3.5° altitude, behind and screen-right. `sun_color` 2200 K `#FF9040`, `sun_energy` 3.1, `angular_distance` 1.1, `sun_disc_size` 0.34 |
+| **Key into fog** | 3.0 in the benchmark frame, **1.3 in the playable level** — in gameplay the camera spends its life looking along the key, and 3.0 puts a hot white wash across the bottom right of every frame |
+| **Fill** | `(18.0, -28.0)`, `#798BB8` cool sabkha/sky bounce, energy 0.54. Weak on purpose: the playing field is behind the key and must stay in shade |
+| **Rim** | `(-4.0, 128.0)`, `#FFB877`, energy 8.0, `rim_cull_mask = 2` (hero layer only) |
+| **Hero fill** | `(-14.0, -30.0)`, energy **1.45** in level / 2.5 in the benchmark, `#D1D4E6`. 2.5 of a cold light on a white robe in gameplay turns him blue |
+| **Sky** | top `#2B3A55`, horizon `#C97B45`, ground horizon `#D5CDBD`, `sky_curve` 0.11, `ambient_energy` 0.29 |
+| **Fog** | colour `#D5CDBD`, `fog_density` 0.00052, `sun_scatter` **0.15** (0.35 blooms the whole right of frame to paper), emission `#0F0B09`, `anisotropy` 0.78, volumetric 0.00040 (level) / 0.00068 (benchmark) |
+| **Grade** | AgX, exposure 1.08, `glow_intensity` 0.12, `glow_hdr_threshold` 2.2, saturation 1.14, contrast 1.06 |
+| **Level-unique colour** | **REGIME GREEN `#2E7A3F`**, faded to `#5E8A5C` on sun faces. This level and no other in World 1. |
 
-Supporting palette: prison slab beige `#D8CEB6`, perimeter wall grey `#B4AEA2`, tank-shell
-chalked cream `#E4E0D4`, fresh rust `#C1652A`, aged rust `#5E3220`, sabkha crust `#E8E2D2`,
-wet sabkha `#5C5040`, dead eucalyptus `#7D8B6A`, prison uniform `#8E96A0`.
+Supporting palette (as `BregaKit.palette()` names them): slab, joint, dark, wall, deck,
+rail, rebar, rust, tank, tank_burnt, bund, tower, steel, sabkha, mud, sand, trunk, leaf,
+door, green, shutter, bag, crate, corrugated. Salt spalling on slab/wall/deck climbs
+from `YARD_Y = -6.6`, not from the gameplay plane — the grime datum is the yard floor.
 
----
+### Level 2 — AJDABIYA CROSSROADS — SHIPPED
 
-### Level 2 — AJDABIYA
-*09:10 → 10:30. Clear mid-morning for the first half. The ghibli arrives at the midpoint
-and the second half is played inside it.*
+*Mid-morning, clear, high and hard. Two hours later and forty kilometres east.*
 
-| | |
-|---|---|
-| **Sun altitude** | 34°, then progressively obscured |
-| **Sun azimuth** | 118° ESE-SE, high screen-right |
-| **Colour temp** | **Clear:** 4900 K `#FFDABB`. **Ghibli:** 2500 K `#FF9B44`, sun reduced to a disc you can look at |
-| **Key** | Clear: energy 1.35, `angular_distance` 0.8. Ghibli: energy 0.42, `angular_distance` 6.0 (the disc smears into a glow) |
-| **Fill** | Clear: directional 0.42, `#8FA8C4`. Ghibli: fill goes omnidirectional — ambient energy 0.75 → 1.60, ambient colour `#B5713F`. The world becomes sourceless. |
-| **Rim** | Clear: 2.2 `#FFD2A0`. Ghibli: 1.1 `#E08B4A` — dropped in energy but shifted warm-bright so Wanis still reads against the brown. This is the one place the rim is allowed to be non-physical. |
-| **Fog** | Clear: `#D9C3A4`, depth density 0.012, `depth_end` 380. Ghibli: `#B5713F`, depth density 0.075, `depth_end` 70, volumetric 0.055. Horizon disappears entirely. |
-| **Level-unique colour** | **SABKHA TERRA ROSSA `#9C4E33`** — the red mud under the cracked salt crust, and red Heix sand tongues lying across the asphalt. The only earth-red in the game. |
-
-Supporting palette: dust plain `#D8C5A0`, render `#E6DCC6`, concrete block `#C2B49C`,
-shadowed concrete `#8E9A8C`, salt bloom `#F4F1E8`, gate sage `#5E8A5C` (the western gate
-is deliberately faded so it never competes with the terra rossa), painted shutters `#3E5A6B`.
-
----
-
-### Level 3 — HIGHWAY TO BENGHAZI
-*13:40 → 15:20. The hardest, flattest light in the game, on purpose. This is the vehicle
-level; the read is horizontal velocity, not surface modelling.*
+Built in `levels/ajdabiya/AjdabiyaKit.gd`. **Ajdabiya is the counterweight to Brega.**
+Brega is a dead plant at first light: key behind the geometry, cold shadow, no people,
+almost no colour. Ajdabiya is a town — the sun is up and *in front*, the street is lit,
+shadows are short and hard blue, and colour is everywhere because people put it there.
 
 | | |
 |---|---|
-| **Sun altitude** | 61° |
-| **Sun azimuth** | 205° SSW, slightly behind-left. Short shadows rake forward-right and slide under the car. |
-| **Colour temp** | 5500 K `#FFE2C8` |
-| **Key** | energy 1.60, `angular_distance` 0.9, `shadow_opacity` 0.90, `directional_shadow_max_distance` 70 (long, for the road) |
-| **Fill** | Sky ambient 1.0 plus an asphalt bounce directional from below, energy 0.22, `#8E8880`. Bounce from below is what stops the car reading as a sticker. |
-| **Rim** | energy 3.2, `#9FC4E8` — the strongest and coolest rim in World 1, because at speed the hero and vehicle are the only things the eye can lock onto. |
-| **Fog** | `#DCCBAE`, depth density 0.009, `depth_begin` 30, `depth_end` 520 — long, so the road has a real vanishing point. Volumetric 0.006, anisotropy 0.55. |
-| **Signature atmospheric** | Heat haze. `strength` 0.016 at the road surface, falling linearly to 0 at y = 0.45 of frame height. Never above that line. |
-| **Level-unique colour** | **OLEANDER PINK `#E58FA6`** on the central reservation — the one living, saturated thing on a dead road, repeating at a spacing that itself reads as speed. Leaf `#3E5F3C`. |
+| **Key** | `(-47.0, 38.0)` — front-three-quarter over the player's shoulder. `#FFEDD0` ≈ 4800 K, energy 4.2, `angular_distance` 0.6, `disc_size` 0.30, into fog 0.9 |
+| **Fill** | `(-26.0, -168.0)`, `#5C80C7` hard blue sky bounce, energy 0.80 — at this hour the sky *is* the whole shadow |
+| **Rim** | `(-14.0, 196.0)`, `#FFE0B8`, energy 2.6, hero layer only |
+| **Hero fill** | `(-18.0, -36.0)`, `#DBE0F0`, energy 1.1 |
+| **Sky** | top `#2F548F`, horizon `#A3B3C2`, `sky_curve` 0.22, `ambient_energy` 0.42 |
+| **Fog** | `#B3B7B8`, density 0.00055, `sun_scatter` 0.10, `anisotropy` 0.55, volumetric 0.00035 |
+| **Grade** | AgX, exposure 1.0, glow 0.10 @ threshold 2.4, saturation 1.10, contrast 1.12 |
+| **Level-unique colour** | The awning stripe set: madder `#B83D2E`, petrol `#2E5C75`, sage `#3D6642`, each against cream `#D6C7B2`. Saturation lives in painted metal and cloth, never in render. |
 
-Supporting palette: asphalt `#4A4741` bleached to `#6E6A62`, faded lane paint `#CFC9B8`,
-sand drift `#DDCBA6`, tamarisk `#8A9683`, rusted guardrail `#8A5A3C`, highway sign green
-`#1F6B3A`, Hilux white `#F2F2EE`.
+**TARGET, not built:** the ghibli. The brief has the dust storm arriving at the
+midpoint and the second half played inside it — key dropping to energy 0.42 with
+`angular_distance` 6.0, fill going omnidirectional, fog to `#B5713F` at 15× density,
+horizon gone. Also unbuilt: **sabkha terra rossa `#9C4E33`**, the red mud under the
+cracked salt crust. When either lands, move these lines up into the shipped table.
 
----
+### Level 3 — HIGHWAY TO BENGHAZI — TARGET
 
-### Level 4 — GARYOUNIS UNIVERSITY
-*17:35 → 18:20. Golden hour raking lengthwise through the two-storey viaducts. This is
-the prettiest level in World 1 and it is allowed to know it.*
+*13:40. The hardest, flattest light in the game, on purpose. The read is horizontal
+velocity, not surface modelling.*
 
-| | |
-|---|---|
-| **Sun altitude** | 9° → 4° |
-| **Sun azimuth** | 268° W — almost dead down the camera-left axis, so light runs *along* the concrete canyons rather than across them |
-| **Colour temp** | 3050 K `#FFB068` → 2400 K `#FF9942` |
-| **Key** | energy 1.50, `angular_distance` 1.4 (large, soft, low sun), `shadow_opacity` 0.78 |
-| **Fill** | Deep viaduct shade is lit by sky alone. Ambient `#6E86A8` at 0.85 — the coolest fill in the game. Maximum warm-key / cool-shade split; this is the level that proves the lighting model. |
-| **Rim** | energy 2.4, `#FFC98A` |
-| **Fog** | `#E2B98A`, volumetric density 0.028, anisotropy **0.86**. This is the sun shaft level: shafts through every gap between blocks, every viaduct arch, every brise-soleil fin. `use_filter = 0` here for hard shaft edges. |
-| **Level-unique colour** | **THE GOLD DOME `#C9A227`** on the central administration block, plus its bounce — the only warm-metal ambient term anywhere in World 1. It is visible from most of the level and it is the level's landmark. |
+Sun altitude 61°, azimuth 205° SSW slightly behind-left; 5500 K `#FFE2C8`; key energy
+1.60, `angular_distance` 0.9, `shadow_opacity` 0.90, shadow max distance 70 (long, for
+the road). Fill: sky ambient plus an **asphalt bounce from below**, energy 0.22
+`#8E8880` — bounce from below is what stops the car reading as a sticker. Rim energy
+3.2 `#9FC4E8`, the strongest and coolest in World 1, because at speed the hero and the
+vehicle are the only things the eye can lock onto. Fog `#DCCBAE`, long, so the road has
+a real vanishing point. Heat haze `strength` 0.016 at the road surface falling to zero
+at y = 0.45 of frame height, never above that line.
 
-Supporting palette: board-marked raw concrete `#A8A296` warm / `#8C8C88` shade, bush-hammered
-`#B5AFA2`, shattered glazing `#9FB3B8`, sandbag hessian `#9E8D6B`, ficus canopy `#2C4A2E`,
-Washingtonia frond `#6B8E4E`.
+Level-unique colour: **OLEANDER PINK `#E58FA6`** on the central reservation, the one
+living saturated thing on a dead road, repeating at a spacing that itself reads as speed.
 
----
+### Level 4 — GARYOUNIS UNIVERSITY — TARGET
 
-### Level 5 — BENGHAZI
-*19:05 dusk → 21:00 night. Corniche at blue hour, the old city after dark, the boss under
-floodlight and a high moon.*
+*17:35. Golden hour raking lengthwise through two-storey viaducts. The prettiest level
+in World 1 and it is allowed to know it.*
 
-| | |
-|---|---|
-| **Sun altitude** | −4°. A horizon-glow driver only: energy 0.12, `#FF6A3A`, no shadows. It exists to paint the sky and the sea, not the world. |
-| **Key (real)** | **Moon.** `DirectionalLight3D`, altitude 52°, azimuth 84°, 8200 K `#C8D8FF`, energy 0.55, `angular_distance` 0.6 (sharp — moon shadows are crisp) |
-| **Practicals ARE the level** | Sodium vapour 1900 K `#FFA13B`, OmniLight energy 3.5 range 9.0 — these make hard visible cones through the fog. Shopfront fluorescents 5200 K `#DFF0E8`. Headlights `#FFF0D8`. Wedding-convoy hazards `#FFB020`, flashing. Café glass-front display counters `#EAF6EE`. |
-| **Fill** | Ambient `#2A3A56` at 0.55. Never lift it to make things visible — add a practical instead. |
-| **Rim** | Cool moon rim 2.0 `#8FB8E8`, plus opportunistic warm sodium rim from whichever practical Wanis is passing. The rim hue changes as he walks. That is the level's best trick. |
-| **Fog** | `#1F2C44`, volumetric density 0.035, emission `#0C1220` (so shadowed fog never crushes to black), anisotropy 0.70 |
-| **Level-unique colour** | **COPPER PATINA `#5FA391`** — the cathedral's four domes and the still water of 23rd July Lake. The only teal in World 1. The boss arena is lit specifically to make it sing. |
+Sun altitude 9° → 4°, azimuth 268° W — almost dead down the camera-left axis, so light
+runs *along* the concrete canyons instead of across them. 3050 K → 2400 K. Key energy
+1.50, `angular_distance` 1.4. Fill: deep viaduct shade lit by sky alone, ambient
+`#6E86A8` at 0.85 — the coolest fill in the game, and the maximum warm-key/cool-shade
+split. Fog `#E2B98A`, volumetric density 0.028, **anisotropy 0.86**. This is the sun
+shaft level: shafts through every gap, arch and brise-soleil fin, with
+`use_filter = 0` for hard shaft edges.
 
-Supporting palette: calcarenite `#E3D9C2`, flaking plaster `#E8C9A0` / `#D9A9A0` / `#BFCBBF`,
-cathedral plaster `#F0EBE0`, lagoon `#4E7A70`, Mediterranean `#2E6F93`, arcade shadow `#1B2536`,
-wet corniche stone `#6E7A80`.
+Level-unique colour: **THE GOLD DOME `#C9A227`** on the administration block plus its
+bounce — the only warm-metal ambient term in World 1, and the level's landmark.
 
----
+### Level 5 — BENGHAZI — TARGET
+
+*19:05 dusk → 21:00 night. Corniche at blue hour, the old city after dark, the boss
+under floodlight and a high moon.*
+
+The sun is a horizon-glow driver only: altitude −4°, energy 0.12 `#FF6A3A`, no shadows.
+It paints the sky and the sea, not the world. **The real key is the moon** — altitude
+52°, 8200 K `#C8D8FF`, energy 0.55, `angular_distance` 0.6 (moon shadows are crisp).
+
+**The practicals are the level.** Sodium vapour 1900 K `#FFA13B` at omni energy 3.5,
+range 9.0, cutting hard cones through the fog; shopfront fluorescents 5200 K `#DFF0E8`;
+headlights `#FFF0D8`; wedding-convoy hazards `#FFB020`, flashing. Ambient `#2A3A56` at
+0.55 — **never lift it to make something visible; add a practical instead.** The rim is
+a cool moon 2.0 `#8FB8E8` plus opportunistic warm sodium from whichever practical he is
+passing, so the rim hue changes as he walks. That is the level's best trick.
+
+Level-unique colour: **COPPER PATINA `#5FA391`** — the cathedral domes and the still
+water of the lake. The only teal in World 1, and the boss arena is lit to make it sing.
 
 ### How the five read as one game
 
-- Ground family never changes; only the light on it does.
-- Shadow is warm ochre-violet by day and cool navy by night, and is never neutral grey.
-- Every level has exactly one unique hue and they occupy five different hue families:
-  green (L1), earth-red (L2), pink (L3), gold (L4), teal (L5). No two compete.
-- Aerial perspective is always **warm** — distance goes pale straw-grey, never cool blue.
-  This is a Saharan dust load, not temperate haze, and it is the single most
-  location-specific lighting fact in the game.
-- The horizon sky band is `#D5CDBD` bleached straw in every daytime level and only goes
-  blue `#4A7FA8` at high zenith angles.
+- The ground family never changes; only the light on it does.
+- Shadow is warm ochre-violet by day and cool navy by night, never neutral grey.
+- Each level owns exactly one unique hue, and the five occupy five hue families: green,
+  awning-madder/terra rossa, pink, gold, teal. No two compete.
+- **Aerial perspective is always warm** — distance goes pale straw-grey, never cool
+  blue. Saharan dust load, not temperate haze. This is the single most location-specific
+  lighting fact in the game.
+- The horizon sky band is bleached straw `#D5CDBD` in every daytime level and only goes
+  blue at high zenith angles.
 
 ---
 
-## Shape language & material rules
+## 3. Shape language
 
-### Shape language
+**World 1 runs from the orthogonal to the arched.** Level 1 is right angles: prefab
+panels, pipe racks, bund walls, everything the same age. Level 3 is the pivot — pure
+horizontals, a dead-straight dual carriageway. Level 5 is arcs: Italian arcades, barrel
+vaults, oriels, four copper domes. Levels 2 and 4 interpolate. A player who cannot
+articulate it will still feel the geometry opening up as World 1 progresses.
 
-**World 1 runs from the orthogonal to the arched.** Level 1 is a world of right angles:
-prefab concrete panels, pipe racks, bund walls, a Doxiadis grid, everything the same age.
-Level 3 is the pivot — pure horizontals, a dead-straight dual carriageway with a median
-line. Level 5 is a world of arcs: Italian arcades, barrel vaults, oriels, four copper
-domes. Levels 2 and 4 interpolate. A player who cannot articulate it will still feel the
-level geometry opening up as World 1 progresses.
+### Three silhouette registers
 
-Three silhouette registers, and every object belongs to exactly one:
+Every object belongs to exactly one.
 
 - **SLAB** — flat-topped, hard-edged, repeated at a fixed module. Prefab panels, bund
   walls, Jersey barriers, boundary walls, catwalk decks. This is the gameplay plane's
-  native language: **if it is standable, it is a slab.** Non-negotiable readability rule.
-- **STACK** — vertical cylinders and shafts. Prilling towers, flare stacks, storage tanks,
-  minarets, Horton spheres, palms, lamp posts. Background rhythm and landmarks.
-- **DRAPE** — anything that hangs, sags, catches wind. Cable catenaries, laundry lines,
-  torn shade cloth, snagged plastic bags, frond skirts, the jard tail. **Every screen
+  native language: **if it is standable, it is a slab.** Non-negotiable.
+- **STACK** — vertical cylinders and shafts. Prilling towers, flare stacks, storage
+  tanks, minarets, Horton spheres, palms, lamp posts. Background rhythm and landmarks.
+- **DRAPE** — anything that hangs, sags or catches wind. Cable catenaries, laundry
+  lines, torn shade cloth, snagged bags, frond skirts, the shemagh tail. **Every screen
   must contain at least one DRAPE element in motion.** This is the anti-deadness rule.
 
-Forbidden geometry: nothing standable may be round-topped, bevelled more than 2 cm, or
-sloped between 12° and 38° (the "am I supposed to stand on this" band). Decorative
-geometry has no such restriction and should break the grid constantly.
+### The chamfer law
 
-### Material rules
+**There is no `BoxMesh` in this project.** A box with perfect ninety-degree edges is
+the loudest blockout signal there is. Real edges are cast, chipped, rendered over, or
+simply small enough that light wraps them — and that wrap *is* the edge highlight.
+Without it a wall has no edge, only a place where two flat values meet.
 
-All values are `StandardMaterial3D` / spatial-shader targets. `metallic_specular` is
-**0.30** on every dielectric in the game (the 0.5 default is the plasticky-sheen tell).
-**Constant roughness is banned.** Every material carries a low-frequency roughness noise
-spanning at least 0.18 in range. Every material carries a detail normal.
+`LevelKit.chamfer_mesh()` is the only box in the game. The bevel scales with the object
+(`bevel_for()`: 7% of the smallest dimension, clamped 14–85 mm), meshes are cached by
+size so a thousand identical blocks share one, and **collision stays a plain
+`BoxShape3D`** — the chamfer is centimetres and must never change where anything stands.
+Faces are flat-shaded on purpose: a chamfer smooth-shaded into its faces stops being an
+edge highlight and becomes a gradient.
 
-| Surface | Albedo | Roughness | Metallic | Rules |
-|---|---|---|---|---|
-| **Concrete (raw / board-marked)** | `#A8A296` – `#C4BDAE` | 0.68 – 0.88 | 0.0 | World-triplanar, sharpness 5.0, 4 m repeat. Panel joints are *modelled*, 12 mm deep, not textured. Board marking runs one axis only, never both. Slab-edge spalling exposes 2–3 rebars with a rust halo bleeding down. |
-| **Plaster / render (painted)** | pastels, §Colour script | 0.55 – 0.78 | 0.0 | Block coursing ghosts through where render is thin. Chalking lifts value +12% and drops saturation −30% on south and west faces only. Bottom 60–90 cm is a darker plinth band or bare cement. |
-| **Rust** | fresh `#C1652A` / mid `#8C4A2A` / aged `#5E3220` | 0.72 – 0.92 | 0.35 – 0.6 | Never a uniform tint. Always three values in one patch, always with a **bleed streak running downward** from the source. Heavy section exfoliates in laminated flakes with a 3–5 mm relief. Galvanised goes white-powdery first, then patchy orange. |
-| **Sand** | continental `#B5784A` / beach `#EDE6D4` | 0.90 – 0.98 | 0.0 | Two sands, and they *meet*: drift lines where they mix are pink-buff. Sand never lies evenly — leeward piles, doorway fills, buried bottom pipe, wind-carved ripple fields. Vertex-colour mask drives a sand-over-surface blend on every static mesh. |
-| **Palm / foliage** | frond `#6B8E4E`, dead eucalyptus `#7D8B6A`, halophyte `#8FA08C` | 0.62 – 0.80 | 0.0 | `DIFFUSE_LAMBERT_WRAP`. `ALPHA_ANTIALIASING_ALPHA_TO_COVERAGE`. `backlight = Color(0.22, 0.26, 0.12)`. Planted species (palm, ficus, casuarina) mark human intervention and only appear in rows or avenues. Wild growth is separated low mounds with bare ground between every plant, never continuous cover. |
-| **Glass** | — | 0.06 clean / 0.34 salt-pitted | 0.0 | Mostly *absent*: blown out, boarded, or frosted opaque by sandblasting. Where intact, it is the only place SSR is enabled. Sandblasted glass is a diffuse `#C6CEC8` at roughness 0.6, not transparent. |
-| **Cloth** | jard `#EAE0CC`, hessian `#9E8D6B`, shade tarp `#C8BCA0` | 0.78 – 0.92 | 0.0 | `backlight_enabled = true`, `backlight = Color(0.25, 0.22, 0.16)`. Sun-perished cloth frays at load points and fades top-down. Every cloth in the world has wind on it. |
-| **Water** | shallow `#4FC3C0`, deep `#1B4F72`, lagoon `#4E7A70` | 0.02 – 0.14 | 0.0 | Gulf of Sidra is *clear and pale over white sand*, then falls off a shelf to lapis. Hard turquoise-to-indigo transition line, not a gradient. Lagoon water is still, brackish, mirror-flat, green. Oil-stained water near the terminal gets an iridescent thin-film term and black waterline staining on concrete. |
-| **Chrome / bright metal** | `#D8DCE0` | 0.10 – 0.28 | 1.0 | Almost never clean. Aluminium pipe jacketing is dented, peeling at the bands, showing dirty yellow mineral wool where torn. Chrome exists for exactly three things: the gold chain, the steel tea *alla* set, and car trim. It is a reward, not a texture. |
+`surface_weathered` detects that chamfer and puts the edge wear on it (§4).
 
-### Weathering law
+### Forbidden geometry
 
-Four rules. They apply to every asset in the game and reviewers should reject assets
-that break them.
+Nothing standable may be round-topped, bevelled past the chamfer law, or sloped between
+12° and 38° — the "am I supposed to stand on this" band. Decorative geometry has no such
+restriction and should break the grid constantly.
+
+### Three rules for detail, from `DetailKit`
+
+**IT IS READ IN PROFILE.** The camera is side-on; an object's silhouette in X and Y is
+all the player ever gets. Anything whose character lives in plan — a flange bolt ring,
+a hand-wheel, a ladder cage hoop — is tilted, stood off the wall, or oversized until it
+reads as a shape rather than a line.
+
+**70 mm IS THE FLOOR.** At 10–40 world units a member thinner than about 70 mm falls
+between pixels and the object goes bald. Build every tube, rail, rung and bar two to
+three times heavier than the real component. Where that is a big lie, say so in a
+comment. The walkway handrail was balusters at 900 mm pitch and read as a smear of
+sticks; it is now stanchions at 1.85 m with knee braces, a top rail, a mid rail and a
+toe plate — two long horizontals and a few uprights, which is a silhouette you can read.
+
+**NOTHING ENDS IN MID-AIR.** A pipe stops at a flange, a blank or a valve. A rail stops
+at a return or a post. A conduit stops in a box. An unterminated run is the second
+loudest greybox tell after the sharp edge.
+
+### Detail on a shaded surface must be silhouette
+
+In a backlit level nothing on a wall reads by its own value, so every piece of detail
+has to stand off the face and break the outline: downpipes with shoes and brackets,
+conduit into junction boxes, split-unit condensers, aerials, dishes, header tanks,
+sagging cables. `PropKit.wall_services` and `PropKit.roof_clutter` exist for exactly
+this. Anything under about 70 mm at gameplay distance disappears — see above.
+
+### Massing before texture
+
+A wall is never a single plane. It has a plinth, a string course at every floor line, a
+cornice before the parapet, and at least one bay stepping forward off the rest
+(`PropKit.building_massing`). Each is a few centimetres of geometry and each buys a hard
+shadow line across the whole facade, which at gameplay distance is worth more than any
+amount of surface detail. The stairhead on a roof is the one person-sized object up
+there, and it is what gives the rest of the roofline its scale.
+
+---
+
+## 4. Material rules
+
+Every environment surface in the game comes from `MaterialLab` and runs one shader,
+`shaders/surface_weathered.gdshader`. A wall in Brega and a wall in Benghazi are the same
+material family with different inputs. **Nothing ships as a texture file** — noise comes
+from `NoiseBank` at load.
+
+### The laws
+
+**Constant roughness is banned.** The shader varies roughness from a detail lookup with
+`roughness_contrast` applied first (raw fbm lives near 0.5 and never reaches the declared
+min/max), then drifts it with a second decorrelated noise so gloss varies in patches, not
+only in grains. Nothing else on the pitfall list matters if this one is broken.
+
+**`metallic_specular = 0.30` on every dielectric** — `MaterialLab.DIELECTRIC_SPECULAR`.
+The 0.5 default is the plasticky-sheen tell.
+
+**Metallic is a switch, not a dial.** There is no physical state between a conductor and
+a dielectric, so do not lerp one. Iron oxide is a dielectric and bare steel is a
+conductor: heavy rust is `metallic 0.0` and reads matte and chalky, and the old
+half-metallic version read like painted plastic. Paint is a dielectric film — the player
+sees the binder, never the steel under it — so painted metal is `metallic 0.0` too. The
+0.15 that used to be there was a fudge for "it should look a bit metal" and it bought a
+grey sheen over every colour in the level.
+
+**Weathering is generated, not authored.** `PropKit.gradient_decal` builds a 64 px
+falloff image in three modes — *streak* (strong at the top, running down, soft off both
+sides), *band* (strong at the bottom, fading up), *radial* (a soft blob). A
+one-dimensional gradient cannot fade on two axes, and a dirt run that does not fade
+sideways reads as a grey rectangle stuck to the wall.
+
+**A polished metal in a dark room renders black,** because a mirror with nothing to
+reflect is black. Either give the room an environment the metal can reflect, or brush it:
+roughness ~0.30–0.38 and a real diffuse underneath, so the key spreads into a sheen.
+`brushed_aluminium()` exists for this. Mirror chrome is a reward, not a texture — it is
+for the gold chain, the steel tea set, and car trim.
+
+### The tone dial
+
+Every world preset takes `tone` as its last parameter, running −1 to +1. It is the level
+author's one dial for making a surface darker, lighter or dirtier without inventing a
+colour by hand, and hand-picked albedos are how five levels drift apart.
+
+- **+1** — full sun-bleach: south and west faces, chalked render, salt-burnt paint.
+  Value up, saturation down hard, per the aspect rule. Dust rises with it.
+- **0** — the preset as authored.
+- **−1** — deep shade, soot, damp, the underside of a canopy. Grime rises with it.
+
+Negative tone does **not** multiply toward grey. A neutral-multiplied shadow is the
+single most common tell of a hobby scene, so the dark end drops blue fastest and then
+leans into a warm soot. Preset signatures are append-only and the first parameter is
+always the tint, because a few hundred call sites pass positionally.
+
+### The preset library
+
+All of these run one shader, `shaders/surface_weathered.gdshader`, unless the row says
+`StandardMaterial3D`. **Nothing ships as a texture file** — noise comes from `NoiseBank`
+at load. The shader's own uniforms ship tuned, so `MaterialLab.surface()` sets only what
+a preset has an opinion about; everything else inherits the shader's look.
+
+| Group | Presets | Notes |
+|---|---|---|
+| **Structure** | `concrete`, `plaster`, `limewash`, `salt_masonry`, `wet_concrete` | Panel joints are *modelled*, 12 mm deep, never textured. Limewash is thin enough that block coursing ghosts through and it crazes wherever the block moves. `salt_masonry` is the bottom two metres of everything within 100 m of the Gulf, and it is the material that makes Brega read as coastal. `wet_concrete` both darkens albedo and collapses roughness on up-faces — darkening alone reads as dirt, not water. |
+| **Metal** | `rusted_metal`, `painted_metal`, `galvanised`, `corrugated`, `brushed_aluminium`, `chrome`, `gold` | Rust is never a uniform tint: three values in one patch, always with a bleed streak running down from the source. Knocked edges on rusted stock go back to bright steel before they go back to rust. Galvanising goes white-powdery carbonate within two summers, which is every roof tank in Libya. Corrugated ridges come from an analytic normal, so a wall of it costs two triangles. |
+| **Ground** | `sand`, `asphalt`, `packed_earth` | Sand's variation is derived from its tint, never fixed — a fixed bright variation gives a dark sand bright patches, which is what kept the yard floor the lightest thing in every frame. Two sands, and they *meet*: pink-buff drift lines where red Heix runs into bone-white calcareous. |
+| **Civic surfaces** | `painted_wood`, `ceramic_tile`, `terracotta`, `bitumen` | Paint on timber crazes along the grain long before it fades, and rubbed edges go back to silvered wood. Tile is almost entirely a specular read: glossy faces against matte grout with a bevel catching the sun along every course. Bitumen never stops being black, which makes it the darkest value available for composition. |
+| **Fabric** (`StandardMaterial3D`) | `canvas`, `sacking`, `cloth` | `canvas` is backlit on purpose: thin enough that the sun comes through, so it throws a coloured pool onto the wall behind it — the cheapest beautiful thing you can put in a Libyan street. `backlight = (0.25, 0.22, 0.16)`, warm and darker than the albedo, because light through one layer of cotton has lost its blue. **`cloth` is the hero exemption and is not chroma-clamped; world fabric uses `canvas` and `sacking`.** |
+| **Vehicles** (`StandardMaterial3D`) | `auto_paint` | Two specular lobes — a tight bright one from the lacquer and a broad soft one from the basecoat. A car reads as a car because of its clearcoat. Metallic stays 0.0 at both ends of `flake`. |
+| **Glass** | `glass`, `dusty_glass` | Mostly *absent*: blown out, boarded, or sandblasted opaque. Where intact it is the only place SSR is enabled. |
+| **Characters** (`StandardMaterial3D`) | `skin` | SSS on, strength 0.28, skin mode on. Not chroma-clamped. |
+| **Special** | `ice`, `emissive` | `shaders/ice.gdshader`: deep core brightening to the silhouette by Fresnel, frost rind on up-faces broken by noise, hard glints on a hashed lattice offset by the view vector so they wink as the camera moves. Neither is clamped — they are light, not albedo. |
+| **Foliage** | `PropKit.foliage_material` | Wind by world position, anchored by height above each plant's base, so trunks stay planted while canopies travel. Alpha-to-coverage — MSAA does not antialias alpha scissor. Planted species appear in rows and avenues only; wild growth is separated low mounds with bare ground between every plant, never continuous cover. |
+
+### The weathering law, and where the shader implements it
+
+Four rules. They apply to every asset. Reject assets that break them.
 
 1. **Gravity.** Every stain runs down. Every scupper, AC unit, bolt, bracket, nozzle and
-   crack produces a hard-edged vertical streak below it, and the streak is longer than
-   you think. A wall without downward streaks is unfinished.
-2. **Aspect.** South and west faces are bleached and chalked. North faces, porch
-   undersides, window reveals and anything under a canopy retain saturation. That
-   differential is the most honest weathering cue available and it is free.
+   crack produces a hard-edged vertical streak below it, longer than you think. The
+   shader gets this from one vertically-stretched lookup shared by grime and by the dust
+   wash — the water that deposits a stain below is the same water that scoured the dust
+   above it, and they line up. A wall without downward streaks is unfinished.
+2. **Aspect.** South and west faces bleach and chalk. North faces, porch undersides,
+   window reveals and anything under a canopy keep their saturation. Free, and the most
+   honest weathering cue available.
 3. **Wind.** Sand ramps into leeward corners and the windward face is scoured — paint
    stripped to bare render from 0 to 1.5 m only, glass frosted, signs scoured on the
-   south face only.
+   south face.
 4. **Occupancy.** Sand depth on a threshold is a map of abandonment. Swept step = someone
-   lives here. Drift over the sill = nobody has come out in years. Use this to author
+   lives here. Drift over the sill = nobody has come out in years. This is how you author
    which buildings feel alive without a single NPC.
 
-### Forbidden
+Three shader behaviours worth knowing before you tune a preset:
 
-Reject on sight, no discussion:
+- **Dust settles by world normal**, packs into concavity, and is scoured off higher up
+  where rain reaches and runs. Its tint varies with macro noise because real dust is
+  never one tan: the fine stuff that blows in is paler and greyer than the coarse grit
+  that stays.
+- **Grime climbs from a per-material ground datum** (`grime_origin_y`), not from y = 0.
+  Every level sets it: Brega uses the yard floor at −6.6, Ajdabiya the street at 0. Get
+  this wrong and the salt spalling starts in mid-air.
+- **Edge wear lands on the chamfer and lifts toward white**, and it is *held back on
+  sky-facing edges* — wear is a story about contact, and nothing knocks the top of a
+  wall. That edge collects dust instead. Without that damping the top chamfers came back
+  reading as white icing piped along every block.
+
+### Emissives and additive
+
+**An additive flame above about 1.5 energy tonemaps to white and stops being fire.**
+Keep the energy low and let the colour carry it. The benchmark flare runs
+`MaterialLab.emissive(#FF5C12, 1.1)` with `BLEND_MODE_ADD` and alpha 0.75, and the heat
+comes from an `OmniLight3D` beside it, not from a brighter quad. Control *what* glows
+with `emission_energy_multiplier`, never by lowering the glow threshold.
+
+### Forbidden — reject on sight
 
 - Black shadows. Pure white. Neutral-grey concrete. Cool-blue aerial perspective.
 - Brown loam, dark soil, grass, moss, temperate deciduous trees.
-- Cobblestone, medina alleys or organic winding lanes anywhere in Brega (it was built
-  from prefab parts in one go on a grid — there is no old town).
-- Tuk-tuks, rickshaws, camels in a city, snake charmers, keffiyeh-and-agal headdress,
-  minarets as the only skyline element.
-- A Hilux with a weapon in the bed. The Hilux carries crates, tea urns, a couch, sheep
-  before Eid. Never a gun.
+- Cobblestone, medina alleys or organic winding lanes anywhere in Brega — it was built
+  from prefab parts in one go on a grid and there is no old town.
+- Tuk-tuks, rickshaws, camels in a city, snake charmers, keffiyeh-and-agal headdress, or
+  a minaret as the only skyline element.
+- A Hilux with a weapon in the bed. It carries crates, tea urns, a couch, sheep before
+  Eid. Never a gun.
 - Gaddafi as a visual gag. The green flag as decoration. Alcohol of any kind.
 - Rubble as comedy or as scenery. Where destruction appears, something is being rebuilt
   around it — a new café in a half-rebuilt villa is the honest version.
-- Arabic rendered as disconnected glyphs, mirrored, stretched non-uniformly, or in a
-  faux-Arabic Latin face. Arabic is cursive and RTL; ship a shaping library. Libyan
-  signage uses **Western digits** (1234567890), never Eastern Arabic numerals.
-- Bilingual street signage. Libya's road and street signage is Arabic-only and sparse.
-  Bilingual safety signage *inside the plant* is correct and is the only exception.
-- Any surface albedo outside sRGB 50–240, or exceeding the red-sector chroma cap.
+- Arabic as disconnected glyphs, mirrored, stretched non-uniformly, or in a faux-Arabic
+  Latin face. Arabic is cursive and RTL, and Godot's TextServer shapes and orders it
+  correctly — `PropKit.sign` already does this. Libyan signage uses **Western digits**.
+- Bilingual street signage. Libyan road and street signage is Arabic-only and sparse.
+  Bilingual safety signage *inside* the plant is correct and is the only exception.
+- Any surface albedo outside sRGB 50–240, or breaking the chroma law in §2.
 - Symmetric decal placement. Constant roughness. Tiling that visibly repeats within one
   screen width.
 
 ### Typography, assigned by function
 
-Three scripts, three jobs, never mixed up:
-
-- **Naskh** — official and state. Road signs (green with white Arabic for highway
-  direction, blue for service, white-with-red-ring regulatory), plant identification,
-  clinic and pharmacy fascias, the `ليبيا` on number plates, Green Book slogans.
+- **Naskh** — official and state. Road signs, plant identification, clinic and pharmacy
+  fascias, the `ليبيا` on number plates, Green Book slogans.
 - **Kufic** — monumental and institutional. Mosque inscriptions, commemorative plaques,
-  university and corporate marks, tile work.
+  university and corporate marks, tile work, place names printed flat on the world map.
 - **Ruq'ah** — the vernacular hand. Hand-painted shop signs, revolutionary graffiti,
-  price cards. White or yellow letters on a saturated field with a drop-shadow, paint
+  price cards. White or yellow letters on a saturated field with a drop shadow, the paint
   sun-faded and flaking so letters are partly missing.
 
 Number plates: 520 × 110 mm, black on white, `1-12345`, `ليبيا` in Naskh at the right.
@@ -279,140 +436,328 @@ White private, yellow commercial, blue public service, red diplomatic.
 
 ### The four-layer wall
 
-The single highest-value environmental storytelling asset in the game. It appears in
-Levels 1, 2 and 5 and is authored as one shader, not as hand-placed decals. Bottom to top:
-
-1. A field of **regime green** `#1E7A3C`, faded to `#5E8A5C` where the sun hits.
-2. A **Green Book slogan** painted over it in white or yellow Naskh.
-3. A **crossing-out** in black or red.
-4. **2011 revolutionary graffiti** over the top — red-black-green tricolour with star and
-   crescent, sprayed fast in Ruq'ah.
-5. Sandblasting and UV fade making all four partly legible at once.
+The highest-value environmental storytelling asset in the game. It appears in Levels 1,
+2 and 5. Bottom to top: a field of **regime green** `#1E7A3C` faded to `#5E8A5C` where
+the sun hits; a **slogan** painted over it in white or yellow Naskh; a **crossing-out**
+in black or red; **2011 revolutionary graffiti** over the top in red-black-green with
+star and crescent, sprayed fast in Ruq'ah; and sandblasting and UV fade making all four
+partly legible at once. The whole political history of the level with no dialogue.
 
 ---
 
-## The hero: Wanis, the Libyan Gangsta
+## 5. Lighting model
 
-> **CANON OVERRIDE — 2026-09-21.** This section was written before the costume and
-> moveset were fixed by the project owner. Binding canon is:
->
-> - **Wanis wears a white thobe**, not a red jacket. The robe is the silhouette.
-> - **The jard tail is a shemagh** — deep madder red, over the shoulder, down the
->   back. Same job: velocity vector and silhouette-breaker. Same 40% envelope break.
-> - **He carries a fully automatic AK-47.** It is his primary ranged attack and it
->   is part of the silhouette: slung across the back at rest, shouldered when firing.
-> - **Moveset: run, variable jump, double jump, Heat Dash, and the thobe glide** —
->   hold jump while falling and the robe fills like a parachute, flattening the
->   descent. The glide is a distinct silhouette, not a slower fall.
->
-> Everything else below — the proportion band, the three-mass rule, negative space,
-> the asymmetry budget, the TF2 dark-bottom placement rule, oversized sandals —
-> stands and is being built to. Where a line below says "jacket", read "thobe";
-> where it says "jard tail", read "shemagh".
->
-> **Why white works better than the red jacket did:** against a drained pastel
-> world capped at S 0.55 / V 0.72, a near-white robe makes Wanis the brightest
-> value in every frame, which is a stronger readability lever than hue contrast
-> alone. The saturated-red reservation moves entirely to the shemagh and the
-> Sriracha, which sharpens it. And a robe is the right thing to catch wind.
->
-> **Revised hero palette (binding):**
->
-> | Zone | Share | Hex | Notes |
-> |---|---|---|---|
-> | Thobe | 58% | `#F4F1EA` base, `#DCD6C8` shade, `#FFFDF6` sun | Cotton. Fine weave shaded in-shader, never textured. |
-> | Sirwal below the hem | 12% | `#999487` | The value step that keeps the hem line crisp. |
-> | Shemagh | 11% | `#9A1D16` base, `#5E120E` shade | The only saturated hue he carries. |
-> | Hair + beard + shades | 12% | `#0E0C0D` | The dark top mass. Matte — roughness 0.74. |
-> | Skin | 5% | `#BD8052` | Subsurface on. |
-> | Gold chain | 1% | `#F2BD42` | Metallic 1.0, roughness 0.16. The glint. |
-> | Sandals | 1% | `#57381F` | Oversized per the rule below. |
+**A level never builds lights.** It declares a `LightingRig.Mood` and calls
+`LightingRig.build()`. One place is what stops World 1 drifting into five
+different-looking games, and every value in §2 is a field on that Mood.
 
-### Proportions
+### Exposure: read this before you change any energy
 
-**5.25 heads tall.** 1.78 m in world units, head 0.339 m. This band keeps face
-legibility at gameplay scale (his head is 3.2% of screen height — expression survives),
-supports a real wardrobe, and sits clear of both death zones: 3 heads reads as a
-licensed toy, 7 heads loses mascot iconicity.
+The whole thing is one equation and one curve.
 
-One non-canonical exaggeration and one only: **the sandals and the feet in them are 1.35×
-scale.** Everything else is honest. Low centre of gravity — lower leg shortened 6%, weight
-carried forward, so landings read as weight and ground contact is never ambiguous.
+```
+linear_radiance = linear_albedo x light_energy x N.L
+```
 
-Shoulder width 1.95 head-widths (exaggerated past life — at gameplay scale a realistic
-neck fuses the head to the torso). Waist 1.18 head-widths. Hands 1.15× scale.
+Godot folds the Lambert 1/pi into the light's energy, so energy 1.0 puts a pure-white
+surface facing the light at linear 1.0. **`linear_albedo` is not the hex you typed.**
+Hex is sRGB and the shader multiplies in linear, and the two are a long way apart in the
+darks: `#D8CEB6` prison slab is linear 0.687, `#A8A296` concrete is 0.392, `#4A4741`
+asphalt is **0.068** — four times darker than a colour picker suggests. Most of "why is
+my dark material black" is that line and nothing else.
 
-### Silhouette
+AgX then maps linear to screen, and it has a shoulder: past linear ~1.5 you buy almost no
+screen value, you only burn headroom. **That is exactly how a level drifts.** The author
+cannot see the wall getting brighter, so they push the key, and the hero — who was
+already on the shoulder — stops separating from it.
 
-**Three masses, and nothing else is permitted to compete.**
+Wanis's thobe is linear 0.905 and the pale calcareous ground is 0.863. They are
+practically the same albedo, **so his separation has to come from light, never from
+material value.** The targets:
 
-1. **The head mass** — curly black hair, full and rounded, with aviator shades pushed up
-   on the forehead reading as a hard horizontal notch across the top third of it. Never
-   over the eyes; the audience must read his expression.
-2. **The shoulder wedge** — the red jacket, sleeves shoved to the elbow, collar standing.
-   The shoulder line is the widest part of him and it is straight, not sloped.
-3. **The jard tail** — a 1.1 m cloth tail trailing from the waist sash, breaking the body
-   envelope by 40% of body width and moving independently. This is the velocity vector
-   and the silhouette-breaker.
+| Band | Screen | Linear |
+|---|---|---|
+| Deep shade / interior | 0.30–0.40 | 0.055–0.110 |
+| Shaded world surface | 0.42–0.52 | 0.120–0.200 |
+| Key-lit world surface | 0.66–0.78 | 0.455–1.000 |
+| Hero thobe, front-lit | 0.80–0.86 | 1.15–2.00 |
+| Hero rim / chain specular | 0.92–0.97 | 3.50–9.00 |
+| Anything at all | never 1.00 | AgX clips hard at 16.5 |
 
-Plus the ground read: oversized sandals, 8% of the silhouette, locked to the player's eye
-during platforming.
+A level whose ground is pale calcareous wants a key in the **1.0–2.0** band, not 3+.
+`Mood.debug_describe()` prints where a mood lands the canon surfaces and warns when
+key-lit mid concrete passes the 0.78 ceiling. Print it from a level's `_ready` and the
+screenshot stops being an opinion.
 
-Negative space is mandatory. There is a gap between arm and torso in every idle pose and a
-gap between the legs at jump apex. Solid blobs read as props.
+**Known deviation:** the shipped moods run key energy 3.1 (Brega) and 4.2 (Ajdabiya),
+two to three stops above that band. Brega half gets away with it because its key is
+behind the geometry and almost nothing in frame has an N.L above 0.2. Ajdabiya, front-lit,
+does not — the pale ground sits on the shoulder right next to the hero and the frame
+flattens. When you retune either, bring the key down and add bounce; do not compensate
+with exposure.
 
-Asymmetry, one element: **the left sleeve is rolled higher than the right.** That is the
-whole asymmetry budget and it is enough.
+### The rig: one key, three fills
+
+| Light | Job | Rules |
+|---|---|---|
+| **Key** | The sun. The only shadow caster. | Splits **0.06 / 0.15 / 0.35 as fractions**, blend on. `GraphicsDirector` rewrites `shadow_max_distance` per quality tier (70 / 110 / 160 / 220), so anything expressed in metres is advisory and fractions are what survive. Bias 0.03, `normal_bias` 0.8, opacity 0.84, `angular_distance` 0.6–1.4 — **the 0.0 default gives razor edges at every distance and is the clearest CG tell there is.** Only the key writes into the volumetrics. |
+| **Fill 1 — sky** | The dome. Decides what shadow looks like. | Cool and broad. From above-front in a daylight level, from below-front where the ground is the brighter source (Brega's sabkha). No shadows, no fog contribution, `specular` 0.35 — a sky fill has no specular in the real world. Always the complement of the key. |
+| **Fill 2 — bounce** | Ground bounce. | Warm, from below, tinted by the sky's own ground colour. **Off by default; switch it on before you reach for more key.** It is the cheapest way to stop an object reading as a sticker pasted on the background. |
+| **Fill 3 — rim** | Separation. | `rim_cull_mask = 2`, the hero layer only. A rim that also lights the world is a second key and it flattens everything. |
+| **Hero fill** | Front value on the hero in a backlit world. | Hero layer only. The single most useful light in a backlit scene: the world sits in true shade while he keeps a readable front. Keep it warm-neutral — a cold light on a white robe turns him blue, and he reads as warm white against a cool world. |
+
+The hero carries render layers 1 **and** 2, so there is no mask that means "the world but
+not the hero." **Light him more; never light the world less.**
+
+### A backlit surface stays in shade
+
+In Brega the key is low and behind the geometry, so the whole playing field faces away
+from it. **Do not "fix" a flat wall by lighting its front.** It would be a lie and it
+would cost the hero his contrast. Put the wall low in the value range, keep the fill cool
+and weak, and let him be the brightest thing in the frame. The only saturated colour
+allowed on the shadow side is a light somebody left on — `PropKit.lit_window` is the
+cheapest way to make a dark mass read as a building with people in it, and in a backlit
+frame it is the only warm accent the shadow side gets.
+
+### Sun shafts
+
+A shaft is not a post-process. It is volumetric fog the key writes into, minus the parts
+an occluder shadows. Three things have to be true at once or you get nothing:
+
+1. `sun_fog_energy` high enough that the key is actually in the fog,
+2. `fog_anisotropy` ≥ ~0.55 — the 0.2 default scatters evenly and the beam never gathers,
+3. **a `FogVolume` downstream of the occluder and on the camera's side of it.**
+
+(3) is the one every level got wrong by hand, and `LightingRig.shafts()` now fixes it:
+you pass the position of the thing *cutting* the light — the pipe rack, the brise-soleil,
+the gap between two towers — not where you want the beams, and it places the volume on
+the far side along the key direction. Corollary worth internalising: in a front-lit level
+the physically correct placement is behind the occluder and out of sight, so **pick a
+foreground occluder instead.** `shafts_height_falloff` stays at 0 — a shaft that thins
+with height dies before it leaves the occluder; ground mist is the one that wants 1.0–1.5.
+Low-frequency noise through the beam is the dust-in-the-light read and it is the
+difference between a shaft and a triangle of haze.
+
+Two companions on the same machinery: `ground_mist()` (height falloff, soft edges so the
+box never shows) and `hero_pocket()` (negative-density ellipsoid parented to the camera
+rig, so he never hazes out while the background stays atmospheric — strictly better than
+lowering the global fog, which flattens every layer at once).
+
+### Practicals
+
+Practicals are `LightingRig.practical()` / `practical_spot()`, never a hand-rolled
+`OmniLight3D`. Pick a **bulb** and override only what the shot needs: `SODIUM` (1900 K,
+the World 1 night signature), `INCANDESCENT`, `FLUORESCENT`, `HEADLIGHT`, `FLARE`,
+`HAZARD`, `CASE`, `MOONSPILL`. Each carries a colour, energy, range, fog contribution,
+quadratic attenuation and a default flicker (`HUM`, `FAIL`, `FIRE`, `BLINK`) that is
+deterministic, so a capture of a flickering lamp is not a lottery. Five levels
+hand-rolling five different ideas of what a street lamp is worth is exactly the drift
+this exists to stop.
+
+Use `light_negative = true` omnis to sculpt darkness back into over-lit corners — a
+standard film trick Godot supports natively, and there is one under the walkway in the
+benchmark. Budget 1–3 `AreaLight3D` per scene; clustered lighting means one in the
+frustum costs on every rendered object.
+
+### Grade
+
+Saturation and contrast are global scalars. They cannot make the shadows cool while the
+highlights stay warm, which is the entire job of a grade and **the reason every level was
+sliding toward the same orange.** The Mood carries a real one: `grade_lift` /
+`grade_gamma` / `grade_gain`, shadow and highlight split-tone around 0.5 grey,
+temperature and tint, feeding a generated 33³ LUT on `adjustment_color_correction`.
+`set_three_way(shadows, mids, highs)` is the colourist-shaped front door. Identity values
+build no LUT at all, so a mood that does not grade pays nothing.
+
+For the cool-shade half of "warm key, cool shadow", push `grade_shadow_tint` toward
+`(0.45, 0.48, 0.58)` rather than dropping global saturation.
+
+### Environment defaults that ship
+
+```
+background_mode        = BG_SKY           # ambient from the sky, never from a clear colour
+ambient_light_source   = AMBIENT_SOURCE_SKY, sky_contribution 1.0
+tonemap_mode           = TONE_MAPPER_AGX  # ACES desaturates our brights; AgX holds them
+agx_white / agx_contrast                  # the real knobs. `tonemap_white` is IGNORED
+                                          # under AgX. Target 9.5 / 1.45; engine
+                                          # default 16.29 / 1.25 is flat
+ssao   radius 1.1  intensity 2.2
+ssil   radius 2.2  intensity 0.9          # the 5.0 radius default bleeds background onto him
+ssr    max_steps 48                       # wet stone, intact glass, chrome, water only
+sdfgi  4 cascades, min_cell 0.2, occlusion on, bounce feedback 0.6
+glow   SOFTLIGHT, bloom 0.0, luminance cap 5.0, levels [0, 0, 0.6, 1.0, 1.0, 0, 0]
+fog    sky_affect 0.0, aerial_perspective 0.16
+vfog   gi_inject 1.0, length 90, detail_spread 2.0, temporal_reprojection 0.68
+```
+
+Five of those are load-bearing:
+
+- **`glow_bloom = 0.0`.** Above zero it lifts *everything* into the glow buffer
+  regardless of threshold. The number one cause of washout. `GLOW_BLEND_MODE_ADD` is the
+  washout machine; SOFTLIGHT ships, SCREEN is acceptable, ADD never.
+- **`glow_levels/1` and `/2` at zero.** Those two are the tight halo beside every bright
+  edge, and that halo *is* the cheap-bloom signature. The wide cinematic falloff lives
+  in 4–6.
+- **`glow_luminance_cap = 5.0`.** At the 12.0 default one blown sun pixel floods the
+  whole frame.
+- **`volumetric_fog_anisotropy` ≥ 0.55.** The sun-shaft knob, and it costs one float.
+- **`temporal_reprojection_amount = 0.68`.** The 0.9 default blends 90% of the last frame
+  and smears fog trails behind everything when the world slides sideways. Side-scroller
+  critical.
+
+Two engine defaults the Mood still ships rather than the canon value, so that adopting
+them is a deliberate per-level change: `volumetric_sky_affect` (canon 0.0 — crisp sky,
+fog only in the world) and `sun_indirect_energy` (canon 1.3).
+
+Depth of field lives on `CameraAttributesPractical`, not on `Environment`, and it is
+currently **off in both shipped levels**: Godot's near blur is distance-from-camera and
+swallows the entire gameplay plane before it softens a foreground at Z = +7. Foreground
+separation is done with value and scale instead (§6).
+
+---
+
+## 6. Depth-layer recipe
+
+Camera at **Z = +16**, **FOV 34°**, `KEEP_HEIGHT`, per `DESIGN.md` Part IV. That is
+fixed — it is tuned into the controller and the camera code. Visible vertical extent at
+the gameplay plane is 2 × 16 × tan(17°) = **9.78 units**, so a 1.78 m Wanis is **18.2%
+of screen height**. Every layer below is sized against that.
+
+Parallax is free and physically correct: a layer at distance *d* from the camera moves at
+16/*d* of the gameplay layer's screen rate, in X and Y, under zoom, and under
+`frustum_offset`. **No `Parallax2D`, no `ParallaxBackground`, ever.**
+
+| # | Layer | Z | Dist | Parallax | Contents |
+|---|---|---|---|---|---|
+| 8 | **Foreground occluder** | +9 | 7 | 2.29× | Near-black shapes: razor coils, a dead trunk, a pipe-rack leg, an arcade column. Clips one or two frame edges. |
+| 7 | **Foreground frame** | +5…+8 | 8–11 | 1.45–2× | Readable but desaturated: chain-link, a parapet lip, a kerb run, tyres, drums, pallets, posts. Never crosses the band the player traverses. |
+| 6 | **Gameplay plane** | **0** (props −1.2…+1.2) | 16 | 1.00× | Everything standable, collectible, hostile. Full PBR, world triplanar, highest contrast, sharpest. **Nothing else is ever at Z = 0.** |
+| 5 | **Near background** | −5 | 21 | 0.76× | The wall behind the action. Full materials, saturation −12%. The four-layer wall lives here. |
+| 4 | **Mid background** | −13…−22 | 29–38 | 0.42–0.55× | The yard, the perimeter wall, the pole line, the windbreak, the far terrace. Simplified materials, saturation −24%. |
+| 3 | **Deep background** | −26…−75 | 42–91 | 0.18–0.38× | The plant bank, the tank farm, the second band of town. Silhouette-driven, saturation −35%, no shadow casting. |
+| 2 | **Far landscape** | −140…−220 | 156–236 | 0.07–0.10× | Sabkha plain, the sea, the dust band. Single material, no normal maps. |
+| 1 | **Horizon skyline** | −300 | 316 | 0.05× | Prilling towers, the flare stack, the minaret, cathedral domes. Near-flat, heavily blended to fog. Landmarks: visible from most of their level. |
+| 0 | **Sky + atmosphere** | −420…−900 | — | ~0.02× | The sky material, the straw dust band, one drifting plume. Effectively infinite. |
+
+**Every screen must carry content in at least six of the nine layers.** A screen with
+only gameplay, near background and sky is a greybox regardless of how good the materials
+are. The benchmark frame is required to hit seven.
+
+### Layer separation comes from material value, not from fog
+
+Fog puts every layer on the same sheet of paper. Give each depth band its own albedo step
+and keep the fog thin enough that the steps survive. In Brega the plant bank at Z −26…−40
+is deliberately darker than the tank farm at −75 behind it, and that value step is why it
+reads. This was the recorded failure of the first benchmark pass: two fifths of the frame
+was empty haze with a sun in it, and the fix was geometry with its own value, not more
+atmosphere.
+
+### A foreground prop is sized to the near frustum, not to the world
+
+At Z = +7 the frame is about six world units across. A beam the length of the walkway
+blacks out the image. Foreground elements are small and there are many of them
+(`BregaKit.foreground_band`), and one of the five variants is a low kerb run — a
+horizontal that crosses the bottom of frame instead of another object sitting in it.
+
+### The middle ground is the thing that is always missing
+
+Every frame in World 1 first landed as "a dark building on the left and bright haze on
+the right, with nothing between them." The between is a pole line with catenary cables
+and a conveyor gantry on legs, both starting behind the block and walking out into the
+light so the eye has a way across. Build the bridge before you add more detail to either
+end. A **catenary, never a straight line** — a straight cable is the fastest way to make
+a skyline look untouched by gravity.
+
+### Between-layer atmosphere
+
+`GPUParticles3D` dust planes at roughly Z = +3, −9 and −22, `local_coords = false`,
+drifting on the ghibli axis. They catch the key, and they are what makes the sun shafts
+visible at all. Set `visibility_aabb` explicitly — the 8-unit default makes particles
+vanish mid-effect under a scrolling camera and it is the most common particle bug in the
+genre. A negative-density `FogVolume` ellipsoid parented to the camera carves a clear
+pocket so the hero never hazes out while the background stays atmospheric; this is
+strictly better than globally lowering the fog.
+
+---
+
+## 7. The hero: Wanis, the Libyan Gangsta
+
+### Binding canon
+
+- **White thobe.** The robe is the silhouette and it is the brightest value in every
+  frame. Against a world capped at S 0.55 / V 0.72 this is a stronger readability lever
+  than hue contrast, and it is why the saturated-red reservation belongs entirely to the
+  shemagh and the Sriracha.
+- **The shemagh** — deep madder red, over the shoulder and down the back. Velocity
+  vector and silhouette-breaker: it breaks the body envelope by 40% of body width.
+- **A fully automatic AK-pattern rifle**, part of the silhouette: slung across the back
+  at rest, shouldered when firing. Built by `WeaponForge` — stamped receiver, wood
+  furniture, gas tube above the barrel, and the curved magazine that carries the shape.
+- **Moveset:** run, variable jump, double jump with a rotation flourish, Heat Dash, and
+  the thobe glide — hold jump while falling and the robe fills like a parachute,
+  flattening the descent to 3.4 u/s with wider lateral authority. **A distinct
+  silhouette, not a slower fall.** Recoil is movement tech: fired airborne it pushes him
+  opposite the aim, so firing down is a hover and firing up drops him faster.
 
 ### Palette
 
-Applied with TF2's placement rule — dark at the bottom, lighter and higher-chroma at the
+Applied with the dark-bottom placement rule: dark low, lighter and higher-chroma at the
 chest, so he reads as grounded with a bright centre.
 
 | Zone | Share | Hex | Notes |
 |---|---|---|---|
-| Jard sash + tank + inner shirt (cream) | 46% | `#EAE0CC` base, `#D8CCB2` shade, `#F4EDDD` sun | Handwoven wool. Slubby weave normal at 3 mm scale. |
-| Trousers + sandal straps (dark low block) | 28% | `#2E3A52` denim, `#1F2738` shade | The dark bottom. Never lighten it. |
-| Jacket (the accent) | 22% | `#C4392E` base, `#8E2419` shade, `#E0584A` sun | HSV S 0.76 V 0.77. Matte, roughness 0.74. The only large red mass in the game. |
-| Gold chain | 4% | `#D9A93C`, spec `#FFE9A8` | Metallic 1.0, roughness 0.18. Highest chroma in the frame, at the chest, where the eye is asked to go. |
-| Skin | — | `#A9724B` base, `#7A4A30` shade, SSS transmittance `#C7523A` | |
-| Hair + beard | — | `#1B1512`, rim break `#3A2C22` | Four chunky masses, never strands. |
-| Sandals (shibshib) | — | `#8A5C3A` leather, `#5E3D24` sole | |
+| Thobe | 58% | `#F4F1EA` base, `#DCD6C8` shade, `#FFFDF6` sun | Cotton. Fine weave shaded in-shader, never textured. |
+| Sirwal below the hem | 12% | `#999487` | The value step that keeps the hem line crisp. |
+| Shemagh | 11% | `#9A1D16` base, `#5E120E` shade | The only saturated hue he carries. |
+| Hair + beard + shades | 12% | `#0E0C0D` | The dark top mass. Matte, roughness 0.74. |
+| Skin | 5% | `#BD8052` | Subsurface on. |
+| Gold chain | 1% | `#F2BD42` | Metallic 1.0, roughness 0.16. The glint. |
+| Sandals | 1% | `#57381F` | Oversized per the rule below. |
 
-The Sriracha bottle sits at `#F03A16` with emission — hotter, brighter and smaller than the
-jacket, so the two never read as the same object. The jacket is matte; the bottle glows.
+The Sriracha bottle sits at `#F03A16` with emission — hotter, brighter and smaller than
+anything he wears, so the two never read as the same object.
+
+### Proportions
+
+**5.25 heads tall**, 1.78 m in world units, head 0.339 m. That band keeps face legibility
+at gameplay scale (his head is 3.2% of screen height, so expression survives), supports a
+real wardrobe, and clears both death zones: 3 heads reads as a licensed toy, 7 heads
+loses mascot iconicity.
+
+One exaggeration and one only: **the sandals and the feet in them are 1.35× scale.**
+Everything else is honest. Low centre of gravity — lower leg shortened 6%, weight carried
+forward, so landings read as weight and ground contact is never ambiguous. Shoulder width
+1.95 head-widths (past life — at gameplay scale a realistic neck fuses head to torso),
+waist 1.18, hands 1.15×.
+
+### Silhouette
+
+Three masses, and nothing else may compete.
+
+1. **The head mass** — curly black hair, full and rounded, with shades pushed up on the
+   forehead as a hard horizontal notch across its top third. Never over the eyes.
+2. **The shoulder line** — the widest part of him, and straight, not sloped. In thobe
+   state the robe carries it; the rifle crosses it diagonally at rest.
+3. **The shemagh tail** — trailing cloth that moves independently, breaking the envelope
+   by 40% of body width.
+
+Plus the ground read: oversized sandals, 8% of the silhouette, locked to the player's eye
+during platforming.
+
+**Negative space is mandatory.** There is a gap between arm and torso in every idle pose
+and a gap between the legs at jump apex. Solid blobs read as props. Asymmetry gets one
+element — the left sleeve rolled higher than the right — and that is the whole budget.
 
 ### Costume, and its grounding
 
 He is not a gangster. He ran the best sandwich cart in Benghazi and his own hot sauce
-built it. He dresses like this because presentation is everything and because a man with a
-gold chain gets served first. The costume has to carry that, which means it sits exactly
-on the seam between two real registers:
+built it. He dresses like this because presentation is everything and because a man with
+a gold chain gets served first. Explicitly **not** a keffiyeh and agal: that is a Gulf
+and Levantine signifier and it is the clearest possible tell that someone researched
+"Arab" rather than "Libyan."
 
-**Contemporary street.** Post-2011 Libya has a genuine, documented youth street culture —
-graffiti that was unthinkable under Gaddafi, hip-hop that was an act of rebellion to
-listen to, and Western daily dress in every Libyan city. Jeans, a tank, a jacket, slides.
-That is what a young man in Benghazi actually wears, and building him in permanent
-traditional dress would make him a diorama.
-
-**Inherited textile.** The **jard** (جرد) is a single uncut length of handwoven wool,
-4–6 m by 1.5 m, historically woven by women on a *masda* over a process that could take a
-year, worn across all of Libyan society, and inseparable from Omar al-Mukhtar. Properly
-worn it is knotted at a *tukmiya* on the left arm, leaving the right arm free, with the
-remainder brought up over the head.
-
-**Wanis's jard is his father's, and he wears it wrong.** Cut down, wrapped twice at the
-waist, knotted at the left hip, tail left long and frayed. Every elder in the game
-disapproves and at least one says so. That tension is the character — the object is
-culturally load-bearing, the way he wears it is entirely his own, and it is the same
-object that gives the silhouette its trailing mass. Costume applied last is a costume;
-this is applied first.
-
-Explicitly **not** a keffiyeh and agal. That is a Gulf and Levantine signifier and using it
-is the clearest possible tell that someone researched "Arab" rather than "Libyan."
-
-No Amazigh motif appears on him. Amazigh geometry has a grammar — motifs are placed at the
-body's openings because those are where the evil eye enters — and a diamond on a shoulder
+No Amazigh motif appears on him. Amazigh geometry has a grammar — motifs sit at the
+body's openings because that is where the evil eye enters — and a diamond on a shoulder
 because it looks good is exactly the failure mode. If Amazigh design enters this game it
 enters woven into cloth, struck into metal, or not at all.
 
@@ -420,774 +765,320 @@ enters woven into cloth, struck into metal, or not at all.
 
 Four systems, ranked. Nothing else moves.
 
-1. **The jard tail — 9-segment Verlet chain**, solved in `_physics_process`, 8 constraint
-   iterations, gravity 12.0, damping 0.94, stiffness 0.62, max segment stretch 1.04. It is
-   already implemented in the repo and it is the hero's most important asset after the
-   silhouette. **Authored override curves on dash, hard landing and wall-kick**, blending
-   back to sim over 10 frames. Pure sim on a platformer's instantaneous velocity changes
-   is the cheap look; pure hand-key is unaffordable; the blend is the AAA look.
-2. **The gold chain — 6-segment Verlet chain**, shorter and stiffer (stiffness 0.80,
-   damping 0.88). Deterministic and cheap, so it can never look wrong in a screenshot.
-   It swings across the chest on turns and lifts on the dash.
-3. **Jacket hem and sleeve cuffs** — 3-bone spring chains driven by chest-bone
-   acceleration. Spring 22.0, damping 0.72. This is what sells the weight of a landing.
-4. **Hair** — four chunky masses on 2-bone springs, spring 30.0, damping 0.80. No strands.
+1. **The shemagh tail** — Verlet chain solved in `_physics_process`. The hero's most
+   important asset after the silhouette. Authored override curves on dash, hard landing
+   and wall-kick, blending back to sim over ~10 frames: pure sim on a platformer's
+   instantaneous velocity changes is the cheap look, pure hand-key is unaffordable, the
+   blend is the expensive one.
+2. **The gold chain** — shorter, stiffer Verlet chain. Deterministic and cheap, so it
+   can never look wrong in a screenshot. Swings across the chest on turns, lifts on dash.
+3. **Hem and cuffs** — spring chains driven by chest-bone acceleration. This is what
+   sells the weight of a landing.
+4. **Hair** — four chunky masses on short springs. No strands.
+
+`WanisRig` drives the skeleton procedurally: poses are targets and bones ease toward
+them, so overlap and follow-through come free. There is no keyframe data in the project
+and no IK — in a side-on game the arms are posed to the rifle rather than the rifle
+solved to the arms.
 
 ### Idle personality
 
-He is bored, and being bored is a performance. Three tiers plus a contextual set.
+He is bored, and being bored is a performance. Continuous: breathing at 0.28 Hz with a
+shoulder counter-drift, weight shifting between feet every 4.5 s ± 1.2. At 7 s: one of
+four fidgets, random without repeat — checks the chain and lets it drop, re-seats the
+shades, rolls a shoulder, scuffs a sandal. At 19 s: the personality beat — he looks
+off-screen at something the player cannot see, holds three seconds, and looks back
+unimpressed. He is waiting for you. Contextual: leans over a ledge edge, leans a shoulder
+on a wall, tugs the sash straight after a long sprint, checks the thobe for damage before
+he checks himself. His single adjective is **unbothered**.
 
-- **Tier 0, continuous** — breathing, 0.28 Hz, with a 2 px chest rise and a shoulder
-  counter-drift. Weight shifts between feet every 4.5 s ± 1.2 s.
-- **Tier 1, at 7 s** — one of four fidgets, random without repeat: checks the chain and
-  lets it drop; re-seats the shades on his forehead; rolls one shoulder; scuffs a sandal.
-- **Tier 2, at 19 s** — the personality beat. He looks off-screen at something the player
-  cannot see, holds three seconds, and looks back unimpressed. He is waiting for you.
-- **Contextual** — at a ledge edge he leans over and looks down. Against a wall he leans
-  a shoulder on it. After a long sprint he tugs the sash straight. After taking damage he
-  checks the jacket for damage before he checks himself.
+### State A — PRISON, and the transformation
 
-Sonic taught impatience in four frames of foot-tap. Wanis's single adjective is
-**unbothered**, and Tier 2 has to teach it without a line of dialogue.
+Level 1 opens with everything stripped. It is a silhouette problem solved deliberately:
+in prison state he has **one mass, not three.** Washed pale blue-grey two-piece uniform
+`#8E96A0` at roughness 0.86, loose and shapeless so the shoulder wedge is gone. No
+shemagh, no chain, no shades — **nothing trails, so nothing reads as velocity**, and the
+player feels slow before the controller is ever slowed. Hair flattened and dust-matted.
+Skin desaturated 22% with a grime mask heaviest at forearms and shins. The animation
+layer runs a posture offset — spine flexed 6°, head dropped 4°, stride shortened 8% —
+so the same physics reads as diminished.
 
-### State A — PRISON
+**The transformation** is the confiscated-property cage at the exact moment the sun
+clears the horizon: the level's unforgettable moment and the mechanic unlock in one beat.
+The chain comes out first and catches the new sun — the first specular highlight in the
+game, and nothing on screen is allowed to be brighter than it for those four frames. Then
+the thobe on an authored 12-frame snap, then the shemagh unfurling on a curve before
+handing to the sim, then the shades, then a dissolve-front wiping the grime off the skin
+in world coordinates so it reads coherently across the whole body. Hit-stop, a bloom of
+light, a slow-motion window, and the camera pushing in. The costume swap lands **on** the
+flash, never before it. Opening the cage also changes the level: it spawns the drones the
+next section is built around.
 
-Level 1 opens with everything stripped. This is a silhouette problem solved deliberately:
-in prison state he has **one mass, not three.**
+**Test:** reduce the first and last frames to pure black at 25% scale. The first must be
+an unidentifiable single mass. The last must be unmistakably Wanis.
 
-- Two-piece uniform, washed pale blue-grey `#8E96A0`, shade `#6B727C`, roughness 0.86,
-  loose and shapeless so the shoulder wedge is gone. Stencilled in black on the back:
-  a Naskh institution mark and five Latin digits.
-- No jacket. No chain. No shades. No sash. No tail — **nothing trails, so nothing reads
-  as velocity**, and the player feels slow before the controller is ever slowed.
-- Hair flattened and dust-matted, so the head mass loses its round silhouette. Beard
-  overgrown and unshaped.
-- Barefoot, with one broken plastic slide he keeps losing — a recurring gag, and the
-  ground contact is deliberately *less* crisp than it will be later.
-- Skin carries a dust layer: albedo desaturated 22%, roughness raised to 0.62, a grime
-  vertex mask heaviest at the forearms and shins.
+### A character in a marketing frame is never in the gameplay idle
 
-He also moves differently. Same feel spec numbers — the controller does not change — but
-the animation layer runs a posture offset: spine flexed 6°, head dropped 4°, arms held
-closer, stride shortened 8%. Same physics, read as diminished.
-
-### The transformation
-
-**The confiscated-property cage, at the exact moment the sun clears the horizon.** It is
-the level's unforgettable moment and it is the mechanic unlock in the same beat: Chain
-Whip is what he gets back.
-
-Beat by beat, at 60 fps:
-
-| Frame | Beat |
-|---|---|
-| 0–12 | He reaches the cage. Camera pushes in, FOV 34 → 29. Volumetric density lifts 0.016 → 0.030. |
-| 12 | He rips the mesh. Hit-stop 5 frames. Camera trauma 0.35. |
-| 17–34 | **The sun clears the horizon.** Key energy ramps 0.35 → 1.45 over 17 frames, temp 1950 K → 2850 K. This is scripted, not ambient — the level has been waiting for this. |
-| 22 | Chain out of the cage first. It arcs, catches the new sun, and the gold hits `#FFE9A8` at emission 3.0 — the first specular highlight in the game. Glow picks it up. |
-| 26–38 | Jacket. Authored, not simulated: it snaps onto the shoulder line in 12 frames and the shoulder wedge returns. Dust burst, 140 particles, `#D8CCB2`, lifetime 0.9. |
-| 34–46 | The jard. The tail unfurls to full 1.1 m over 12 frames on an authored curve, then hands to the Verlet sim with a 10-frame blend. This is the silhouette completing. |
-| 40 | Shades up to the forehead. One frame. No ceremony. |
-| 44–52 | The dust layer wipes off the skin — a dissolve-front on the grime mask, driven by triplanar world coords so it reads coherently across the whole body. |
-| 52–64 | He rolls the left sleeve. Posture offset releases: spine to 0°, head to 0°, stride to 100%. |
-| 64 | Control returns. HEAT gauge and Chain Whip appear in the HUD for the first time. |
-
-The audio beat lands at frame 22 with the chain — a single darbuka hit, and the level's
-music enters on the next bar. Nothing on screen is allowed to be brighter than that chain
-between frames 22 and 26.
-
-**Test:** reduce frames 0 and 64 to pure black at 25% scale. Frame 0 must be an
-unidentifiable single mass. Frame 64 must be unmistakably Wanis. If both are true, the
-transformation works.
+The gameplay idle is symmetrical, which is correct in play and is a mannequin in a still.
+`WanisRig.beauty_pose` is the authored alternative: weight on the back leg, hips tilted
+toward the free leg, spine counter-curved, shoulders against the hips, head turned past
+the shoulders. Every capture intended as a screenshot sets it.
 
 ---
 
-## Depth-layer recipe
+## 8. UI
 
-Camera is at **Z = +16** with **FOV 34°**, per `DESIGN.md` Part IV. That is fixed —
-it is tuned into the controller and camera code. `near` is raised to **0.5** (from the
-0.05 default) for roughly 10× depth-buffer precision; nothing in a side-scroller is ever
-within 0.5 m of the camera. `far = 1200`. `keep_aspect = KEEP_HEIGHT`.
+**Nothing in the UI is a themed `Control`.** A focused Godot `Button` draws a rectangle
+with a blue outline, and that is the exact default look this project is not allowed to
+have. `UIKit` draws cut-corner skewed slabs, letterspaced type, chevrons, rules and chain
+pips; `MenuList` owns its own selection, input and drawing. Everything is `_draw`, so it
+scales to any resolution and carries the game's shapes rather than the engine's.
 
-Visible vertical extent at the gameplay plane = 2 × 16 × tan(17°) = **9.78 units**, so a
-1.78 m Wanis is **18.2% of screen height**. That is correct framing and every layer below
-is sized against it.
+Rules:
 
-Parallax is free and physically correct: a layer at distance *d* from the camera moves at
-16/*d* of the gameplay layer's screen rate, in X and Y, under zoom, and under
-`frustum_offset`. **No `Parallax2D`, no `ParallaxBackground`, ever.**
-
-| # | Layer | Z | Dist | Parallax | Cull bit | Contents |
-|---|---|---|---|---|---|---|
-| 8 | **Foreground occluder** | +9 | 7 | 2.29× | 5 | Near-black at 24% alpha, heavy near-DOF. Razor-wire coils, a dead casuarina trunk, a pipe-rack leg, an arcade column, a palm bole. Clips one or two frame edges. `proximity_fade_distance = 1.0`. |
-| 7 | **Foreground frame** | +5 | 11 | 1.45× | 5 | Readable but desaturated 40%. Chain-link mesh, a parapet lip, oleander mass, a parked Hilux rear quarter. Never crosses the horizontal band the player traverses. |
-| 6 | **Gameplay plane** | **0** (props −1.2 … +1.2) | 16 | 1.00× | 1 | Everything standable, everything collectible, every enemy and hazard. Full PBR, world-triplanar, highest contrast, sharpest, lit by its own key. **Nothing else is ever at Z = 0.** |
-| 5 | **Near background** | −5 | 21 | 0.76× | 2 | The wall behind the action — prison slab facade, villa boundary wall, arcade back wall, viaduct underside. Full materials, slight aerial fade, saturation −12%. This is where the four-layer wall lives. |
-| 4 | **Mid background** | −14 | 30 | 0.53× | 2 | The next street, the second row of tanks, the campus block opposite, the far carriageway. Simplified materials (no heightmap, no triplanar), saturation −24%, fog-tinted. |
-| 3 | **Deep background** | −34 | 50 | 0.32× | 3 | Tank farm, villa grid, the campus mass, the lagoon. Silhouette-driven. Saturation −35%. `lod_bias = 2.5`. No shadow casting. |
-| 2 | **Far landscape** | −90 | 106 | 0.15× | 3 | Sabkha plain, the sea, the Jebel line, the industrial complex entire. Far-DOF. Heavy aerial perspective toward the fog colour. Single-material, no normal maps. |
-| 1 | **Horizon skyline** | −260 | 276 | 0.058× | 4 | The prilling towers, the flare stack, the cathedral domes, the Tibesti tower. Near-flat, 70% blended to fog. These are landmarks and they must be visible from most of their level. |
-| 0 | **Sky dome + atmosphere** | −900 | 916 | 0.017× | 4 | Custom sky shader: gradient ramp, dust band, sun disc, procedural cloud noise. Plus one drifting smoke or dust plume plane. Parallax 0.017× reads as effectively infinite. |
-
-**Every screen must carry content in at least six of the nine layers.** A screen with only
-gameplay + near BG + sky is a greybox, regardless of how good the materials are.
-
-Between-layer atmosphere: `GPUParticles3D` dust planes at Z = +3, −9 and −22, drifting on
-the ghibli axis. `local_coords = false`. `visibility_aabb` set explicitly to
-`AABB(Vector3(-36,-24,-12), Vector3(72,48,24))` — the 8-unit default makes particles vanish
-mid-effect in a scrolling camera and it is the single most common particle bug in the genre.
-
-Light rigs are per-layer via `light_cull_mask`: the gameplay plane's key runs at 1.30×
-the background key's energy, giving figure-ground separation no post-process can fake.
-
-A negative-density `FogVolume` ellipsoid, `size = Vector3(13, 9, 9)`, `density = -2.0`,
-parented to the camera, carves a clear pocket so Wanis never hazes out while the
-background stays atmospheric. This is strictly better than globally lowering fog.
+- **The HUD is minimal during gameplay.** Bottle, sandwich and chain glyphs are polygons.
+  The HEAT gauge only asserts itself as it fills.
+- **A ring beats a bar when the quantity is time.** The ice HUD is a count inside a
+  closing timer ring, because a bar needs a label to say what it measures and a ring
+  does not.
+- **The title screen is the beauty benchmark.** `TitleScreen` extends `BregaBeauty`
+  outright — same geometry, same colour script, same lighting — so the first frame of the
+  game is literally the frame every level has to match, and the title can never look like
+  a different game. Type sits in the left column behind a soft wedge of shade, and
+  anything visually noisy is moved out of that column: a black tangle behind cream type
+  is a fight neither side wins.
+- **Arabic is laid out RTL and shaped.** `draw_string` lays out from `pos`, so a
+  right-aligned box starts at the right edge *minus* its width. Getting this wrong puts
+  the label a full text-box width off the slab, and it has happened once already.
+- **Locked content is shown, not hidden.** Unbuilt levels are pinned on the world map and
+  refuse entry with a red shudder, because the shape of the world is the promise.
+- **Terrain colour on the map is soft-edged.** A shape of a second colour laid on a map
+  reads as a sticker however irregular its outline; what sells it is the edge going away.
+  Sabkha and the Jebel green are radial alpha falloffs generated at load, not polygons.
 
 ---
 
-## Godot implementation notes
-
-Godot 4.7.2, Forward+. Property names are exact.
-
-### `project.godot` — the diff against what is in the repo now
-
-```ini
-[rendering]
-; AA: FXAA on top of MSAA throws away MSAA's sharpness. Pick crisp.
-anti_aliasing/quality/msaa_3d=2                          ; keep 4x
-anti_aliasing/quality/screen_space_aa=0                  ; WAS 1 (FXAA) — remove
-anti_aliasing/quality/use_debanding=true                 ; WAS absent (false). Mandatory:
-                                                         ; our skies and fog are huge gradients
-anti_aliasing/screen_space_roughness_limiter/amount=0.4
-
-; 4.7 features currently unused
-lights_and_shadows/contact_shadow/enabled=true           ; grounds his feet — #1 readability cue
-lights_and_shadows/contact_shadow/shadow_length=1
-lights_and_shadows/contact_shadow/surface_thickness=0.01
-lights_and_shadows/multi_bounce_occlusion/enabled=true   ; AO picks up surrounding albedo
-                                                         ; instead of going grey-dirt
-
-global_illumination/gi/use_half_resolution=false         ; WAS true — blobby, stair-stepped GI
-global_illumination/voxel_gi/quality=1
-
-environment/ssao/half_size=false                         ; WAS absent (true) — chunky at 1080p
-environment/ssil/half_size=false
-environment/ssil/quality=2                               ; WAS 1
-
-environment/subsurface_scattering/subsurface_scattering_quality=3   ; WAS 2
-environment/subsurface_scattering/subsurface_scattering_scale=0.025 ; WAS default 0.05, which
-                                                         ; bleeds scatter across his whole face
-
-camera/depth_of_field/depth_of_field_bokeh_quality=2     ; WAS 1
-camera/depth_of_field/depth_of_field_bokeh_shape=2       ; circle, WAS hexagon
-camera/depth_of_field/depth_of_field_use_jitter=true     ; kills bokeh banding
-
-textures/default_filters/anisotropic_filtering_level=4   ; 16x, WAS 3 (8x)
-```
-
-### GI strategy: VoxelGI chained on X. Not SDFGI, not lightmaps.
-
-**`LightmapGI` exposes zero methods to scripting.** `bake()` is not in the scripting API
-at all, in any build. This project is headless and code-authored, so lightmaps are
-impossible without a custom engine build. Do not plan around them.
-
-**SDFGI is wrong for this game.** It is camera-centred and streams cascades as the camera
-moves. Our camera moves fast in X, constantly, forever. `frames_to_converge = 5` means
-30 frames — half a second — of visibly dark newly-streamed geometry, continuously.
-
-**`VoxelGI.bake(from_node, create_visual_debug)` IS exposed and works in exported
-projects.** That is the unlock. Bake at level load from `LevelKit`.
-
-```
-VoxelGI.size          = Vector3(32, 24, 24)
-VoxelGI.subdiv        = SUBDIV_128       # ≈0.25 u/voxel at this size
-spacing               = 28 units on X    # 4 units of overlap
-VoxelGIData.energy    = 1.2
-VoxelGIData.propagation = 0.65           # outdoors; 0.50 in the prison interiors
-VoxelGIData.dynamic_range = 4.0          # high-contrast sun
-VoxelGIData.normal_bias = 0.2            # only if striping appears
-VoxelGIData.interior  = true             # prison interiors — kills sky leak
-VoxelGIData.use_two_bounces = true
-```
-
-**Hard limit: 8 VoxelGI nodes render at once and only 2 blend per pixel.** Overlapping 3+
-flickers. Generate one volume per 28 X-units and enable/disable by camera proximity so at
-most 3 are active and at most 2 overlap anywhere.
-
-Geometry must be `gi_mode = GI_MODE_STATIC` to bake. **Wanis, enemies and any moving prop
-must be `GI_MODE_DYNAMIC`** or they bake in and leave ghost lighting behind them.
-
-**Procedural vertex-colour AO is the lightmap substitute.** We generate geometry in code,
-so run a hemisphere raycast occlusion pass at build time — 48 rays per vertex — and write
-it to `ArrayMesh` `ARRAY_COLOR`. Read `COLOR.r` in the shader as a diffuse multiplier, not
-via `vertex_color_use_as_albedo`, so it darkens without tinting. Cache to disk keyed by a
-level hash. This is what makes a code-generated scene read as expensive at zero runtime cost.
-
-Reflection probes chain the same way: `size = Vector3(40, 28, 30)`, spacing 30 on X,
-`blend_distance = 5.0` (the 1.0 default pops hard), `update_mode = UPDATE_ONCE` (captures
-over 6 frames at runtime — no editor needed), `box_projection = true` in corridors and
-`false` in open desert, `interior = true` and `enable_shadows = true` on the one or two
-hero interior probes. At most **one** `UPDATE_ALWAYS` probe in the entire project, and
-probably zero.
-
-### Environment
-
-The default combination of `background_mode = BG_CLEAR_COLOR` + `ambient_light_source =
-AMBIENT_SOURCE_BG` + black clear colour means **ambient light is literally black.** That
-one default is responsible for most "why does my Godot scene look dead" scenes ever made.
-
-```
-background_mode         = BG_SKY
-ambient_light_source    = AMBIENT_SOURCE_SKY
-reflected_light_source  = REFLECTION_SOURCE_SKY
-ambient_light_sky_contribution = 1.0
-ambient_light_energy    = per level, §Colour script
-
-tonemap_mode            = TONE_MAPPER_AGX
-tonemap_exposure        = 1.0            # grade with lights, never with exposure
-tonemap_agx_white       = 9.5            # 16.29 default is flat
-tonemap_agx_contrast    = 1.45           # AgX-internal contrast: pre-display-encode,
-                                         # no gamut clipping. This is why AgX over ACES —
-                                         # ACES desaturates our brights and kills the jacket.
-adjustment_enabled      = true
-adjustment_saturation   = 1.15           # recover what AgX pulls out of highlights
-adjustment_contrast     = 1.0            # leave — use tonemap_agx_contrast instead
-adjustment_color_correction = <Texture3D LUT, generated per level>
-```
-
-`tonemap_white` is **ignored** under AgX. Build the LUT procedurally in GDScript: 32
-`Image`s of 32×32 `FORMAT_RGB8`, lift/gamma/gain + split-tone + per-hue saturation math
-per texel, then `ImageTexture3D.create()`. One generator, one parameter set per level,
-zero external assets, and every level gets a distinct identity. Author assuming
-post-tonemap sRGB input — the pipeline order is tonemap → brightness/contrast/saturation → LUT.
-
-Sky is a custom `ShaderMaterial`, not `ProceduralSkyMaterial`: gradient ramp, a bleached
-straw dust band at the horizon that is thicker than any temperate sky would have, a sun
-disc, and low-frequency cloud noise. The horizon band is the most location-specific
-lighting decision in the project.
-
-### The sun
-
-```
-light_angular_distance          = 0.8 – 1.4    # DEFAULT IS 0.0 — razor shadows at all
-                                               # distances, the clearest CG tell there is.
-                                               # Real sun ≈ 0.53°; we go softer for style.
-shadow_enabled                  = true         # default is FALSE, easy to forget
-shadow_bias                     = 0.03
-shadow_normal_bias              = 0.8          # default 2.0 detaches small props' shadows
-shadow_opacity                  = 0.78 – 0.90  # per level; lets ambient lift the shadow
-directional_shadow_mode         = SHADOW_PARALLEL_4_SPLITS
-directional_shadow_max_distance = 50           # NOT 100. Near-doubles texel density free.
-                                               # 70 on Level 3 only, for the road.
-directional_shadow_split_1/2/3  = 0.06 / 0.15 / 0.35
-directional_shadow_blend_splits = true
-light_indirect_energy           = 1.3
-light_volumetric_fog_energy     = 2.0 – 3.5    # sun shafts live here
-```
-
-Fill lights get `light_volumetric_fog_energy = 0.0`. If fills feed the fog, the fog turns
-into flat grey soup. Rim light is character-cull-mask-only,
-`shadow_enabled = false` except on Levels 4 and 5 where SSS transmittance needs it.
-
-Use `light_negative = true` omnis to sculpt darkness back into over-lit corners. It is a
-standard film trick and Godot supports it natively.
-
-`AreaLight3D` (new in 4.7) for prison strip lights, shopfront glass counters and window
-light slabs. Emits along −Z. `area_attenuation = 2.0` for physically-accurate falloff,
-`area_normalize_energy = true`, `light_size = 0.5` for PCSS softness. **Budget 1–3 per
-scene** — clustered lighting means an AreaLight in the frustum costs on every rendered
-object.
-
-### Volumetric fog
-
-```
-volumetric_fog_enabled  = true
-volumetric_fog_density  = per level, 0.006 – 0.055
-volumetric_fog_albedo   = Color(1.00, 0.93, 0.82)   # tint to the dust, never pure white
-volumetric_fog_emission = Color(0.06, 0.045, 0.035) # lifts fog out of black in shadow
-volumetric_fog_anisotropy = 0.55 – 0.86             # ★ THE SUN-SHAFT KNOB. The 0.2 default
-                                                    # means no shaft will ever form.
-volumetric_fog_length   = 95
-volumetric_fog_detail_spread = 1.6
-volumetric_fog_gi_inject = 0.45
-volumetric_fog_ambient_inject = 0.25
-volumetric_fog_sky_affect = 0.0                     # crisp sky, fog only in the world
-volumetric_fog_temporal_reprojection_amount = 0.68  ; ★ SIDE-SCROLLER CRITICAL. The 0.9
-                                                    ; default blends 90% of last frame and
-                                                    ; smears fog trails behind everything
-                                                    ; when the world slides sideways.
-```
-
-Project `environment/volumetric_fog/use_filter`: **0 on Level 4** (hard sun shafts),
-1 everywhere else (soft ambient dust). Volumetric fog has finite range, so always pair it
-with non-volumetric depth fog for the far layers.
-
-`FogVolume` uses: `CONE` aligned to a window spot for prison dust shafts (`density 1.5`,
-`edge_fade 0.45`, 64³ `NoiseTexture3D` density texture, translated 0.15 u/s along the
-shaft); `BOX` for ground mist (`height_falloff 1.2`); `ELLIPSOID` with negative density
-for the hero pocket. `FogMaterial.emission` does not cast light on anything — it only
-makes the fog itself glow.
-
-### Glow
-
-```
-glow_enabled           = true
-glow_blend_mode        = GLOW_BLEND_MODE_SCREEN      # ADDITIVE is the washout machine
-glow_bloom             = 0.0    ; ★ KEEP AT ZERO. Above zero it lifts EVERYTHING into the
-                                ; glow buffer regardless of threshold. #1 cause of washout.
-glow_hdr_threshold     = 1.22
-glow_hdr_scale         = 2.5
-glow_hdr_luminance_cap = 5.0    ; ★ 12.0 default lets one blown sun pixel flood the frame
-glow_intensity         = 0.55
-glow_normalized        = true
-glow_levels/1          = 0.0    ; ★ levels 1–2 are the tight halo beside every bright edge.
-glow_levels/2          = 0.0    ;   That halo IS the cheap-bloom signature. Zero them.
-glow_levels/3          = 0.3
-glow_levels/4          = 0.7
-glow_levels/5          = 1.0    ; the wide cinematic halo lives in 4–6
-glow_levels/6          = 0.6
-glow_levels/7          = 0.2
-```
-
-Control *what* glows with material `emission_energy_multiplier > 1.0`, never by lowering
-the threshold. Use `glow_map` to suppress glow in the lower sixth of the frame where the
-HUD lives.
-
-### Screen space
-
-```
-ssao_enabled      = true
-ssao_radius       = 1.0        # correct at 1.78 m hero scale
-ssao_intensity    = 1.3        # 2.0 default is heavy-handed
-ssao_power        = 2.0
-ssao_horizon      = 0.10       # 0.06 default halos around silhouettes
-ssao_light_affect = 0.1        # small amount stops AO reading as painted-on dirt
-
-ssil_enabled      = true
-ssil_radius       = 2.2        # ★ 5.0 default bleeds the whole background onto Wanis
-ssil_intensity    = 0.75
-
-ssr_enabled       = true       # wet corniche stone, intact glass, chrome, lagoon ONLY
-ssr_max_steps     = 48
-ssr_depth_tolerance = 0.2
-```
-
-### Camera
-
-```
-projection      = PROJECTION_PERSPECTIVE
-fov             = 34.0
-near            = 0.5          # WAS 0.05. ~10x depth precision. Cheapest quality win here.
-far             = 1200.0
-keep_aspect     = KEEP_HEIGHT
-
-CameraAttributesPractical:
-  dof_blur_far_enabled     = true
-  dof_blur_far_distance    = 38.0      # just past the mid background
-  dof_blur_far_transition  = 26.0
-  dof_blur_near_enabled    = true
-  dof_blur_near_distance   = 10.0
-  dof_blur_near_transition = 5.0
-  dof_blur_amount          = 0.10
-```
-
-For camera lead and off-centre framing, use `PROJECTION_FRUSTUM` with
-`frustum_offset = Vector2(±0.05 … ±0.28, ±0.10)` driven by facing and velocity. This shifts
-the *projection*, not the camera, so verticals stay vertical and background parallax stays
-stable. Panning the camera transform instead introduces perspective rotation that makes
-backgrounds swim. **Never orthographic** — zero inter-layer parallax turns every
-background into a sticker.
-
-### Materials
-
-`metallic_specular = 0.30` on all dielectrics. `roughness` never constant. Detail normals
-from `NoiseTexture2D` + `FastNoiseLite(TYPE_SIMPLEX_SMOOTH, octaves 5, frequency 0.02)`,
-`seamless = true`, `as_normal_map = true`, `bump_strength` 8–16 stone, 2–4 painted metal,
-with `uv2_scale = Vector3(12,12,12)`.
-
-World-triplanar on gameplay-plane and near-BG geometry: `uv1_triplanar = true`,
-`uv1_world_triplanar = true`, `uv1_triplanar_sharpness = 5.0`, `uv1_scale = 0.25`
-(4 m repeat). This kills the "tiled prototype blocks" read on code-generated geometry.
-Regular UV on layers 3 and below — triplanar is 3 samples per map.
-
-`heightmap_scale = 0.05` where used. **The 5.0 default is 60–250× too large.**
-`distance_fade_mode = DISTANCE_FADE_PIXEL_DITHER`, not alpha — better performance, no
-transparency sorting. `proximity_fade_enabled = true` on every fog card, particle quad,
-water edge and foreground silhouette element.
-
-Decals carry the storytelling: rust runs, water stains, cracks, tyre marks, Arabic
-signage, graffiti. `size = Vector3(2.0, 2.0, 0.6)` — thin on the projection axis so they
-don't wrap corners. `normal_fade = 0.6`. `distance_fade_enabled = true, begin = 40`. For
-grime that adds only roughness and normal, keep an albedo texture for alpha masking but
-set `albedo_mix = 0.0` and supply `texture_orm`. **Decals cannot affect transparency.**
-
-### Wanis's shading
-
-```
-subsurf_scatter_enabled               = true
-subsurf_scatter_strength              = 0.26        # NOT 1.0 — that's the waxy mannequin
-subsurf_scatter_skin_mode             = true        # switches to the red-shifted skin kernel
-subsurf_scatter_texture               = <mask: thick at cheeks/nose, thin at brow/jaw>
-subsurf_scatter_transmittance_enabled = true
-subsurf_scatter_transmittance_color   = Color(0.78, 0.30, 0.22)
-subsurf_scatter_transmittance_depth   = 0.10
-subsurf_scatter_transmittance_boost   = 0.25
-```
-
-Transmittance is computed from the shadow map, so it needs a light *behind* him with
-shadows enabled. Watch for godot#123422 (crash enabling transmittance + SSS on a
-`BaseMaterial3D`); if it bites, fall back to a custom spatial shader writing
-`SSS_STRENGTH` / `SSS_TRANSMITTANCE_*` directly.
-
-Skin roughness is never uniform: 0.32 forehead and nose bridge, 0.52 cheeks, 0.68 near the
-hairline. Eyes get a separate cornea mesh with `clearcoat_enabled = true`, `clearcoat = 1.0`,
-`clearcoat_roughness = 0.03` — 4.7 fixed clearcoat energy conservation, so it is finally
-trustworthy, and eyes are the single biggest AAA-versus-hobby tell. Hair uses
-`anisotropy_enabled = true` with a flowmap. Jacket and jard use `backlight_enabled = true`.
-
-**`extra_cull_margin = 0.8` on every skinned mesh.** Skinned AABBs are computed from the
-rest pose, so an animated character pops out of existence at screen edges when a limb
-extends. In a side-scroller that happens exactly when the hero enters frame — constantly.
-
-### Shaders to write
-
-Ranked by impact. Seven exist or are half-built; the rest are new.
-
-1. `surface_weathered.gdshader` *(exists — extend)* — triplanar PBR base + vertex-colour
-   AO + grime mask + sand-drift blend. The workhorse. Every static surface uses it.
-2. `wall_archaeology.gdshader` **(new, highest value)** — the four-layer wall as one
-   shader: regime green, slogan, crossing-out, tricolour, differential UV fade, sandblast
-   scour band at 0–1.5 m. Parameterised so one shader authors hundreds of unique walls.
-3. `hero_rim.gdshader` **(new)** — Fresnel rim with a **directional gate**:
-   `smoothstep(0.0, 0.3, dot(NORMAL, -rim_dir))`. Without the gate it is a uniform glow
-   outline and reads as a sticker. `rim_power` 3.2, `rim_energy` 0.6–2.0. Do not rely on
-   `BaseMaterial3D.rim` — it is light-coupled and `rim_tint` mushes it toward albedo.
-4. `sky_libya.gdshader` **(new)** — gradient ramp, straw dust band, sun disc, cloud noise.
-   Per-level parameter set. The colour script lives here.
-5. `heat_haze.gdshader` **(new, Level 3)** — screen-texture UV offset from scrolling noise,
-   `strength` 0.016, masked to `1.0 - UV.y` so it's strongest at the road. Sample the depth
-   texture to reject pixels in front of the shimmer plane so Wanis never wobbles.
-6. `cloth_billow.gdshader` *(exists — extend)* — jard, laundry, shade tarps, flags.
-7. `foliage_wind.gdshader` **(new)** — world-position phase so instances desync,
-   `INSTANCE_CUSTOM.x` for per-instance offset, vertex-colour masks (red = trunk-to-tip,
-   green = tip flutter). `wind_strength` 0.05 grass → 0.25 palm frond.
-8. `sriracha_glass.gdshader` **(new)** — the collectible. Thin-walled glass, red fluid
-   inside, emissive at `#F03A16`, gentle spin, catches the key.
-9. `iced_out.gdshader` **(new)** — diamond dispersion. Do **not** use `TRANSPARENCY_ALPHA`;
-   gem sorting is a nightmare. Fake it opaquely: screen-texture lookup with per-channel
-   chromatic offset (`r × 0.98`, `g × 1.00`, `b × 1.02`), a second perturbed lookup for
-   fake internal facets, and `EMISSION += step(0.96, sparkle) * color * 12.0` so it blows
-   past the glow threshold. Pair with tiny additive `GPUParticles3D` twinkles that survive
-   outside the silhouette.
-10. `water_sidra.gdshader` **(new)** — depth-driven turquoise-to-indigo with a hard shelf
-    line, caustics on the shallow floor, and a thin-film iridescence term near the terminal.
-11. `dissolve.gdshader` **(new)** — triplanar world-coord noise front, emissive edge at
-    `vec3(3.0, 1.2, 0.2)` so it blooms. Used for the transformation grime wipe, enemy
-    defeats, and warp-ins.
-12. `rust_bleed.gdshader` **(new, decal)** — a parameterised downward streak that takes a
-    source point and a length. Placed procedurally under every bolt, bracket and scupper.
-
-### Particles
-
-`transform_format = TRANSFORM_3D` must be set **before** `instance_count` on every
-`MultiMesh`. `use_custom_data = true` and pack `(wind_phase, scale_variation, colour_seed,
-time_offset)` into `INSTANCE_CUSTOM` so 5,000 fronds don't sway in lockstep. Set
-`custom_aabb` explicitly or Godot computes one so large it never culls.
-
-**MultiMesh has no per-instance frustum culling** — "millions of objects will be always or
-never drawn." Chunk every MultiMesh at 32 X-units and toggle `visible` from camera
-position. `cast_shadow = SHADOW_CASTING_SETTING_OFF` on all background debris and foliage
-multimeshes.
-
-Procedural `ArrayMesh` has **no LODs and no tangents.** Call
-`SurfaceTool.generate_tangents()` or normal maps are silently wrong. Build through
-`ImporterMesh` and call `generate_lods(25.0, 60.0, [])` at build time, cached — it is the
-only way `lod_bias` does anything for code-generated geometry.
-
-`GPUParticles3D`: `fixed_fps = 30` + `interpolate = true` for dust (halves sim cost);
-`fixed_fps = 0` for sparks and impact debris or you see stepping. `amount_ratio` scales
-density at runtime for free — changing `amount` reallocates and restarts the system.
-`collision_base_size` raised to roughly match particle size.
-`GPUParticlesCollisionHeightField3D` with `UPDATE_MODE_ALWAYS` follows the camera and bakes
-at runtime, which is the only collision option available to a headless pipeline —
-`GPUParticlesCollisionSDF3D` needs an editor bake.
-
-### Pitfall list — check these first when something looks cheap
-
-1. Ambient light is black (`BG_CLEAR_COLOR` + `AMBIENT_SOURCE_BG` + black clear colour).
-2. `tonemap_mode = LINEAR` with `tonemap_white = 1.0`. Both defaults. Clipped and flat.
-3. The editor's preview sun and preview sky **do not exist at runtime**. A scene that
-   looks fine in a viewport renders black in a capture.
-4. `Camera3D.near = 0.05` — z-fighting, poor SSAO/SSR/contact shadows.
+## 9. Implementation notes and pitfalls
+
+Godot 4.7.2, Forward+, GDScript. Property names are exact.
+
+### What the engine actually does today
+
+| Area | Shipped | Note |
+|---|---|---|
+| Scene authoring | GDScript builders; `.tscn` files are thin wrappers | Levels are diffable and parameterised |
+| Geometry | `LevelKit.chamfer_mesh` only, cached by size | No `BoxMesh` anywhere |
+| Materials | `MaterialLab` + `surface_weathered` + `NoiseBank` | No texture files ship |
+| Lighting | `LightingRig.Mood` → key / sky fill / bounce / rim / hero fill, plus `shafts()`, `ground_mist()`, `hero_pocket()`, `practical()` and a generated grade LUT | §5. `Mood.debug_describe()` prints exposure landings and warns when the key is hot |
+| Quality tiers | `GraphicsDirector`, four tiers | It owns `directional_shadow_max_distance` (70 / 110 / 160 / 220), so express shadow splits as fractions. Tiers scale cost, never look |
+| Sky | `ProceduralSkyMaterial`, installed by `LightingRig` | `SkyForge` + `shaders/sky.gdshader` exist as the replacement and **no level adopts them yet** |
+| GI | **SDFGI**, 4 cascades, 0.2 min cell | See the open question below |
+| Tonemap | AgX, exposure per level | `Environment.tonemap_white` is **ignored under AgX**; `Mood.white` is therefore inert. Grade with lights, not exposure |
+| DOF | Off in both shipped levels | Near blur swallows the gameplay plane; separation is value and scale |
+| Checkpoints | `Checkpoint` placed in both shipped levels | — |
+| Ice pool | `IceBonus01`, `IceBonus02` | The warp draws from both |
+| Water | `WaterKit` + `shaders/water.gdshader` | Built; **no level adopts it yet** |
+| Detail library | `DetailKit` | Built; **nothing calls it yet** |
+
+**Open question — GI.** SDFGI is camera-centred and streams cascades as the camera moves,
+and our camera moves fast in X forever, so newly-streamed geometry is visibly dark for
+several frames. The alternative is chained `VoxelGI` volumes baked at level load
+(`VoxelGI.bake()` is exposed to scripting; `LightmapGI.bake()` is not, in any build, so
+lightmaps are impossible for a headless code-authored project). Nobody has built the
+chain yet. Whoever does: 8 VoxelGI nodes render at once and only 2 blend per pixel, so
+space them so at most 2 overlap anywhere, and mark Wanis, enemies and every moving prop
+`GI_MODE_DYNAMIC` or they bake in and leave ghost lighting behind them.
+
+### Engine facts that cost a day each
+
+- **Godot winds FRONT faces clockwise.** Emitting a quad counter-clockwise hides every
+  outward face and leaves the inside of the box visible — and the inside of a backlit
+  wall faces the sun, which is why the first chamfered box lit the whole level like noon.
+- **A degenerate UV chart returns garbage tangents.** Mapping every face of a box with
+  one formula gives the top and bottom faces a constant V; the garbage tangent that
+  follows is enough to make the renderer light a back-facing wall as though it faced the
+  sun. `LevelKit._planar_uv` picks the two axes the face does *not* point down.
+- **`ProceduralSkyMaterial` draws a sun disc for every directional light.** Fill and rim
+  lights were each painting a second and third sun into the sky. Non-shadow lights are
+  `SKY_MODE_LIGHT_ONLY`.
+- **`StandardMaterial3D.specular` is a Godot 3 property name.** Every specular tweak
+  written against it was a silent no-op that also spammed the log. It is
+  `metallic_specular`.
+- **Procedural `ArrayMesh` has no tangents and no LODs.** Call
+  `SurfaceTool.generate_tangents()` or normal maps are silently wrong; build through
+  `ImporterMesh` and `generate_lods()` if you want `lod_bias` to do anything.
+- **Skinned AABBs come from the rest pose.** Set `extra_cull_margin` ≈ 0.8 on every
+  skinned mesh or the hero pops out of existence at a screen edge when a limb extends —
+  which in a side-scroller is exactly when he enters frame.
+- **A particle system whose emitter is buried under a scaled skeleton inherits garbage
+  transforms.** The tracer pool owns its own placement for this reason.
+- **`MultiMesh` has no per-instance frustum culling.** Set `transform_format` *before*
+  `instance_count`, set `custom_aabb` explicitly, chunk by X and toggle `visible`.
+- **`vertex_color_is_srgb` defaults false**, so code-authored hex vertex colours blow out.
+- **MSAA does not antialias alpha-scissor foliage.** Use
+  `ALPHA_ANTIALIASING_ALPHA_TO_COVERAGE`.
+- **The editor's preview sun and preview sky do not exist at runtime.** A scene that
+  looks fine in a viewport renders black in a capture. Capture is the only truth.
+
+### Check these first when a frame looks cheap
+
+1. Constant roughness. Nothing else on this list matters if this one is true.
+2. Ambient is black (`BG_CLEAR_COLOR` + `AMBIENT_SOURCE_BG` + black clear colour).
+3. `glow_bloom > 0.0`, or `glow_levels/1-2` carrying energy.
+4. `volumetric_fog_anisotropy` at the 0.2 default — no sun shaft will ever form.
 5. `light_angular_distance = 0.0` — razor shadow edges at every distance.
-6. `shadow_enabled = false` is the `Light3D` default.
-7. `shadow_normal_bias = 2.0` default detaches small props' shadows (peter-panning).
-8. `glow_bloom > 0.0` — guaranteed washout.
-9. `glow_levels/1` and `/2` carrying energy — the cheap-bloom halo.
-10. `ssil_radius = 5.0` default bleeds the background onto the hero.
-11. `volumetric_fog_anisotropy = 0.2` default — no sun shaft will ever form.
-12. `volumetric_fog_temporal_reprojection_amount = 0.9` — smeared fog trails under
-    horizontal scroll.
-13. `GPUParticles3D.visibility_aabb` 8-unit default — particles vanish mid-effect.
-14. MSAA does not antialias alpha-scissor foliage. Set
-    `ALPHA_ANTIALIASING_ALPHA_TO_COVERAGE`.
-15. `gi_mode = GI_MODE_STATIC` on moving objects — baked in, leaves ghosts.
-16. `extra_cull_margin = 0.0` on skinned meshes — hero pops at screen edges.
-17. `vertex_color_is_srgb = false` default — code-authored hex vertex colours blow out.
-18. Constant roughness. Nothing else on this list matters if this one is true.
+6. `shadow_enabled = false`, which is the `Light3D` default.
+7. `shadow_normal_bias = 2.0` default, detaching small props' shadows.
+8. `ssil_radius = 5.0` default, bleeding the background onto the hero.
+9. `Camera3D.near = 0.05` — z-fighting and poor SSAO/SSR/contact shadows.
+10. `GPUParticles3D.visibility_aabb` left at the 8-unit default.
+11. `gi_mode = GI_MODE_STATIC` on something that moves.
+12. Fog doing the job that a value step between layers should be doing.
 
 ---
 
-## Level 1 beauty benchmark shot
+## 10. Terminology
 
-### **"FIRST LIGHT, EXERCISE YARD"**
+Volumetric light shafts are called **sun shafts** or **light shafts** in this project.
+**Never the other term.** This applies to code, comments, commit messages, documentation,
+capture filenames and conversation, without exception and regardless of context.
 
-One screen. Built at final shippable quality before any more of Level 1 exists. This is a
-build order, not a mood board — every number is buildable as written.
+Other fixed names: the hero is **Wanis**; the collectible is a **Sriracha bottle**; the
+secret is the **Iced Out Sriracha**; the reward is a **chain**; the dust storm is a
+**ghibli**; the salt flat is **sabkha**; the red interior sand is **Heix**.
 
-**The moment.** Wanis, still in prison grey, has come through the block door onto the
-raised walkway above the exercise yard. The sun is two minutes from clearing the horizon
-behind the dead fertiliser plant. He is not running yet. He has stopped, because he can
-see the way out and it is a long way off.
+---
 
-### Composition
+## 11. The benchmark, and how a frame is judged
 
-16:9, 1920×1080. Horizon at **y = 0.46**. Wanis's feet at **y = 0.62**, his head at
-**y = 0.44** — his head breaks the horizon line, which is what makes a small figure read
-as the subject. He stands at **x = 0.31**, facing screen-right, so two-thirds of the frame
-is the distance he has to cover. He is **18.2%** of frame height.
+### The benchmark
 
-The frame's structural lines: the walkway rail runs a hard horizontal at y = 0.66 from
-x = 0.00 to x = 0.44 and then stops at a broken post — the eye falls off the end of it
-into the yard. The pipe rack enters at upper-right and runs down-left on a 14° diagonal,
-pointing at him. The two prilling towers stand at x = 0.71 and x = 0.79, the flare stack at
-x = 0.90. Rule-of-thirds intersection at (0.33, 0.33) is empty sky, deliberately — the
-composition breathes there.
+**"FIRST LIGHT, EXERCISE YARD"** — `levels/brega/BregaBeauty.gd`. One screen at final
+shippable quality. Every later level has to match or beat it, and the title screen *is*
+it.
 
-### Layer by layer
+The moment: Wanis, still in prison grey, has come through the block door onto the raised
+walkway above the exercise yard. The sun is two minutes from clearing the horizon behind
+a dead fertiliser plant. He has stopped, because he can see the way out and it is a long
+way off. He is not doing anything. That is correct — the shot is a held breath.
 
-**Layer 8 — Foreground occluder, Z = +9.** A single coil of razor wire, out of focus,
-crossing the top-left corner from (0.00, 0.00) to (0.19, 0.22). Near-black, 24% alpha,
-heavy near-DOF. It reads as a shape, not as wire. One dead casuarina trunk at the extreme
-bottom-right, x = 0.94–1.00, rising the full frame height, silvered bone-white, so the
-right edge is closed.
+Composition: horizon at y ≈ 0.46, his feet at 0.62, his head at 0.44 so it **breaks the
+horizon line**, which is what makes a small figure read as the subject. He stands a third
+in from the left facing screen-right, so two thirds of the frame is the distance he has
+to cover. The walkway rail runs a hard horizontal from the left edge and stops at a
+broken post, and the eye falls off the end of it into the yard.
 
-**Layer 7 — Foreground frame, Z = +5.** Chain-link fence, 50 mm mesh, running the bottom
-edge from x = 0.00 to x = 0.38, top of the mesh at y = 0.78 so it never crosses his body.
-Sand drifted into its base. Three plastic bags snagged in it, moving. Desaturated 40%.
+One standing deviation from the original brief, and it is the right call: the cell block
+runs the **left 55% only** and stops just past him, instead of the full frame width. At
+Z = −5 a 10 m block subtends more of the frame than a 71 m tower at Z = −300, so running
+it full width buries every layer behind it. The left of frame is the prison he is
+leaving; the right is the distance he has to cover.
 
-**Layer 6 — Gameplay plane, Z = 0.** The walkway: a precast concrete deck, 1.2 m wide,
-with a 90 mm steel rail on the outboard side, three balusters missing. Wanis on it. The
-deck's leading 40 cm is spalled, exposing two rebars, orange-brown, with a rust halo
-bleeding down the underside. A green-painted steel door, `#2F5D46`, standing half open
-behind him at x = 0.16 — the door he just came through, and it is the only saturated
-non-hero colour in the left third. A puddle of sand has drifted across the threshold of it,
-and there is a clean swept arc where the door swung. Two sriracha bottles on the deck ahead
-of him at x = 0.48 and x = 0.55, glowing, starting the trail.
+Layers, front to back: razor wire and a dead casuarina at +9; chain-link at +5; the
+walkway, rail, green door and the first two Srirachas at 0; the cell block facade with
+the four-layer wall at −5; the yard, perimeter wall, pole line and windbreak at −14; the
+pipe rack at −22; the plant bank at −26…−40; the tank farm at −75 with one burnt tank at
+the golden section; the sabkha plain and the Gulf at −140; the prilling towers and the
+flare stack at −300; the sky.
 
-**Layer 5 — Near background, Z = −5.** The cell block's long facade, running the full frame
-width behind him. **This is the four-layer wall.** Prefab beige slabs, `#D8CEB6`, 3.0 m ×
-1.2 m module, joint lines 12 mm deep, **one circular crane hole at the centre of every
-panel** — most mortared shut, three visibly knocked through. Panel joints carry the water
-staining and the rust bleed. The bottom 50 cm is fretted back to blockwork by salt. Small
-deep-set windows on a 3.0 m rhythm, half with bent louvred shutters in faded `#6B4A32`, one
-hanging off a single hinge. One window head is fan-blackened by an old fire. Across three
-panels at x = 0.55–0.78: the regime-green field `#2E7A3F`, a Green Book slogan in white
-Naskh over it, a black crossing-out over that, and a red-black-green tricolour with star
-and crescent sprayed over all of it, all four sun-faded together. Sandbags on the roof
-parapet, split and spilling.
-
-**Layer 4 — Mid background, Z = −14.** The yard floor, cracked concrete going to sabkha
-crust, `#E8E2D2`, polygonally cracked and blistered, with tyre ruts cutting through to dark
-mud `#5C5040`. The second block opposite, its own crane-hole grid, partly hidden by the
-first. A perimeter wall, `#B4AEA2`, 4.5 m, razor wire on top, running to the right edge. A
-dead eucalyptus windbreak row — seven trunks in a dead-straight planted line, four of them
-silvered and leafless, three with sparse `#7D8B6A` foliage. Sand drifted over the line.
-
-**Layer 3 — Deep background, Z = −34.** The tank farm. Six storage tanks, 42 m diameter,
-chalked cream `#E4E0D4` going `#BFB7A4` in the chalked zones, vertical rust bleed from
-every ladder bracket, the bottom metre exfoliating orange. Spiral staircases wrap two of
-them. Each sits in a pale rubble bund wall a third its height. One tank is burnt: scorched
-matte black-brown above the fire line, roof collapsed inward, steel heat-warped in soft
-vertical buckles. That tank is the one at the golden-section point.
-
-**Layer 2 — Far landscape, Z = −90.** The sabkha plain running flat to the horizon,
-blinding pale, with the pipe-rack corridor crossing it on concrete sleepers. The Gulf of
-Sidra visible as a thin turquoise band `#4FC3C0` in the upper-right gap between the towers,
-falling to `#1B4F72`. No cliffs, no hills — this coast is dead flat and that flatness is
-the point.
-
-**Layer 1 — Horizon skyline, Z = −260.** The two urea prilling towers, 62 m and 71 m, plain
-windowless concrete shafts, vertically streaked, 70% blended to fog. The flare stack beside
-them: a cold black steel lattice with nothing burning on it. **That dead flare stack is the
-most eloquent object in the shot** — it says the plant stopped, the town emptied, and
-nobody is coming.
-
-**Layer 0 — Sky, Z = −900.** Pre-dawn gradient: zenith `#2B3A55`, mid `#6B5F6E`, horizon
-band `#C97B45` warming to `#FFA657` at the sun point behind the towers. The bleached straw
-dust band `#D5CDBD` sits above the horizon glow, thick — this is Saharan aerosol, and it is
-thicker than any temperate sky would be. A high thin cloud deck catching the first light.
-
-### Lighting
-
-| Light | Setup |
-|---|---|
-| **Key** | `DirectionalLight3D`. Altitude **3.5°**, azimuth **101°** — behind and screen-right. 2200 K `#FF9040`, `light_energy` 0.85, `light_angular_distance` 1.1, `shadow_enabled` true, `shadow_bias` 0.03, `shadow_normal_bias` 0.8, `shadow_opacity` 0.82, `directional_shadow_max_distance` 50, splits 0.06/0.15/0.35, `blend_splits` true, `light_volumetric_fog_energy` 3.2, `light_indirect_energy` 1.3. Shadows rake nearly the full width of the frame to the left. |
-| **Fill** | `DirectionalLight3D`, altitude −18° (from below-front, the sabkha bounce), `#B8B0A0`, `light_energy` 0.34, `shadow_enabled` false, `light_volumetric_fog_energy` 0.0. This is what stops the shadow side going dead. |
-| **Sky ambient** | `AMBIENT_SOURCE_SKY`, `ambient_light_energy` 0.92. Pre-dawn sky is a huge cool source and it is doing real work on every up-facing surface. |
-| **Rim** | `DirectionalLight3D`, `light_cull_mask` = character bit only. From behind-right, `#FFB877`, `light_energy` 2.6, `light_specular` 0.3, `shadow_enabled` false. He is back-lit and near-silhouette; this rim is the only reason he reads at all, and it is the shot's thesis. |
-| **Practical 1** | `AreaLight3D` inside the open green door, `area_size = Vector2(0.9, 2.05)`, 3100 K `#FFB877`, energy 2.2, `area_range` 4.5. A failing corridor strip light behind him. It puts a warm slab on the deck and edges his left shoulder. |
-| **Practical 2** | `OmniLight3D` sodium `#FFA13B` on a lattice pole at Z = −14, x = 0.86, energy 3.0, range 11. Still burning at dawn because nobody turned it off. It throws a hard cone through the fog. |
-| **Negative** | `OmniLight3D`, `light_negative = true`, energy 0.6, range 6, placed under the walkway to sink the deck's underside into proper dark. |
-
-### Atmosphere
-
-- Volumetric fog: density **0.016**, albedo `Color(1.00, 0.93, 0.82)`, emission
-  `Color(0.06, 0.045, 0.035)`, **anisotropy 0.78**, `length` 95,
-  `temporal_reprojection_amount` 0.68, `sky_affect` 0.0.
-- Depth fog: `#3A4152`, `depth_begin` 22, `depth_end` 380, `depth_curve` 1.4,
-  `aerial_perspective` 1.0, `sun_scatter` 0.35.
-- The key at `light_volumetric_fog_energy` 3.2 plus anisotropy 0.78 produces **shafts
-  through the pipe rack** at upper-right and through the gap between the two prilling
-  towers. Those shafts are the single most expensive-looking thing in the frame and they
-  cost one float.
-- `FogVolume` `BOX`, `size = Vector3(80, 3.5, 24)`, `density` 0.55, `height_falloff` 1.2,
-  `edge_fade` 0.5, sitting on the yard floor at Z = −14. Ground mist in the low yard,
-  because the sabkha is damp before sunrise. It makes the eucalyptus row read as depth.
-- `FogVolume` `ELLIPSOID`, `size = Vector3(13, 9, 9)`, `density` **−2.0**, parented to the
-  camera. The hero pocket.
-- Dust `GPUParticles3D` at Z = +3, −9 and −22. 180 / 300 / 420 particles, `amount_ratio`
-  1.0, `fixed_fps` 30, `interpolate` true, `local_coords` false, drifting left-to-right at
-  0.35 u/s on the ghibli axis, `visibility_aabb = AABB(Vector3(-36,-24,-12),
-  Vector3(72,48,24))`. Small, `proximity_fade_enabled = true`. They catch the key and they
-  are what makes the shafts visible.
-- Three plastic bags on the chain-link, on cloth sim, at 0.6 Hz. The DRAPE rule.
-
-### Wanis's pose and framing
-
-Prison state. **Contrapposto, weight on the right leg, left knee soft.** Shoulders square
-to camera-right, head turned 12° further right than the shoulders — he is looking at the
-perimeter wall, not at the yard. Right hand rests on the broken rail post. Left arm hangs.
-Spine flexed 6°, head dropped 4° — the diminished posture offset.
-
-He is back-lit, so his body is 70% in shadow, lifted only by the sabkha fill and the door's
-warm slab. The rim runs the top of his shoulders, the right edge of his jaw, and the crown
-of his hair. His face is readable but dark. **The one hot pixel on him is a single specular
-hit on the left cheekbone from the door practical.**
-
-His contact shadow grounds the right sandal-less foot on the deck — `contact_shadow`
-enabled, `shadow_length` 1. Without it he floats, and this frame lives or dies on whether
-his feet are on the ground.
-
-He is not doing anything. That is correct. The shot is a held breath.
+**The most eloquent object in the frame is the flare.** A plant that stopped running,
+with one tip still burning and a plume leaning downwind — it is the focal point the right
+of the image did not have, and the only motion big enough to read at that distance.
 
 ### The twelve details that make this Libya and not generic ruins
 
-1. **The crane holes.** One circular hole at the centre of every prefab panel, mortared
-   shut, three knocked through. Abu Salim's panels had them for the crane hook, and inmates
-   reopened them to talk through the walls. Nobody who has not been there would invent this.
-2. **The four-layer wall.** Regime green under a Green Book slogan under a crossing-out
-   under the tricolour. The whole political history of the level, legible at once, with no
-   dialogue.
-3. **The dead flare stack.** A cold black lattice with no flame. Brega's plant has exported
-   nothing since 2011.
-4. **The prilling towers, taller than any minaret.** A fertiliser plant is the skyline here,
-   not a mosque. Getting that hierarchy right is the whole location.
-5. **Two sands meeting.** Red continental "Heix" sand drifting in from the south against
-   bone-white calcareous beach sand, with pink-buff drift lines where they mix. Visible in
-   the yard corner at x = 0.62.
-6. **The salt crust.** Polygonally cracked, puffed and blistered where salt crystallised
-   and lifted it, dark mud showing through the tyre ruts. Nothing grows on it.
-7. **The planted windbreak, dead in a straight line.** Eucalyptus and casuarina planted by
-   the oil company to hold back the sand, irrigation stopped, failing back to desert in
-   visible rows. A dead tree in a straight line is unmistakably planted.
-8. **Sand depth as the abandonment map.** Drifted over the threshold of every dark window;
-   a clean swept arc where the green door still swings. Someone still uses that one door.
-9. **Salt spalling, not impact damage.** Chloride corrodes the rebar, the rust expands past
-   3× volume, and the cover concrete cracks and falls. The brown stain from a crack comes
-   first; the spall follows. Every spall in this shot is at a slab edge, a lintel or a
-   column base — where it actually happens.
-10. **The green steel door.** Mid-blue and bottle-green doors and gates are everywhere in
-    coastal Libya. It is the right colour and it is the only place the eye rests on the left.
-11. **The sodium lamp still burning at dawn.** Dirty amber, buzzing, throwing a hard cone
-    through the mist. Nobody turned it off because nobody is here.
-12. **The straw-white horizon.** The sky does not go blue near the horizon. Saharan aerosol
-    bleaches it, distance goes pale *warm* grey rather than cool blue, and this single
+1. **Crane holes** — one circular hole at the centre of every prefab panel, most mortared
+   shut, three knocked through. Nobody who has not been there invents this.
+2. **The four-layer wall** — the level's whole political history, legible at once.
+3. **The dead flare stack** — a cold black lattice with nothing burning on it.
+4. **Prilling towers taller than any minaret** — a fertiliser plant is the skyline here.
+   Getting that hierarchy right is the whole location.
+5. **Two sands meeting** — red Heix against bone-white calcareous, pink-buff where they mix.
+6. **Salt crust** — polygonally cracked, puffed and blistered, dark mud in the tyre ruts.
+7. **A planted windbreak, dead in a straight line** — the irrigation stopped. A dead tree
+   in a straight line is unmistakably planted.
+8. **Sand depth as the abandonment map** — drifted over every dark sill, swept in a clean
+   arc where the green door still swings.
+9. **Salt spalling, not impact damage** — every spall at a slab edge, lintel or column
+   base, with the brown crack stain arriving before the spall.
+10. **The green steel door** — mid-blue and bottle-green doors are everywhere on this
+    coast, and it is the only place the eye rests on the left.
+11. **The sodium lamp still burning at dawn** — nobody turned it off because nobody is here.
+12. **The straw-white horizon** — the sky does not go blue near the ground. This single
     decision is what stops the frame reading as Spain, Arizona, or nowhere.
 
-### Acceptance criteria
+### The quality gate
 
-The shot is done when all seven are true:
+The standard is: **every screenshot must pass as an official marketing frame for a AAA
+2026 release.** That is not a feeling; it is eight checks, and a frame fails if any one
+of them fails.
 
-1. Reduced to pure black at 25% scale, the hero silhouette reads as a single ambiguous
-   human mass — **correct for prison state** — and the composition still reads: rail,
-   wall, towers, stack.
-2. Content is present in **at least seven of the nine depth layers**.
-3. No pixel in the frame is pure black or pure white. Shadow sits in the `#6B5F55`
-   family at its darkest.
+1. **Value structure.** Desaturate the frame. There must be a clear dark mass, a clear
+   mid, and a clear light, and the hero must sit at the top of the range. No pixel is
+   pure black or pure white; the darkest shadow sits in the `#6B5F55` family by day,
+   `#2A3A56` by night. If the greyscale is one grey soup, nothing else will save it.
+2. **Silhouette density.** Every important object reads as a shape at 25% scale with the
+   image reduced to black. If a thing only exists because of its surface detail, it does
+   not exist.
+3. **Colour discipline.** One level-unique hue, present. The chroma law held (§2). No
+   saturated accent anywhere except the three named exceptions. Shadow is not grey.
+   Aerial perspective is warm.
+4. **Focal point.** Exactly one, and you can say what it is in four words. Nothing else in
+   the frame out-values or out-saturates it. The eye does not go to the sun first — a
+   bright blob doing no storytelling is a failure, not a light source.
+5. **Foreground / mid / background.** Content in six of the nine layers, and the middle
+   ground is not empty. Foreground is sized to the near frustum and does not black out
+   the image. Layer separation comes from value steps, not from fog.
+6. **Storytelling detail.** At least three things in the frame say what happened here and
+   who used to live here. Not decoration: evidence. Weathering obeys gravity, aspect, wind
+   and occupancy.
+7. **Edge treatment.** No perfect ninety-degree edges. Chamfers catch the key. Nothing
+   ends in mid-air. Nothing important is under 70 mm. Cables are catenaries.
+8. **Motion.** At least three independent things move, and at least one of them is a
+   DRAPE element. A still frame of a dead world is still a dead world.
+
+### How to judge your own capture
+
+In this order. Do not skip to the last question — everyone wants to, and the first three
+are where frames actually fail.
+
+1. **Squint, or desaturate it.** What are the three big value masses? If you cannot name
+   them, stop and fix the lighting. Nothing below this line matters yet.
+2. **Where does your eye go first, before you decide?** Say it out loud. If the answer is
+   "the sun", "a bright patch of ground" or "I don't know", the frame has no subject.
+3. **Reduce it to black at 25%.** Does the hero read? Does the composition — the
+   horizontals, the landmark verticals, the diagonal that points at him? If the answer is
+   no, the problem is shape, not shading.
+4. **Cover the hero with your thumb.** Is the rest of the frame still a place? Is there
+   still something happening in the middle ground? A frame that only works because
+   somebody is standing in it is a backdrop.
+5. **Count the layers.** Six or it goes back. Then ask what each one is doing that its
+   neighbours are not — if two adjacent layers have the same value, they are one layer.
+6. **Find the brightest pixel and the most saturated pixel.** Are they where you meant
+   them to be? Is either of them something you did not choose?
+7. **Follow the water.** Pick three fittings and check that something runs down from each.
+   Check the streaks fade sideways as well as down. Check the grime starts at the ground
+   the level actually has, not at y = 0.
+8. **Look at every edge that catches the key.** Are they chamfers or are they corners? Is
+   any top chamfer reading as white icing? Is any ninety-degree edge left?
+9. **What is moving?** Name three. Name the DRAPE one.
+10. **What does this tell you about the people?** If the answer is nothing, add a lit
+    window, a swept threshold, a laundry line or a light somebody left on before you add
+    another pipe.
+11. **Would you put it on a store page?** Only now. And if the honest answer is "it is
+    much better than it was", that is a no — write down what is still wrong in
+    `docs/PROGRESS.md` and go again.
+
+### Acceptance criteria for the benchmark specifically
+
+1. Reduced to pure black at 25%, the hero reads as a single ambiguous human mass —
+   correct for prison state — and the composition still reads: rail, wall, towers, stack.
+2. Content present in at least seven of the nine depth layers.
+3. No pixel pure black or pure white.
 4. The sun shafts through the pipe rack are visible without being pointed out.
-5. His feet are unambiguously on the deck — contact shadow reads at 100% zoom.
-6. At least three independent things are in motion: bags, dust, and the ground mist.
-7. A stranger shown the frame with no context says "somewhere on the North African coast,"
-   not "a desert" and not "a ruin."
+5. His feet are unambiguously on the deck at 100% zoom.
+6. At least three independent things in motion.
+7. A stranger shown the frame with no context says "somewhere on the North African
+   coast," not "a desert" and not "a ruin."
 
 Anything less and it goes back. This frame sets the bar for four more levels and a boss.
-
----
-
-## Rules learned on the benchmark
-
-These came out of looking at captures and fixing what was wrong. They are
-binding on every level, not notes.
-
-**A backlit surface stays in shade.** In World 1 the key is always low and
-behind the geometry, so the whole playing field faces away from it. Do not
-"fix" a flat wall by lighting its front — it would be a lie and it would cost
-the hero his contrast. Put the wall low in the value range, make the fill cool
-and weak, and let him be the brightest thing in the frame. Warm key, cool
-shadow, and the only saturated colour on the shadow side is a light someone
-left on.
-
-**Detail on a shaded surface has to be silhouette.** Nothing on a wall in shade
-reads by its own value, so every piece of detail must stand off the face and
-break the outline: downpipes with shoes and brackets, conduit runs into
-junction boxes, split-unit condensers, aerials, dishes, header tanks, sagging
-cables. `PropKit.wall_services` and `PropKit.roof_clutter` exist for this.
-Anything under about 70 mm at gameplay distance disappears — build it thicker
-than is strictly right.
-
-**Layer separation comes from material value, not from fog.** Fog puts every
-layer on the same sheet of paper. Give each depth band its own albedo step and
-keep the fog thin enough that the steps survive. The plant bank at z −26…−40
-is darker than the tank farm at −75 behind it, and that is why it reads.
-
-**Weathering is generated, not authored.** `PropKit.gradient_decal` builds a
-64 px falloff image for three shapes: a run (strong at the top, fading down and
-off both sides), a band (strong at the bottom, fading up) and a blob. A
-one-dimensional gradient cannot fade on two axes, and a dirt run that does not
-fade sideways reads as a grey rectangle stuck to the wall.
-
-**A foreground prop is sized to the near frustum, not to the world.** At nine
-units from the camera the frame is about seven world units across. A beam the
-length of the walkway blacks out the image.
-
-**An additive flame above about 1.5 energy tonemaps to white** and stops being
-fire. Keep the energy low and let the colour carry it.
-
-**A polished metal in a dark room renders black,** because a mirror with
-nothing to reflect is black. Either give the room an environment the metal can
-reflect, or brush the metal: roughness around 0.38 and metallic around 0.5, so
-the key spreads into a sheen and there is real diffuse underneath.
-
-**A character in a marketing frame is never in the gameplay idle.** The
-gameplay idle is symmetrical, which is correct in play and is a mannequin in a
-still. `WanisRig.beauty_pose` is the authored alternative: weight on the back
-leg, hips tilted toward the free leg, spine counter-curved, shoulders against
-the hips, head turned past the shoulders.
-
-## Terminology
-
-Volumetric light shafts are called **sun shafts** or **light shafts** in this
-project. Never the other term. This applies to code, comments, commit messages,
-documentation and conversation.

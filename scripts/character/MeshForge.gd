@@ -74,7 +74,21 @@ class Builder extends RefCounted:
 		if rings.size() < 2:
 			return
 		var closed := arc_span >= TAU - 0.0001
-		var steps := segments if closed else segments + 1
+		# One more vertex column than there are segments, ALWAYS — including
+		# when the loft closes on itself.
+		#
+		# The obvious closed-loft trick is to emit `segments` columns and wrap
+		# the last quad back to index 0 with a modulo. It is wrong, and it was
+		# wrong here for a long time: the wrapped quad's U interpolates from
+		# 0.94 back to 0.0 across one face, so that face samples the whole
+		# texture backwards, and its face tangent points opposite its
+		# neighbour's, which `generate_tangents` then averages to nearly zero.
+		# The result is a hard crease running the length of every lofted mesh
+		# in the game — most visibly straight down the hero's robe.
+		#
+		# Duplicating the seam column with U = 1.0 costs one vertex per ring
+		# and removes the crease everywhere at once.
+		var steps := segments + 1
 		var first := count
 		for r in rings.size():
 			var ring: Dictionary = rings[r]
@@ -87,11 +101,10 @@ class Builder extends RefCounted:
 					ring["weights"], ring.get("color", Color.BLACK))
 
 		for r in rings.size() - 1:
-			for s in (steps if closed else steps - 1):
-				var s2 := (s + 1) % steps
+			for s in steps - 1:
 				var a := first + r * steps + s
-				var b := first + r * steps + s2
-				var c := first + (r + 1) * steps + s2
+				var b := first + r * steps + s + 1
+				var c := first + (r + 1) * steps + s + 1
 				var d := first + (r + 1) * steps + s
 				st.add_index(a); st.add_index(c); st.add_index(b)
 				st.add_index(a); st.add_index(d); st.add_index(c)
@@ -108,17 +121,18 @@ class Builder extends RefCounted:
 	## rather than as a flat disc catching a hard specular.
 	## `outward` is +1 when this end faces up the Y axis and -1 when it faces
 	## down; the dome and the winding both follow it.
-	func _cap(ring: Dictionary, ring_start: int, segments: int, is_start: bool,
+	## `columns` is the vertex-column count of the ring, which is one more than
+	## the segment count because the seam column is duplicated (see loft).
+	func _cap(ring: Dictionary, ring_start: int, columns: int, is_start: bool,
 			outward := -1.0) -> void:
 		var dome: float = maxf(ring["rx"], ring["rz"]) * 0.55 * outward
 		var pole: Vector3 = ring["pos"] + ring["offset"] + Vector3(0.0, dome, 0.0)
 		var pi := _vertex(pole, Vector2(0.5, 0.0 if is_start else 1.0), ring["bones"],
 			ring["weights"], ring.get("color", Color.BLACK))
 		var flip := outward < 0.0
-		for s in segments:
-			var s2 := (s + 1) % segments
+		for s in columns - 1:
 			var a := ring_start + s
-			var b := ring_start + s2
+			var b := ring_start + s + 1
 			if flip:
 				st.add_index(pi); st.add_index(a); st.add_index(b)
 			else:

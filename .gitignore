@@ -11,3 +11,6 @@ captures/
 # OS / editor
 .DS_Store
 *.swp
+
+# Stray agent scratch output
+tmp/

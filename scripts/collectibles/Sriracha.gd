@@ -90,64 +90,168 @@ func _build() -> void:
 	var weights: Array = [1.0]
 
 	# Body: squat, high-shouldered, with a pinched neck. The silhouette has to
-	# survive being 12 px tall.
+	# survive being 12 px tall, so the shoulder is the shape that carries it —
+	# a straight-sided bottle at that size is a pill.
+	#
+	# More rings than the read strictly needs. This is the object the player
+	# looks at more than any other in the game, and the cost of twelve extra
+	# rings on a mesh that is instanced a thousand times is still nothing
+	# compared to the cost of it looking moulded.
 	var b := MeshForge.Builder.new()
 	b.begin()
 	b.loft([
-		MeshForge.ring(Vector3(0, 0.000, 0), 0.056, 0.056, bones, weights, 3.0),
-		MeshForge.ring(Vector3(0, 0.020, 0), 0.068, 0.068, bones, weights, 2.8),
-		MeshForge.ring(Vector3(0, 0.140, 0), 0.070, 0.070, bones, weights, 2.6),
-		MeshForge.ring(Vector3(0, 0.190, 0), 0.066, 0.066, bones, weights, 2.4),
-		MeshForge.ring(Vector3(0, 0.225, 0), 0.040, 0.040, bones, weights, 2.2),
-		MeshForge.ring(Vector3(0, 0.250, 0), 0.030, 0.030, bones, weights, 2.2),
-	], 14, true, false)
+		MeshForge.ring(Vector3(0, 0.000, 0), 0.050, 0.050, bones, weights, 3.4),
+		MeshForge.ring(Vector3(0, 0.010, 0), 0.062, 0.062, bones, weights, 3.2),
+		MeshForge.ring(Vector3(0, 0.026, 0), 0.069, 0.069, bones, weights, 2.9),
+		MeshForge.ring(Vector3(0, 0.060, 0), 0.071, 0.071, bones, weights, 2.7),
+		MeshForge.ring(Vector3(0, 0.110, 0), 0.071, 0.071, bones, weights, 2.6),
+		MeshForge.ring(Vector3(0, 0.152, 0), 0.070, 0.070, bones, weights, 2.6),
+		MeshForge.ring(Vector3(0, 0.182, 0), 0.066, 0.066, bones, weights, 2.5),
+		MeshForge.ring(Vector3(0, 0.206, 0), 0.058, 0.058, bones, weights, 2.4),
+		MeshForge.ring(Vector3(0, 0.224, 0), 0.046, 0.046, bones, weights, 2.3),
+		MeshForge.ring(Vector3(0, 0.238, 0), 0.036, 0.036, bones, weights, 2.2),
+		MeshForge.ring(Vector3(0, 0.250, 0), 0.031, 0.031, bones, weights, 2.2),
+	], 18, true, false)
 	var body_mesh := b.commit()
 
+	# The sauce is a SEPARATE, shorter loft. A bottle filled to the cap reads as
+	# a solid lump of plastic; the air gap and the line where the liquid stops
+	# are most of what says "there is something in this".
+	var l := MeshForge.Builder.new()
+	l.begin()
+	l.loft([
+		MeshForge.ring(Vector3(0, 0.004, 0), 0.046, 0.046, bones, weights, 3.4),
+		MeshForge.ring(Vector3(0, 0.024, 0), 0.064, 0.064, bones, weights, 2.9),
+		MeshForge.ring(Vector3(0, 0.110, 0), 0.066, 0.066, bones, weights, 2.6),
+		MeshForge.ring(Vector3(0, 0.178, 0), 0.062, 0.062, bones, weights, 2.5),
+		MeshForge.ring(Vector3(0, 0.196, 0), 0.058, 0.058, bones, weights, 2.4),
+	], 18, true, true)
+	var liquid_mesh := l.commit()
+
 	_mesh = MeshInstance3D.new()
-	_mesh.name = "Body"
-	_mesh.mesh = body_mesh
+	_mesh.name = "Sauce"
+	_mesh.mesh = liquid_mesh
 	_mesh.material_override = sauce
 	add_child(_mesh)
 
-	# Glass shell, slightly proud of the sauce, so the sauce glows through it.
+	# Glass shell over the lot. Proud of the sauce so the sauce glows through
+	# it, and it carries the bottle's real silhouette.
 	var shell := MeshInstance3D.new()
 	shell.name = "Glass"
 	shell.mesh = body_mesh
 	shell.material_override = glass
-	shell.scale = Vector3(1.10, 1.02, 1.10)
 	_mesh.add_child(shell)
 
+	# Moulded base ring: a real pressed bottle sits on a rim, not on its belly,
+	# and that rim is the one thing that catches light from below.
+	var base_ring := TorusMesh.new()
+	base_ring.inner_radius = 0.040
+	base_ring.outer_radius = 0.052
+	base_ring.rings = 18
+	base_ring.ring_segments = 6
+	var br := MeshInstance3D.new()
+	br.name = "BaseRim"
+	br.mesh = base_ring
+	br.material_override = glass
+	br.position = Vector3(0, 0.006, 0)
+	_mesh.add_child(br)
+
+	# Neck with a thread. Four shallow torus turns is cheaper than a helix and
+	# at this size nobody can tell the difference.
 	var neck := CylinderMesh.new()
 	neck.top_radius = 0.026
-	neck.bottom_radius = 0.030
-	neck.height = 0.055
-	neck.radial_segments = 12
+	neck.bottom_radius = 0.031
+	neck.height = 0.058
+	neck.radial_segments = 14
 	var n := MeshInstance3D.new()
 	n.name = "Neck"
 	n.mesh = neck
 	n.material_override = glass
-	n.position = Vector3(0, 0.272, 0)
+	n.position = Vector3(0, 0.276, 0)
 	_mesh.add_child(n)
 
+	for i in 3:
+		var thread := TorusMesh.new()
+		thread.inner_radius = 0.026
+		thread.outer_radius = 0.031
+		thread.rings = 14
+		thread.ring_segments = 5
+		var tm := MeshInstance3D.new()
+		tm.name = "Thread%d" % i
+		tm.mesh = thread
+		tm.material_override = glass
+		tm.position = Vector3(0, 0.262 + i * 0.013, 0)
+		_mesh.add_child(tm)
+
+	# The spout insert under the cap: a small warm dot that reads even when the
+	# bottle is a dozen pixels tall, because it is the only saturated thing
+	# above the shoulder.
+	var spout := CylinderMesh.new()
+	spout.top_radius = 0.010
+	spout.bottom_radius = 0.017
+	spout.height = 0.022
+	spout.radial_segments = 10
+	var sp := MeshInstance3D.new()
+	sp.name = "Spout"
+	sp.mesh = spout
+	sp.material_override = sauce
+	sp.position = Vector3(0, 0.306, 0)
+	_mesh.add_child(sp)
+
 	var cap_mesh := CylinderMesh.new()
-	cap_mesh.top_radius = 0.026
-	cap_mesh.bottom_radius = 0.034
-	cap_mesh.height = 0.072
-	cap_mesh.radial_segments = 14
+	cap_mesh.top_radius = 0.030
+	cap_mesh.bottom_radius = 0.035
+	cap_mesh.height = 0.070
+	cap_mesh.radial_segments = 16
 	var c := MeshInstance3D.new()
 	c.name = "Cap"
 	c.mesh = cap_mesh
 	c.material_override = cap
-	c.position = Vector3(0, 0.320, 0)
+	c.position = Vector3(0, 0.322, 0)
 	_mesh.add_child(c)
+
+	# Knurling. Ten ribs round a cap is the detail that makes a cap a cap, and
+	# a MultiMesh means it costs one draw call.
+	var rib := LevelKit.chamfer_mesh(Vector3(0.008, 0.052, 0.010))
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.mesh = rib
+	mm.instance_count = 10
+	for i in 10:
+		var a := TAU * float(i) / 10.0
+		mm.set_instance_transform(i, Transform3D(
+			Basis(Vector3.UP, -a),
+			Vector3(cos(a) * 0.033, 0.322, sin(a) * 0.033)))
+	var knurl := MultiMeshInstance3D.new()
+	knurl.name = "Knurl"
+	knurl.multimesh = mm
+	knurl.material_override = cap
+	_mesh.add_child(knurl)
+
+	# A flat top disc so the cap is closed rather than an open tube.
+	var cap_top := CylinderMesh.new()
+	cap_top.top_radius = 0.030
+	cap_top.bottom_radius = 0.030
+	cap_top.height = 0.008
+	cap_top.radial_segments = 16
+	var ct := MeshInstance3D.new()
+	ct.name = "CapTop"
+	ct.mesh = cap_top
+	ct.material_override = cap
+	ct.position = Vector3(0, 0.358, 0)
+	_mesh.add_child(ct)
 
 	# Paper band with an abstract chilli mark — a curve and a stem, nothing that
 	# could be mistaken for anyone's trademark.
+	#
+	# It is modelled as a wrapped paper label rather than painted on the glass:
+	# a band standing 1 mm proud with a lip top and bottom. That 1 mm is the
+	# difference between a sticker and a bottle, and it costs two cylinders.
 	var band_mesh := CylinderMesh.new()
-	band_mesh.top_radius = 0.0715
-	band_mesh.bottom_radius = 0.0715
-	band_mesh.height = 0.105
-	band_mesh.radial_segments = 16
+	band_mesh.top_radius = 0.0725
+	band_mesh.bottom_radius = 0.0725
+	band_mesh.height = 0.112
+	band_mesh.radial_segments = 18
 	var bd := MeshInstance3D.new()
 	bd.name = "Band"
 	bd.mesh = band_mesh
@@ -155,19 +259,70 @@ func _build() -> void:
 	bd.position = Vector3(0, 0.098, 0)
 	_mesh.add_child(bd)
 
-	var chilli := TorusMesh.new()
-	chilli.inner_radius = 0.016
-	chilli.outer_radius = 0.030
-	chilli.rings = 10
-	chilli.ring_segments = 5
+	for i in 2:
+		var lip := TorusMesh.new()
+		lip.inner_radius = 0.0718
+		lip.outer_radius = 0.0742
+		lip.rings = 18
+		lip.ring_segments = 5
+		var lp := MeshInstance3D.new()
+		lp.name = "BandLip%d" % i
+		lp.mesh = lip
+		lp.material_override = band
+		lp.position = Vector3(0, 0.042 + i * 0.112, 0)
+		_mesh.add_child(lp)
+
+	# A printed rule above and below the mark. At twelve pixels tall this is
+	# two dark lines and that is exactly what a label reads as from across a
+	# yard — the eye wants the horizontal, not the artwork.
+	for i in 2:
+		var rule := TorusMesh.new()
+		rule.inner_radius = 0.0726
+		rule.outer_radius = 0.0736
+		rule.rings = 18
+		rule.ring_segments = 4
+		var rl := MeshInstance3D.new()
+		rl.name = "BandRule%d" % i
+		rl.mesh = rule
+		rl.material_override = mark
+		rl.position = Vector3(0, 0.062 + i * 0.072, 0)
+		_mesh.add_child(rl)
+
+	# The mark itself: a chilli as a tapered curve with a stem, built from a
+	# short loft rather than a torus so it has a point at one end. A ring reads
+	# as a doughnut; a chilli has to taper.
+	var cb := MeshForge.Builder.new()
+	cb.begin()
+	var pod := []
+	for i in 7:
+		var t := float(i) / 6.0
+		# The curve is the whole character of the shape.
+		var ang := lerpf(-0.5, 1.5, t)
+		var r := sin(t * PI) * 0.013 + 0.002
+		pod.append(MeshForge.ring(
+			Vector3(sin(ang) * 0.030, -cos(ang) * 0.030 + 0.030, 0.0),
+			r, r * 0.6, bones, weights, 2.6))
+	cb.loft(pod, 8, true, true)
 	var ch := MeshInstance3D.new()
 	ch.name = "Mark"
-	ch.mesh = chilli
+	ch.mesh = cb.commit()
 	ch.material_override = mark
-	ch.position = Vector3(0, 0.098, 0.070)
-	ch.rotation_degrees = Vector3(90, 0, 24)
-	ch.scale = Vector3(1.0, 1.0, 0.55)
+	ch.position = Vector3(0, 0.082, 0.0735)
+	ch.rotation_degrees = Vector3(90, 0, 0)
 	_mesh.add_child(ch)
+
+	var stem := CylinderMesh.new()
+	stem.top_radius = 0.0035
+	stem.bottom_radius = 0.005
+	stem.height = 0.018
+	stem.radial_segments = 6
+	var st := MeshInstance3D.new()
+	st.name = "MarkStem"
+	st.mesh = stem
+	st.material_override = cap
+	st.position = Vector3(-0.014, 0.112, 0.0735)
+	st.rotation_degrees = Vector3(90, 0, -38)
+	_mesh.add_child(st)
 
 	# A small light so the bottle writes into the volumetrics and lifts whatever
 	# it is sitting on. This is what makes a trail read at distance.
