@@ -146,7 +146,7 @@ static func mood() -> LightingRig.Mood:
 	m.ground_bottom = Color(0.300, 0.368, 0.330)
 	m.sky_energy = 1.30
 	m.sky_curve = 0.22
-	m.ambient_energy = 0.40
+	m.ambient_energy = 0.24
 
 	m.fog_color = Color(0.835, 0.804, 0.741)
 	m.fog_density = 0.00034
@@ -173,7 +173,7 @@ static func mood() -> LightingRig.Mood:
 	m.agx_white = 9.5
 	m.agx_contrast = 1.58
 	m.bounce_energy = 0.33
-	m.bounce_color = Color(0.98, 0.80, 0.62)
+	m.bounce_color = Color(0.98, 0.86, 0.74)
 
 	# Cool the shadows, keep the highlights warm. This is the one lever that
 	# stops five levels sliding into a single orange, and it is the lever
