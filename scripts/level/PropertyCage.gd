@@ -151,17 +151,7 @@ func _burst() -> void:
 	pm.scale_curve = Collectible._shrink_curve()
 	p.process_material = pm
 
-	var quad := QuadMesh.new()
-	quad.size = Vector2(0.10, 0.10)
-	var mat := StandardMaterial3D.new()
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-	mat.albedo_color = Color(1.0, 0.86, 0.58, 0.9)
-	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
-	mat.disable_receive_shadows = true
-	quad.material = mat
-	p.draw_pass_1 = quad
+	p.draw_pass_1 = FXKit.sprite_pass(0.10, Color(1.0, 0.86, 0.58), {"alpha": 0.9})
 
 	add_child(p)
 	p.position = Vector3(0, 1.6, 0)

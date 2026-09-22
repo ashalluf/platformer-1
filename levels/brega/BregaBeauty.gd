@@ -1821,19 +1821,8 @@ func _dust(pos: Vector3, extents: Vector3, amount: int, scale_: float) -> GPUPar
 	pm.turbulence_noise_scale = 2.2
 	p.process_material = pm
 
-	var quad := QuadMesh.new()
-	quad.size = Vector2(scale_, scale_)
-	var dm := StandardMaterial3D.new()
-	dm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	dm.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-	dm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	dm.albedo_color = Color(1.0, 0.86, 0.68, 0.22)
-	dm.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
-	dm.proximity_fade_enabled = true
-	dm.proximity_fade_distance = 1.4
-	dm.disable_receive_shadows = true
-	quad.material = dm
-	p.draw_pass_1 = quad
+	p.draw_pass_1 = FXKit.sprite_pass(scale_, Color(1.0, 0.86, 0.68),
+		{"alpha": 0.22, "proximity": 1.4})
 	add_child(p)
 	return p
 

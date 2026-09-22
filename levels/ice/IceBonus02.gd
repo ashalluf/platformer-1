@@ -678,17 +678,8 @@ func _atmosphere_shaft() -> void:
 	pm.scale_min = 0.5
 	pm.scale_max = 1.6
 	p.process_material = pm
-	var quad := QuadMesh.new()
-	quad.size = Vector2(0.07, 0.07)
-	var mat := StandardMaterial3D.new()
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-	mat.albedo_color = Color(0.92, 0.97, 1.0, 0.5)
-	mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
-	mat.disable_receive_shadows = true
-	quad.material = mat
-	p.draw_pass_1 = quad
+	p.draw_pass_1 = FXKit.sprite_pass(0.07, Color(0.92, 0.97, 1.0),
+		{"alpha": 0.5, "additive": false})
 	add_child(p)
 	p.emitting = true
 
@@ -717,15 +708,8 @@ func _atmosphere_shaft() -> void:
 	npm.scale_min = 1.8
 	npm.scale_max = 4.4
 	near_p.process_material = npm
-	var nquad := QuadMesh.new()
-	nquad.size = Vector2(0.07, 0.07)
-	var nmat := StandardMaterial3D.new()
-	nmat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	nmat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	nmat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-	nmat.albedo_color = Color(0.86, 0.93, 1.0, 0.24)
-	nmat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
-	nmat.disable_receive_shadows = true
-	nquad.material = nmat
-	near_p.draw_pass_1 = nquad
+	# Near flakes are alpha-blended, not additive: they cross in front of a
+	# white glacier, and an additive flake over white is invisible.
+	near_p.draw_pass_1 = FXKit.sprite_pass(0.07, Color(0.86, 0.93, 1.0),
+		{"alpha": 0.24, "additive": false})
 	add_child(near_p)

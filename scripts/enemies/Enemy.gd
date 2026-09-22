@@ -1286,17 +1286,7 @@ func _particles(count: int, color: Color, life: float, dir: Vector3, speed: floa
 	pm.scale_curve = Collectible._shrink_curve()
 	p.process_material = pm
 
-	var quad := QuadMesh.new()
-	quad.size = Vector2(0.06, 0.06)
-	var mat := StandardMaterial3D.new()
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-	mat.albedo_color = color
-	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
-	mat.disable_receive_shadows = true
-	quad.material = mat
-	p.draw_pass_1 = quad
+	p.draw_pass_1 = FXKit.sprite_pass(0.06, color, {"alpha": color.a})
 
 	var root := get_tree().current_scene
 	if root == null:

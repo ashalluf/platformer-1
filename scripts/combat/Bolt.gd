@@ -120,16 +120,7 @@ func _pop() -> void:
 	pm.scale_min = 0.5
 	pm.scale_max = 1.2
 	p.process_material = pm
-	var quad := QuadMesh.new()
-	quad.size = Vector2(0.05, 0.05)
-	var m := StandardMaterial3D.new()
-	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	m.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-	m.albedo_color = Color(tint.r, tint.g, tint.b, 0.6)
-	m.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
-	quad.material = m
-	p.draw_pass_1 = quad
+	p.draw_pass_1 = FXKit.sprite_pass(0.05, tint, {"alpha": 0.6})
 	var root := get_tree().current_scene
 	if root != null:
 		root.add_child(p)

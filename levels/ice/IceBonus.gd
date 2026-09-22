@@ -101,17 +101,7 @@ func _chain_burst() -> void:
 	pm.scale_curve = Collectible._shrink_curve()
 	p.process_material = pm
 
-	var quad := QuadMesh.new()
-	quad.size = Vector2(0.12, 0.12)
-	var mat := StandardMaterial3D.new()
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-	mat.albedo_color = Color(0.85, 0.96, 1.0, 0.95)
-	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
-	mat.disable_receive_shadows = true
-	quad.material = mat
-	p.draw_pass_1 = quad
+	p.draw_pass_1 = FXKit.sprite_pass(0.12, Color(0.85, 0.96, 1.0), {"alpha": 0.95})
 
 	add_child(p)
 	p.global_position = player.global_position + Vector3(0, 1.2, 0)

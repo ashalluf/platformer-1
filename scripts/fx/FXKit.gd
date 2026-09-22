@@ -239,13 +239,18 @@ static func smoke_material(tint: Color, opts: Dictionary = {}) -> ShaderMaterial
 ## Unshaded additive card. Sparks, flashes, tracer-adjacent things — anything
 ## that is light rather than matter. Deliberately a StandardMaterial3D: the
 ## particle shader billboards by hand, which fights velocity alignment.
+## `tex` defaults to the soft radial falloff, and that default matters more
+## than it looks: an additive billboard quad with no texture is a *hard square*,
+## and at particle sizes it reads as confetti rather than light. Every hand-rolled
+## spark material in this project had that bug until they were all routed here.
+## Pass a texture to override it; you cannot get a square back by accident.
 static func spark_material(tint: Color, alpha := 0.55, tex: Texture2D = null) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
 	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	m.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
 	m.albedo_color = Color(tint.r, tint.g, tint.b, alpha)
-	m.albedo_texture = tex
+	m.albedo_texture = tex if tex != null else soft_texture()
 	m.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
 	m.disable_receive_shadows = true
 	m.vertex_color_use_as_albedo = true
@@ -356,6 +361,27 @@ static func _quad(size: float, mat: Material, aspect := 1.0) -> QuadMesh:
 	q.size = Vector2(size * aspect, size)
 	q.material = mat
 	return q
+
+
+## The house particle draw pass. Every billboard sprite in the game should come
+## from here rather than assembling its own QuadMesh + StandardMaterial3D, for
+## one blunt reason: a hand-rolled additive billboard with no albedo_texture is
+## a hard-edged square, and sixteen sites in this project shipped that way.
+##
+## `opts` keys, all optional:
+##   alpha       0..1 on the tint                      (default 0.55)
+##   additive    false for alpha blending, e.g. snow   (default true)
+##   proximity   metres of fade as the sprite nears a surface (default 0.25)
+##   aspect      width/height, for streaks             (default 1.0)
+##   shape       Texture2D override of the soft falloff
+static func sprite_pass(size: float, tint: Color, opts: Dictionary = {}) -> QuadMesh:
+	var m := spark_material(tint, opts.get("alpha", 0.55), opts.get("shape", null))
+	if not opts.get("additive", true):
+		# Alpha blending, not additive. Snow and steam read as *matter* and must
+		# be able to sit darker than what is behind them; additive can only add.
+		m.blend_mode = BaseMaterial3D.BLEND_MODE_MIX
+	m.proximity_fade_distance = opts.get("proximity", 0.25)
+	return _quad(size, m, opts.get("aspect", 1.0))
 
 
 static func shrink_curve(from := 1.0, to := 0.0, mid := -1.0) -> CurveTexture:
@@ -945,12 +971,12 @@ static func shockwave(radius := 1.4, life := 0.3, tint := Color(1.0, 0.92, 0.80)
 ## attention is a level's worth of noise.
 ##
 ## Adopt in: Collectible._burst (the base pop) — via a pool of 8.
-static func sriracha_pop(tint := SRIRACHA_TINT, scale := 1.0) -> Node3D:
+static func sriracha_pop(tint := SRIRACHA_TINT, scale := 1.0, count := 10) -> Node3D:
 	var root := Timed.new()
 	root.name = "CollectPop"
 	root.life = 0.6
 
-	var p := _burst(8, 0.24, 2.0)
+	var p := _burst(count, 0.24, 2.0)
 	var pm := ParticleProcessMaterial.new()
 	pm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
 	pm.emission_sphere_radius = 0.07 * scale
@@ -973,7 +999,7 @@ static func sriracha_pop(tint := SRIRACHA_TINT, scale := 1.0) -> Node3D:
 	flash.tint = tint
 	flash.alpha = 0.5
 	flash.additive = true
-	flash.size = Vector2.ONE * 0.5 * scale
+	flash.size = Vector2.ONE * 0.5 * scale * (0.85 + 0.15 * sqrt(float(count) / 10.0))
 	flash.from_scale = Vector3(0.35, 0.35, 1.0)
 	flash.to_scale = Vector3(1.25, 1.25, 1.0)
 	flash.life = 0.16

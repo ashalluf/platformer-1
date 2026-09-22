@@ -223,16 +223,8 @@ func _impact(at: Vector3, normal: Vector3) -> void:
 	pm.scale_max = 1.3
 	p.process_material = pm
 
-	var quad := QuadMesh.new()
-	quad.size = Vector2(0.05, 0.05)
-	var mat := StandardMaterial3D.new()
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.albedo_color = Color(0.85, 0.78, 0.66, 0.85)
-	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
-	mat.disable_receive_shadows = true
-	quad.material = mat
-	p.draw_pass_1 = quad
+	p.draw_pass_1 = FXKit.sprite_pass(0.05, Color(0.85, 0.78, 0.66),
+		{"alpha": 0.85, "additive": false})
 
 	var root := get_tree().current_scene
 	if root == null:

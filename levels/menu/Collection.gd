@@ -461,17 +461,7 @@ func _build_dust(i: int) -> void:
 	pm.turbulence_noise_scale = 2.6
 	pm.color = Color(1.0, 0.86, 0.66, 0.55)
 
-	var mat := StandardMaterial3D.new()
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-	mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
-	mat.vertex_color_use_as_albedo = true
-	mat.albedo_color = Color(1.0, 0.88, 0.70, 0.5)
-	mat.disable_receive_shadows = true
-	var quad := QuadMesh.new()
-	quad.size = Vector2(0.013, 0.013)
-	quad.material = mat
+	var quad := FXKit.sprite_pass(0.013, Color(1.0, 0.88, 0.70), {"alpha": 0.5})
 
 	var ps := GPUParticles3D.new()
 	ps.name = "Dust%d" % i

@@ -796,17 +796,8 @@ func _atmosphere_ice() -> void:
 	pm.scale_max = 1.6
 	p.process_material = pm
 
-	var quad := QuadMesh.new()
-	quad.size = Vector2(0.075, 0.075)
-	var mat := StandardMaterial3D.new()
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-	mat.albedo_color = Color(0.86, 0.95, 1.0, 0.55)
-	mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
-	mat.disable_receive_shadows = true
-	quad.material = mat
-	p.draw_pass_1 = quad
+	p.draw_pass_1 = FXKit.sprite_pass(0.075, Color(0.86, 0.95, 1.0),
+		{"alpha": 0.55, "additive": false})
 	add_child(p)
 
 	# A second flurry between the camera and the action. Big, slow, soft flakes
@@ -836,17 +827,10 @@ func _atmosphere_ice() -> void:
 	npm.scale_min = 1.6
 	npm.scale_max = 4.2
 	near_p.process_material = npm
-	var nquad := QuadMesh.new()
-	nquad.size = Vector2(0.075, 0.075)
-	var nmat := StandardMaterial3D.new()
-	nmat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	nmat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	nmat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-	nmat.albedo_color = Color(0.80, 0.90, 1.0, 0.26)
-	nmat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
-	nmat.disable_receive_shadows = true
-	nquad.material = nmat
-	near_p.draw_pass_1 = nquad
+	# Alpha-blended, not additive: these cross in front of a white glacier, and
+	# an additive flake over white adds nothing.
+	near_p.draw_pass_1 = FXKit.sprite_pass(0.075, Color(0.80, 0.90, 1.0),
+		{"alpha": 0.26, "additive": false})
 	add_child(near_p)
 
 	var fv := FogVolume.new()

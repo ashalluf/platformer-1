@@ -435,16 +435,8 @@ func _build_atmosphere() -> void:
 	pm.turbulence_noise_scale = 2.4
 	p.process_material = pm
 
-	var quad := QuadMesh.new()
-	quad.size = Vector2(0.045, 0.045)
-	var mat := StandardMaterial3D.new()
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.albedo_color = Color(0.92, 0.97, 1.0, 0.55)
-	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
-	mat.disable_receive_shadows = true
-	quad.material = mat
-	p.draw_pass_1 = quad
+	p.draw_pass_1 = FXKit.sprite_pass(0.045, Color(0.92, 0.97, 1.0),
+		{"alpha": 0.55, "additive": false})
 	p.position = Vector3(0.0, TOP_Y + 3.0, 0.0)
 	geometry.add_child(p)
 	p.emitting = true

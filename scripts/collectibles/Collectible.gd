@@ -99,51 +99,14 @@ func _pop_and_free() -> void:
 
 
 func _burst() -> void:
-	var p := GPUParticles3D.new()
-	p.amount = burst_count
-	p.lifetime = 0.26
-	p.one_shot = true
-	p.explosiveness = 1.0
-	p.local_coords = false
-	p.visibility_aabb = AABB(Vector3(-3, -3, -3), Vector3(6, 6, 6))
-
-	var pm := ParticleProcessMaterial.new()
-	pm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
-	pm.emission_sphere_radius = 0.08
-	pm.direction = Vector3(0, 1, 0)
-	pm.spread = 180.0
-	# The old 3–7.5 threw the sparks half a metre in every direction, and
-	# additive sparks on an expanding shell pile up at its rim: the burst read
-	# as a white ring with a hole in it, which is not a spark burst.
-	pm.initial_velocity_min = 1.5
-	pm.initial_velocity_max = 3.4
-	pm.gravity = Vector3(0, -7.0, 0)
-	pm.damping_min = 8.0
-	pm.damping_max = 16.0
-	pm.scale_min = 0.6
-	pm.scale_max = 1.5
-	pm.scale_curve = _shrink_curve()
-	p.process_material = pm
-
-	var quad := QuadMesh.new()
-	quad.size = Vector2(0.045, 0.045)
-	var mat := StandardMaterial3D.new()
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-	mat.albedo_color = Color(burst_color.r, burst_color.g, burst_color.b, 0.55)
-	mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
-	mat.disable_receive_shadows = true
-	quad.material = mat
-	p.draw_pass_1 = quad
-
+	# This used to hand-roll its own particle system, and its draw pass was an
+	# untextured additive quad — i.e. every Sriracha in the game popped into
+	# hard white squares. FXKit.sriracha_pop() is the same burst with a soft
+	# falloff and a centre flash, and it is the one place to tune it.
 	var root := get_tree().current_scene
 	if root == null:
 		return
-	root.add_child(p)
-	p.global_position = global_position
-	p.emitting = true
-	p.finished.connect(p.queue_free)
+	FXKit.spawn(root, FXKit.sriracha_pop(burst_color, 1.0, burst_count), global_position)
 
 
 static func _shrink_curve() -> CurveTexture:
