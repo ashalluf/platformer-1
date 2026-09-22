@@ -60,15 +60,17 @@ func _mood() -> LightingRig.Mood:
 	# The key comes straight down the shaft. Everything else is bounce off blue
 	# ice, which is why the walls go violet as they recede.
 	mood.sun_angles = Vector2(-78.0, 20.0)
+
+	# --- contrast budget (see LightingRig.Mood.set_contrast) ---
+	# Same snow budget as IceBonus01. Measured 1.6:1, 0.0% shadow.
+	mood.set_contrast(3.4, 3.2, 0.78)
 	mood.sun_color = Color(0.92, 0.97, 1.0)
-	mood.sun_energy = 3.4
 	mood.sun_angular_distance = 0.5
 	mood.sun_fog_energy = 4.5
 	mood.sun_disc_size = 0.0
 
 	mood.fill_angles = Vector2(12.0, -150.0)
 	mood.fill_color = Color(0.30, 0.38, 0.78)
-	mood.fill_energy = 0.60
 
 	mood.rim_angles = Vector2(-4.0, 152.0)
 	mood.rim_color = Color(0.72, 0.92, 1.0)
@@ -82,20 +84,18 @@ func _mood() -> LightingRig.Mood:
 	mood.sky_horizon = Color(0.420, 0.560, 0.780)
 	mood.ground_horizon = Color(0.120, 0.170, 0.300)
 	mood.ground_bottom = Color(0.030, 0.045, 0.100)
-	mood.sky_energy = 1.3
 	mood.sky_curve = 0.30
-	mood.ambient_energy = 0.36
 
 	mood.fog_color = Color(0.480, 0.620, 0.840)
-	mood.fog_density = 0.0055
+	mood.fog_density = 0.0038
 	mood.fog_sun_scatter = 0.40
 	mood.fog_emission = Color(0.06, 0.10, 0.22)
 	mood.fog_anisotropy = 0.70
-	mood.volumetric_density = 0.0070
+	mood.volumetric_density = 0.0022
 
 	# The far shoulder and the peaks beyond the rim are modelled, so they get a
 	# real lens response rather than sitting sharp at two hundred metres.
-	mood.dof_distance = 56.0
+	mood.dof_distance = 88.0
 	mood.dof_transition = 48.0
 	mood.dof_amount = 0.10
 
@@ -104,7 +104,7 @@ func _mood() -> LightingRig.Mood:
 	mood.exposure = 0.90
 	mood.agx_white = 9.5
 	mood.agx_contrast = 1.45
-	mood.fog_aerial = 0.70
+	mood.fog_aerial = 0.42
 	mood.glow_intensity = 0.50
 	mood.glow_hdr_threshold = 1.30
 	mood.adjustment_saturation = 1.12

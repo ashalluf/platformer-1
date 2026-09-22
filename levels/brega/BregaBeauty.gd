@@ -97,9 +97,13 @@ func _mood() -> LightingRig.Mood:
 	# which is exactly where the live flare's lattice stands. The sun therefore
 	# arrives broken into pieces by the plant that killed this town, instead of
 	# arriving as a smear off the right edge. See deviation 2 in the header.
-	m.sun_angles = Vector2(6.0, 32.0)
+	m.sun_angles = Vector2(-6.0, 32.0)   ## negative == above the horizon
+
+	# --- contrast budget (see LightingRig.Mood.set_contrast) ---
+	# The benchmark and the level must grade identically or the benchmark is
+	# not a benchmark. Same budget as BregaKit.
+	m.set_contrast(3.2, 5.0, 0.6)
 	m.sun_color = Color(1.0, 0.760, 0.520)      # ~2900 K: the sun on the water
-	m.sun_energy = 2.8
 	m.sun_angular_distance = 1.1
 	# A disc you can actually see is the point now that something is standing in
 	# front of it. 0.34 deg was 9 px at 900 and read as a stuck highlight.
@@ -118,7 +122,6 @@ func _mood() -> LightingRig.Mood:
 	# and pushed bluer, so the shaded wall reads COOL grey against a warm sky.
 	m.fill_angles = Vector2(18.0, -28.0)
 	m.fill_color = Color(0.480, 0.580, 0.790)
-	m.fill_energy = 0.76
 
 	# Rim: hero layer only. Swung round to sit with the new key azimuth, or the
 	# rim lands on the wrong edge of him and reads as a second light.
@@ -141,12 +144,10 @@ func _mood() -> LightingRig.Mood:
 	m.sky_horizon = Color(1.000, 0.700, 0.420)  # #C97B45
 	m.ground_horizon = Color(0.780, 0.835, 0.820)
 	m.ground_bottom = Color(0.300, 0.368, 0.330)
-	m.sky_energy = 1.30
 	m.sky_curve = 0.22
 	# Halved. Volumetric density is a global and it was doing the job of eight
 	# local volumes badly — everything past 30 units went to one value.
 	m.volumetric_density = 0.00034
-	m.ambient_energy = 0.40
 
 	m.fog_color = Color(0.960, 0.705, 0.585)
 	m.fog_density = 0.0075

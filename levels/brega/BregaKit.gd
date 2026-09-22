@@ -110,9 +110,14 @@ static func palette() -> Dictionary:
 static func mood() -> LightingRig.Mood:
 	var m := LightingRig.Mood.new()
 
-	m.sun_angles = Vector2(6.0, 32.0)
+	m.sun_angles = Vector2(-6.0, 32.0)   ## negative == above the horizon
+
+	# --- contrast budget (see LightingRig.Mood.set_contrast) ---
+	# Low sun at 6 degrees, big bright sky over water. Measured 3.7:1 with a
+	# median of 0.961 while the sun was under the horizon; with the sun back
+	# above it, 5:1 is a real sunset.
+	m.set_contrast(3.2, 5.0, 0.6)
 	m.sun_color = Color(1.0, 0.760, 0.520)      # ~2900 K: the sun on the water
-	m.sun_energy = 2.8
 	m.sun_angular_distance = 1.1
 	# 3.0 is a beauty-frame number. In gameplay the camera spends its life
 	# looking along the key, and at that energy the volumetrics put a hot white
@@ -126,7 +131,6 @@ static func mood() -> LightingRig.Mood:
 	# the benchmark's colour script exactly — see BregaBeauty._mood.
 	m.fill_angles = Vector2(18.0, -28.0)
 	m.fill_color = Color(0.480, 0.580, 0.790)
-	m.fill_energy = 0.54
 
 	m.rim_angles = Vector2(8.0, 44.0)
 	m.rim_color = Color(1.0, 0.800, 0.580)
@@ -144,9 +148,7 @@ static func mood() -> LightingRig.Mood:
 	m.sky_horizon = Color(1.000, 0.700, 0.420)
 	m.ground_horizon = Color(0.780, 0.835, 0.820)
 	m.ground_bottom = Color(0.300, 0.368, 0.330)
-	m.sky_energy = 1.30
 	m.sky_curve = 0.22
-	m.ambient_energy = 0.40
 
 	m.fog_color = Color(0.835, 0.804, 0.741)
 	m.fog_density = 0.0070

@@ -52,15 +52,19 @@ func _mood() -> LightingRig.Mood:
 	# Twilight over ice: a low cold key, a strong sky, and a violet fill. The
 	# whole level is lit to make white read as white and ice read as deep.
 	mood.sun_angles = Vector2(-8.0, 138.0)
+
+	# --- contrast budget (see LightingRig.Mood.set_contrast) ---
+	# Snow genuinely does bounce, so this is the one place a low ratio is
+	# correct — but it measured 1.5:1 with 0.0% of the frame in shadow, which
+	# is not bounce, it is no key. 3.2:1 keeps the seracs modelled.
+	mood.set_contrast(3.0, 3.2, 0.78)
 	mood.sun_color = Color(0.76, 0.90, 1.0)
-	mood.sun_energy = 2.3
 	mood.sun_angular_distance = 0.9
 	mood.sun_fog_energy = 2.6
 	mood.sun_disc_size = 2.4
 
 	mood.fill_angles = Vector2(22.0, -40.0)
 	mood.fill_color = Color(0.46, 0.44, 0.78)
-	mood.fill_energy = 0.55
 
 	mood.rim_angles = Vector2(-6.0, 106.0)
 	mood.rim_color = Color(0.70, 0.94, 1.0)
@@ -74,20 +78,22 @@ func _mood() -> LightingRig.Mood:
 	mood.sky_horizon = Color(0.302, 0.482, 0.690)
 	mood.ground_horizon = Color(0.322, 0.404, 0.522)
 	mood.ground_bottom = Color(0.086, 0.114, 0.184)
-	mood.sky_energy = 0.9
 	mood.sky_curve = 0.16
-	mood.ambient_energy = 0.34
 
 	mood.fog_color = Color(0.588, 0.729, 0.878)
 	mood.fog_density = 0.0040
 	mood.fog_sun_scatter = 0.55
 	mood.fog_emission = Color(0.10, 0.16, 0.28)
 	mood.fog_anisotropy = 0.72
-	mood.volumetric_density = 0.0045
+	# 0.0045 was eleven times Brega's. Volumetric fog is rendered at a low
+	# internal resolution, so at that density in an already-white scene it does
+	# not read as atmosphere, it reads as the whole frame being out of focus —
+	# which is exactly what the capture showed.
+	mood.volumetric_density = 0.0018
 
 	# The far bands are modelled, not painted, so they get a real lens response:
 	# past the mid field the eye should not be able to resolve an edge.
-	mood.dof_distance = 74.0
+	mood.dof_distance = 96.0
 	mood.dof_transition = 58.0
 	mood.dof_amount = 0.09
 
@@ -102,7 +108,10 @@ func _mood() -> LightingRig.Mood:
 	mood.agx_contrast = 1.45
 	# Aerial perspective: the ice levels are built in receding bands and this is
 	# what separates them.
-	mood.fog_aerial = 0.70
+	# Aerial perspective tints distance toward the sky. In a desert that gives
+	# depth; in a white scene under a white sky it dissolves the serac field
+	# into the background entirely. Half as much, so the ridgelines survive.
+	mood.fog_aerial = 0.42
 	mood.glow_intensity = 0.55
 	mood.glow_hdr_threshold = 1.35
 	mood.adjustment_saturation = 1.14

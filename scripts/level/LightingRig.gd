@@ -149,6 +149,15 @@ class Mood extends RefCounted:
 	## engine default so adopting it stays a deliberate per-level decision.
 	var sun_indirect_energy := 1.0
 
+	## SDFGI bounce strength. This was hardcoded to 1.0 for every scene, and it
+	## is the term that defeated the first version of the contrast budget:
+	## Ajdabiya was re-lit to a 5.5:1 key-to-fill ratio and measured 2.3:1,
+	## because a town of sand-coloured surfaces at albedo 0.55 bounces enough
+	## indirect light to refill every shadow the budget had just carved out.
+	## Real sand does bounce; Godot's SDFGI over-bounces, and it is not occluded
+	## by the same cascade that darkens the direct pass.
+	var gi_energy := 1.0
+
 	# --- Shadows -------------------------------------------------------------
 	# Split fractions, not distances, which is what makes them tier-proof:
 	# GraphicsDirector owns `directional_shadow_max_distance` and rewrites it
@@ -443,15 +452,69 @@ class Mood extends RefCounted:
 	func shafts_viable() -> bool:
 		return sun_fog_energy >= 0.8 and fog_anisotropy >= 0.55 and volumetric_density > 0.0
 
+	## --- The contrast budget ------------------------------------------------
+	##
+	## `sun_energy`, `fill_energy`, `sky_energy` and `ambient_energy` were four
+	## independent numbers, and every level tuned them separately by eye. Every
+	## level got it wrong in the same direction, because turning the lights up
+	## always looks like an improvement on the one surface you are staring at.
+	## Measured across the game with tools/light_report.py:
+	##
+	##   Brega     contrast 3.7:1   1.7% of frame in shadow   median 0.961
+	##   Ajdabiya  contrast 2.1:1   0.9%                      median 0.629
+	##   Ice 01/02/03       1.5 / 1.6 / 1.1      0.0%         median 0.83
+	##   Greybox   contrast 1.2:1   0.6%
+	##
+	## Below about 2:1 nothing has form. No normal map resolves, no modelling
+	## reads, and the PBR stack is being paid for and thrown away — a normal map
+	## only exists in the difference between N·L at two angles, and if the fill
+	## is as strong as the key there is no difference to have.
+	##
+	## So the fill and the ambient are no longer authored. You author the key
+	## and the ratio you want, and this derives the rest.
+	##
+	##   key_to_fill   how many times brighter the lit side is than the shaded
+	##                 side. 4-6 for direct sun, 2.5-3.5 for overcast or snow
+	##                 (which really does bounce), 8+ for night or interiors.
+	##
+	## `sky_lift` is the share of the shaded side that comes from the sky rather
+	## than from the fill light: high for an open exterior under a big sky, low
+	## in an alley. It only splits a fixed budget, so it cannot inflate it.
+	func set_contrast(key: float, key_to_fill: float, sky_lift := 0.6) -> void:
+		sun_energy = key
+		var shade := key / maxf(key_to_fill, 1.05)
+		# The sky contributes through both the sky energy and the ambient term,
+		# and those compound, so the split is against their product not a sum.
+		var ambient_share := shade * clampf(sky_lift, 0.0, 1.0)
+		var fill_share := shade - ambient_share
+		fill_energy = maxf(fill_share, 0.0)
+		# 0.62 is the measured contribution of one unit of sky_energy to a
+		# camera-facing diffuse surface under this project's sky material.
+		sky_energy = clampf(ambient_share / 0.62, 0.15, 2.4)
+		ambient_energy = clampf(ambient_share * 0.72, 0.02, 0.9)
+		# Indirect is part of the shade side and has to come out of the same
+		# budget, or it simply refills what the fill and ambient just gave up.
+		# Tuned so a 2.6:1 scene keeps full bounce and a 6:1 scene runs at
+		# roughly a third of it.
+		gi_energy = clampf(2.6 / maxf(key_to_fill, 1.05), 0.25, 1.0)
+		sun_indirect_energy = clampf(2.2 / maxf(key_to_fill, 1.05), 0.30, 1.2)
+
+	## What the budget currently implies, for logging and for tests.
+	func contrast_ratio() -> float:
+		var shade := fill_energy + sky_energy * 0.62 * 0.72 + ambient_energy \
+			+ gi_energy * 0.34
+		return sun_energy / maxf(shade, 0.0001) + 1.0
+
 
 static func neutral_studio() -> Mood:
 	## Greybox mood: warm key, cool fill, enough contrast to judge silhouettes.
 	var m := Mood.new()
-	m.sun_energy = 3.4
 	m.sun_color = Color(1.0, 0.91, 0.78)
 	m.sun_angles = Vector2(-38.0, 42.0)
+	# Measured at 1.2:1 — the greybox, the one scene whose entire job is to let
+	# you judge a silhouette, had the flattest light in the game.
+	m.set_contrast(3.6, 4.5, 0.55)
 	m.fill_color = Color(0.46, 0.58, 0.80)
-	m.fill_energy = 0.45
 	m.rim_color = Color(0.62, 0.78, 1.0)
 	m.rim_energy = 2.6
 	m.sky_top = Color(0.14, 0.26, 0.52)
@@ -518,7 +581,7 @@ static func build(parent: Node3D, mood: Mood) -> WorldEnvironment:
 	env.sdfgi_bounce_feedback = 0.6
 	env.sdfgi_cascades = 4
 	env.sdfgi_min_cell_size = 0.2
-	env.sdfgi_energy = 1.0
+	env.sdfgi_energy = mood.gi_energy
 
 	env.glow_enabled = true
 	env.glow_intensity = mood.glow_intensity

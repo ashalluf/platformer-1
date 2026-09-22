@@ -93,8 +93,12 @@ func _mood() -> LightingRig.Mood:
 	# metres of wall are lit and everything below is bounce. Two stops of
 	# separation between the first shelf and the last, for free.
 	mood.sun_angles = Vector2(-58.0, 34.0)
+
+	# --- contrast budget (see LightingRig.Mood.set_contrast) ---
+	# The dimmest of the three by design — but 1.1:1 is not dim, it is flat.
+	# 3.0:1 at a lower key keeps it the coldest and softest of the set.
+	mood.set_contrast(2.6, 3.0, 0.8)
 	mood.sun_color = Color(0.96, 0.94, 1.0)
-	mood.sun_energy = 1.8
 	mood.sun_angular_distance = 0.7
 	mood.sun_fog_energy = 3.2
 	mood.sun_disc_size = 0.0
@@ -104,7 +108,6 @@ func _mood() -> LightingRig.Mood:
 	# that impossible cyan.
 	mood.fill_angles = Vector2(20.0, -140.0)
 	mood.fill_color = Color(0.26, 0.52, 0.86)
-	mood.fill_energy = 0.46
 	mood.bounce_energy = 0.28
 	mood.bounce_color = Color(0.46, 0.66, 0.92)
 
@@ -120,12 +123,10 @@ func _mood() -> LightingRig.Mood:
 	mood.sky_horizon = Color(0.62, 0.74, 0.92)
 	mood.ground_horizon = Color(0.10, 0.20, 0.38)
 	mood.ground_bottom = Color(0.015, 0.035, 0.085)
-	mood.sky_energy = 0.85
 	mood.sky_curve = 0.26
 	# Ambient is the enemy of a slot canyon: it is the one light with no
 	# direction, and a place defined entirely by how deep you are needs every
 	# light in it to fall off.
-	mood.ambient_energy = 0.16
 
 	# Fog is charged per unit of DEPTH, and this level is a hundred and ten
 	# units deep. The first pass ran 0.0075 / 0.030 — Brega's numbers multiplied
@@ -135,7 +136,7 @@ func _mood() -> LightingRig.Mood:
 	mood.fog_color = Color(0.30, 0.46, 0.72)
 	mood.fog_density = 0.0016
 	mood.fog_sun_scatter = 0.22
-	mood.volumetric_density = 0.0030
+	mood.volumetric_density = 0.0014
 	mood.fog_anisotropy = 0.62
 
 	mood.glow_intensity = 1.10

@@ -184,8 +184,13 @@ static func mood() -> LightingRig.Mood:
 	# player's shoulder, the street is lit, and the shadows fall away to the
 	# left across everything he has to read.
 	m.sun_angles = Vector2(-47.0, 38.0)
+
+	# --- contrast budget (see LightingRig.Mood.set_contrast) ---
+	# Mid-morning direct sun on a town street, which is the highest-contrast
+	# condition in the game. It measured 2.1:1 with 0.9% of the frame in
+	# shadow — no shadow at all, and no normal map could resolve.
+	m.set_contrast(3.6, 5.5, 0.58)
 	m.sun_color = Color(1.0, 0.925, 0.815)     # ~4800 K, two hours after dawn
-	m.sun_energy = 2.3
 	m.sun_angular_distance = 0.6
 	m.sun_disc_size = 0.30
 	m.sun_fog_energy = 0.9
@@ -194,7 +199,6 @@ static func mood() -> LightingRig.Mood:
 	# Sky into the shadow side, which at this hour is a hard blue.
 	m.fill_angles = Vector2(-26.0, -168.0)
 	m.fill_color = Color(0.360, 0.500, 0.780)
-	m.fill_energy = 0.80
 
 	m.rim_angles = Vector2(-14.0, 196.0)
 	m.rim_color = Color(1.0, 0.880, 0.720)
@@ -214,9 +218,7 @@ static func mood() -> LightingRig.Mood:
 	m.sky_horizon = Color(0.870, 0.910, 0.950)
 	m.ground_horizon = Color(0.520, 0.470, 0.396)
 	m.ground_bottom = Color(0.270, 0.240, 0.205)
-	m.sky_energy = 1.35
 	m.sky_curve = 0.20
-	m.ambient_energy = 0.44
 
 	# Depth fog carries the four town bands apart. At 0.00055 they all sat on
 	# the same plane and the skyline read as a decal; this is still gentle

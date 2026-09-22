@@ -199,7 +199,11 @@ static func _brega_sunset() -> Dictionary:
 		"dust_height": 0.26,
 
 		# 6 degrees: the disc is up, but only just.
-		"sun_direction": sun_direction(6.0, 32.0),
+		# -6.0, not 6.0: pitch is negative above the horizon (see sun_direction).
+		# At +6 this sunset had its sun six degrees UNDER the ground for the whole
+		# of the level's life, which is why Brega measured a median value of 0.961
+		# — every upward-facing surface was lit by sky and GI alone.
+		"sun_direction": sun_direction(-6.0, 32.0),
 		"sun_color": Color("#ffdca6"),
 		"sun_intensity": 5.6,
 		"sun_angular_radius": 1.5,
