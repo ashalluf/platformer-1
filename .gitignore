@@ -8,6 +8,9 @@ export_presets.cfg
 # Capture output (screenshots worth keeping live in docs/screenshots/)
 captures/
 
+# Export output (builds are artifacts, not source)
+build/
+
 # OS / editor
 .DS_Store
 *.swp
