@@ -28,22 +28,25 @@ class_name FoliageKit
 
 const SHADER := preload("res://shaders/foliage_kit.gdshader")
 
-# Palette straight out of docs/ART_DIRECTION.md. Nothing here may exceed the
-# red-sector chroma cap; the bougainvillea sits at hue ~325 (magenta), which is
-# outside the reserved 340-25 band, and it is the one saturated thing allowed in
-# an Ajdabiya frame.
-const FROND := Color(0.420, 0.557, 0.306)        # #6B8E4E date/fan palm
-const FROND_TIP := Color(0.560, 0.580, 0.330)    # sun-bleached frond tips
-const FICUS := Color(0.173, 0.290, 0.180)        # #2C4A2E street ficus
-const FICUS_TIP := Color(0.290, 0.400, 0.220)
-const EUCALYPT := Color(0.490, 0.545, 0.416)     # #7D8B6A half-dead eucalyptus
-const TAMARISK := Color(0.541, 0.588, 0.514)     # #8A9683
-const HALOPHYTE := Color(0.561, 0.628, 0.549)    # #8FA08C
-const DRY_STRAW := Color(0.620, 0.545, 0.365)    # dead everything
+# The green-mountain palette. This was a desert set -- ficus at #2C4A2E is
+# nearly black, eucalyptus and tamarisk were grey-greens, and there is a
+# constant here literally named DRY_STRAW for "dead everything". Under the old
+# S 0.58 chroma cap it could not have been anything else. The direction is now
+# Jebel Akhdar, the genuinely forested side of eastern Libya, so the greens are
+# allowed to be green. Value spread is kept wide -- a lush mass still needs a
+# dark side, or it reads as one flat sheet of colour.
+const FROND := Color(0.360, 0.700, 0.280)        # date/fan palm
+const FROND_TIP := Color(0.620, 0.840, 0.360)    # sunlit frond tips
+const FICUS := Color(0.120, 0.450, 0.210)        # deep street ficus
+const FICUS_TIP := Color(0.310, 0.680, 0.290)
+const EUCALYPT := Color(0.400, 0.680, 0.390)
+const TAMARISK := Color(0.450, 0.700, 0.440)
+const HALOPHYTE := Color(0.500, 0.750, 0.480)
+const DRY_STRAW := Color(0.720, 0.650, 0.360)    # the dry end, kept for contrast
 const BARK := Color(0.355, 0.310, 0.255)
 const BARK_PALE := Color(0.560, 0.530, 0.470)    # whitewashed / silvered
-const BOUGAINVILLEA := Color(0.745, 0.180, 0.490)
-const DATE_FRUIT := Color(0.620, 0.360, 0.150)
+const BOUGAINVILLEA := Color(0.880, 0.140, 0.520)
+const DATE_FRUIT := Color(0.850, 0.430, 0.130)
 
 ## Per-species wind. Different plants have different natural frequencies and it
 ## is the fastest way to tell two green masses apart in motion: a palm crown is

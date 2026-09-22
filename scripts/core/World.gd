@@ -66,9 +66,21 @@ static func entry(chain_id: String) -> Entry:
 	return null
 
 
-## Index of the furthest level the player may enter: everything cleared, plus
-## the next one. Levels that are not built yet stop the line.
+## How many levels the player may enter.
+##
+## Everything built is open from the first run. The staged unlock -- cleared
+## levels plus the next one -- was gating a game whose whole point right now is
+## being looked at, and a player who wants to see the ice levels or the world
+## finale should not have to earn their way back to them every session.
+## `World.world_one()` still stops the line at whatever is not built yet, so
+## this can never open a door onto a level that does not exist.
 static func unlocked_count() -> int:
+	return world_one().size()
+
+
+## The staged version, kept because a progression game will want it back: the
+## furthest level reached is everything cleared, plus the next one.
+static func staged_unlock_count() -> int:
 	var list := world_one()
 	var n := 1
 	for i in list.size():
