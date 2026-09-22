@@ -184,8 +184,8 @@ static func mood() -> LightingRig.Mood:
 	m.grade_strength = 0.80
 	m.glow_intensity = 0.12
 	m.glow_hdr_threshold = 2.2
-	m.adjustment_saturation = 1.68
-	m.adjustment_contrast = 1.16
+	m.adjustment_saturation = 1.12
+	m.adjustment_contrast = 1.10
 	m.dof_near_distance = 0.0
 	m.dof_distance = 0.0
 	return m

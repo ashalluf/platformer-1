@@ -184,11 +184,11 @@ func _mood() -> LightingRig.Mood:
 	# is already there, it cannot put blue into a shadow that has none.
 	m.grade_shadow_tint = Color(0.34, 0.42, 0.72)
 	m.grade_highlight_tint = Color(0.84, 0.71, 0.47)
-	m.grade_strength = 0.92
+	m.grade_strength = 0.74
 	m.glow_intensity = 0.12
 	m.glow_hdr_threshold = 2.2
-	m.adjustment_saturation = 1.72
-	m.adjustment_contrast = 1.18
+	m.adjustment_saturation = 1.14
+	m.adjustment_contrast = 1.12
 	return m
 
 
