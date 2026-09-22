@@ -1322,10 +1322,24 @@ static func street_dressing(parent: Node3D, mats: Dictionary,
 	# flat slab across the bottom of the frame is its own kind of dead: the
 	# paved walk the arcade stands on, then the unmade dust verge beyond it
 	# where the town stopped bothering.
+	# These two get their OWN materials, two stops under the street versions.
+	#
+	# They were built from mats["kerb"] and mats["dust"], which are mid-ground
+	# values, and a measurement of the result was blunt about it: the verge
+	# rendered at luminance 0.96 while the market floor behind it sat at 0.74
+	# and the buildings at 0.55. The brightest band in the frame was the empty
+	# one along the bottom, so the eye was being pulled out of the picture and
+	# down into dead space every frame.
+	#
+	# Foreground is the darkest band in a composition, not the lightest. This
+	# file already applies exactly that rule to its foreground palms, with the
+	# same reasoning written out above them.
+	var fg_paving := MaterialLab.concrete(Color(0.232, 0.218, 0.200), 1.0, -0.75)
+	var fg_dust := MaterialLab.sand(Color(0.196, 0.172, 0.138))
 	LevelKit.prop(parent, Vector3(mid, STREET_Y + 0.055, 3.75),
-		Vector3(span + 80.0, 0.11, 3.7), mats["kerb"], "NearPavement")
+		Vector3(span + 80.0, 0.11, 3.7), fg_paving, "NearPavement")
 	LevelKit.prop(parent, Vector3(mid, STREET_Y + 0.045, 8.05),
-		Vector3(span + 80.0, 0.09, 4.9), mats["dust"], "NearVerge")
+		Vector3(span + 80.0, 0.09, 4.9), fg_dust, "NearVerge")
 	# Slab joints. A paved band with no module on it is a painted plane, and
 	# the module is also the only thing in the foreground with a rhythm.
 	var joints: Array[Transform3D] = []
@@ -1824,6 +1838,10 @@ static func _font_for(id: int) -> String:
 ## small enough that its shadow is two pixels, comes out of the shadow pass,
 ## because a cascade drawn over scenery whose shadow nobody can see is the
 ## most expensive nothing in a level.
+static func cull_shadows(node: Node) -> Node:
+	return _no_shadows(node)
+
+
 static func _no_shadows(node: Node) -> Node:
 	if node == null:
 		return null   # _mm returns null for an empty batch; callers chain onto it

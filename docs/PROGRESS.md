@@ -3,10 +3,82 @@
 **Status: Levels 1 and 2 playable end to end, plus three ICE bonus levels. Neither main
 level passes the visual quality gate yet.**
 
-Last doc pass: 2026-09-22. The visual judgements in the weakness list below come from the
-capture set in `docs/screenshots/` dated 2026-09-21; they have not been re-verified since,
-and several systems have landed since those frames were taken. Re-capture before trusting
-any line in this file that describes how a frame looks.
+Last doc pass: 2026-09-22 (second pass, lighting + foreground).
+
+---
+
+## 2026-09-22 — measured lighting pass
+
+`tools/light_report.py` is new and is the reason this section can state numbers instead
+of opinions. It reports three things from any capture directory: ground contrast
+(brightest/darkest, 2nd-to-98th percentile), the fraction of world pixels below 0.25, and
+the fraction above 0.98. It uses Rec.709 luminance — its first version used max(r,g,b)
+and reported Brega's warm sunset at a median of 0.965, which was the red channel of an
+orange image, not its brightness. Any conclusion drawn from that first version is void.
+
+`tools/parse.sh` is also new: 25 seconds to parse-check all 82 scripts, no render. It
+exists because `tools/check.sh` boots ONE scene, so a parse error in any level it does
+not load passes clean — which is how a broken `Ajdabiya.gd` reached a three-minute
+capture run. Run `parse.sh` after every edit, `verify_all.sh` before every commit.
+
+### What the measurements found
+
+The whole game was lit too flat, and the cause was the same everywhere: `sun_energy`,
+`fill_energy`, `sky_energy`, `ambient_energy` and `sdfgi_energy` were five free numbers
+per scene, and turning any of them up always improves the surface you happen to be
+looking at. Before:
+
+| scene | contrast | shadow % | median |
+|---|---|---|---|
+| Brega | 4.40 | 5.3 | 0.740 |
+| Ajdabiya | 2.18 | 2.7 | 0.549 |
+| Ice 01 / 02 / 03 | 2.15 / 1.6 / 1.1 | 0.0 | 0.83 |
+| Greybox | 1.19 | 0.6 | 0.514 |
+| Title | 6.86 | 37.1 | 0.310 |
+
+Below about 2:1 nothing in a frame has form, and a normal map cannot resolve at all — it
+exists only in the difference between N·L at two angles. The full PBR stack was being
+paid for and discarded on three of those scenes.
+
+`LightingRig.Mood.set_contrast(key, key_to_fill, sky_lift)` now derives fill, sky,
+ambient, SDFGI and sun-indirect from one authored ratio. Six moods converted. GI had to
+be folded in on a second pass: the first version re-lit Ajdabiya to 5.5:1 and it still
+measured 2.3:1, because `sdfgi_energy` was hardcoded to 1.0 and a town of albedo-0.55
+sand refills every shadow the budget carves.
+
+### Brega's sun was below the horizon
+
+`SkyForge.sun_direction` documents its convention plainly — pitch is negative above the
+horizon — and the Brega sunset was authored at +6.0 in both the sky preset and the rig
+mood. They agreed with each other, which is what that class exists to enforce, and they
+agreed on a sun six degrees under the ground. Every upward-facing surface in Level 1 was
+lit by sky and GI alone. Now -6.0 in both places.
+
+### Ajdabiya's value structure was inverted
+
+Measured band luminance in the market frame: near verge 0.96, market floor 0.74,
+buildings 0.55. The brightest band in the picture was the empty one along the bottom, so
+the eye was pulled out of the composition and into dead space every frame. `NearPavement`
+and `NearVerge` were built from the mid-ground `kerb` and `dust` materials; they have
+their own two-stops-down materials now, and a continuous near kerb with bollards, crates
+and gutter weeds sits on top of them. Result: 2.18:1 -> 3.71:1, median 0.549 -> 0.505.
+
+Two dead ends on the way there, both recorded so they are not repeated:
+- Scattering dark scrub at z +5.5 as a foreground. It produced a handful of small black
+  tufts at mid-frame that read as dead spiders on the road. A band that must be
+  continuous cannot be made of scattered props.
+- Extending the road slab from z +3 to z +11 to "fill the hole at the bottom of the
+  frame". There was no hole: `AjdabiyaKit` already builds `NearPavement` and `NearVerge`
+  for exactly that reason, with the diagnosis written above them. Reverted.
+
+### Ice fog
+
+IceBonus01/02/03 ran volumetric density at 0.0045 / 0.0070 / 0.0030 — three to seventeen
+times every other level. Volumetric fog renders at a low internal resolution, so at that
+density in an already-white scene it does not read as atmosphere, it reads as the whole
+frame being out of focus, which is exactly what the captures showed. Now 0.0018 / 0.0022
+/ 0.0014, aerial perspective 0.70 -> 0.42, DOF far planes pushed off the mid-ground.
+Not yet re-captured.
 
 ---
 

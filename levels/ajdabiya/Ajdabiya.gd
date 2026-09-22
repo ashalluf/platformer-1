@@ -114,6 +114,7 @@ func _build_level() -> void:
 	_section_e_east_gate()
 	_atmosphere()
 	_layer_green()
+	_layer_foreground()
 	_layer_vfx()
 
 
@@ -143,14 +144,26 @@ func _layer_green() -> void:
 			"mix": {"date_palm": 0.70, "fan_palm": 0.30},
 		})
 
-	# The kerb line on the player's side, wider spaced and shorter so it never
-	# curtains the gameplay layer. Ficus, because a municipal street tree at
-	# pavement level in eastern Libya is a ficus that has been pollarded flat.
-	FoliageKit.street_trees(green, Vector3(6.0, STREET_Y, -4.8),
-		Vector3(268.0, STREET_Y, -4.8), 26.0, {
-			"seed": 79, "gap": 0.24, "jitter": 2.2, "whitewash": true,
+	# The kerb line on the player's side. Two corrections against the first
+	# capture of it:
+	#
+	# NO WHITEWASH. The lime band is right on the far reservation, where it
+	# puts a bright note at the foot of a distant trunk. On a near tree it is a
+	# white bar up the side of the frame — brighter than the buildings behind
+	# it, which is the failure this file already warns about for the foreground
+	# palms, made worse.
+	#
+	# BACK TO -7.5. At -4.8 the crowns were above the top of a 16-metre camera
+	# and what crossed the screen was a bare pole. Further back, and taller,
+	# the canopy is in frame.
+	FoliageKit.street_trees(green, Vector3(6.0, STREET_Y, -7.5),
+		Vector3(268.0, STREET_Y, -7.5), 28.0, {
+			"seed": 79, "gap": 0.24, "jitter": 2.2, "whitewash": false,
+			"heights": {"ficus": Vector2(6.4, 8.2), "date_palm": Vector2(8.0, 10.5)},
 			"mix": {"ficus": 0.62, "date_palm": 0.38},
 		})
+
+	# The near kerb is built as geometry, not planting — see _layer_foreground().
 
 	# Waste ground past the east gate. The town stops and nothing replaces it
 	# but scrub, which is the point of the level's ending.
@@ -167,6 +180,128 @@ func _layer_green() -> void:
 			"seed": 89, "band": 0.5, "min_gap": 5.0,
 			"mix": {"grass": 0.58, "prickly_pear": 0.42},
 		})
+
+
+
+## Dark material overrides for anything planted in front of the play line.
+##
+## FoliageKit keys its materials by layer name, so a foreground override has to
+## name every layer the species in the band actually use. Two stops under the
+## street, matching what AjdabiyaKit already does for its foreground palms and
+## for the same reason: a near layer rendered at the value of the buildings
+## behind it is not a layer, it is a bush standing in the middle of the frame.
+func _fg_foliage_tint() -> Dictionary:
+	var dark := func(tint: Color, species: String, rim: float) -> ShaderMaterial:
+		return FoliageKit.wind_material({
+			"species": species, "color": tint,
+			"tip_color": tint.lightened(0.14),
+			"dead_color": tint.lightened(0.08),
+			"backlight": Color(0.06, 0.08, 0.04),
+			"rim": rim, "roughness": 0.88, "base_y": STREET_Y - 0.62,
+			"anchor_height": 2.0,
+		})
+	return {
+		"grass_mat": dark.call(Color(0.176, 0.166, 0.104), "grass", 0.55),
+		"scrub_mat": dark.call(Color(0.112, 0.140, 0.086), "scrub", 0.50),
+		"succulent_mat": dark.call(Color(0.100, 0.130, 0.094), "scrub", 0.45),
+		"bark_mat": dark.call(Color(0.108, 0.092, 0.072), "bark", 0.34),
+	}
+
+
+## THE NEAR KERB.
+##
+## The bottom quarter of every frame in this level was bare pavement. The level
+## already had foreground palms, but one every sixty to seventy metres means
+## most frames have no foreground at all, and the first attempt at fixing it —
+## scattering dark scrub at z +5.5 — put a handful of small black tufts in the
+## middle of the image and read as dead spiders on the road, which is worse
+## than the empty pavement was.
+##
+## Scattered props are the wrong instrument for a band that must be continuous.
+## This is the opposite kerb, built as one unbroken run at z +6.2 with a gutter
+## behind it: a dark horizontal that closes the bottom of the frame at every
+## camera height, parallaxes at roughly twice the rate of the play line, and
+## gives the pavement a near edge to stop at instead of fading out of frame.
+##
+## Nothing here goes above 0.9 units. At ten metres from a sixteen-metre camera
+## that is the bottom quarter of the image, so it can never cover the hero.
+func _layer_foreground() -> void:
+	var fg := Node3D.new()
+	fg.name = "NearKerb"
+	geometry.add_child(fg)
+
+	const FG_Z := 6.2
+	# The kerb stands ABOVE the verge it sits on, whose top is at +0.09. The
+	# first version centred it at STREET_Y - 0.22 with a height of 0.44, which
+	# put its top flush with the road: a perfectly built kerb, entirely buried.
+	const KERB_TOP := STREET_Y + 0.26
+
+	# Two stops under the street, or it stops being a layer.
+	var stone := MaterialLab.concrete(Color(0.212, 0.196, 0.176), 1.0, -0.7)
+	var tar := MaterialLab.asphalt(Color(0.070, 0.068, 0.072))
+	var dark := MaterialLab.concrete(Color(0.108, 0.102, 0.098), 0.6, -0.9)
+
+	# The kerb itself, in three-metre stones with a hairline joint between them
+	# so the run has a rhythm rather than being one extruded box.
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 30517
+	var x := X_START - 10.0
+	var i := 0
+	while x < X_END + 10.0:
+		var w := rng.randf_range(2.6, 3.4)
+		var k := LevelKit.prop(fg, Vector3(x + w * 0.5, KERB_TOP, FG_Z),
+			Vector3(w - 0.06, 0.44, 0.72), stone, "Kerb%d" % i)
+		# A settled kerb is never dead level. Two degrees is enough to read.
+		k.rotation.z = rng.randf_range(-0.035, 0.035)
+		x += w
+		i += 1
+
+	# The gutter behind it, sunk and much darker — this is the value step that
+	# actually separates the foreground from the road, not the kerb face.
+	LevelKit.prop(fg, Vector3((X_START + X_END) * 0.5, STREET_Y - 0.50,
+		FG_Z - 0.78), Vector3(X_END - X_START + 24.0, 0.18, 0.9), tar, "Gutter")
+
+	# Silhouette punctuation. Spaced so one is in frame most of the time but
+	# never two at once, and all of it short enough to sit under the play line.
+	var px := X_START + 9.0
+	var pi := 0
+	while px < X_END:
+		match pi % 4:
+			0:
+				# Bollard pair. The most legible vertical this low in frame.
+				for b in 2:
+					LevelKit.prop(fg, Vector3(px + b * 1.35, STREET_Y + 0.14, FG_Z + 0.3),
+						Vector3(0.20, 0.86, 0.20), dark, "Bollard%d_%d" % [pi, b])
+			1:
+				# Stacked crates against the kerb.
+				for c in 3:
+					var cy: float = STREET_Y - 0.02 + float(c) * 0.36
+					LevelKit.prop(fg, Vector3(px + rng.randf_range(-0.2, 0.2), cy,
+						FG_Z + 0.24), Vector3(0.78, 0.34, 0.58), dark,
+						"FgCrate%d_%d" % [pi, c]).rotation.y = rng.randf_range(-0.3, 0.3)
+			2:
+				# A drum on its side, and the kerb stone it is resting against.
+				var d := LevelKit.prop(fg, Vector3(px, STREET_Y + 0.08, FG_Z + 0.28),
+					Vector3(0.86, 0.56, 0.56), dark, "FgDrum%d" % pi)
+				d.rotation = Vector3(0.0, 0.0, PI * 0.5)
+			3:
+				# Growth in the gutter. Planted, not scattered: it sits ON the
+				# kerb line where a real weed takes hold, at a size that reads.
+				FoliageKit.scrub_band(fg,
+					Vector3(px - 1.6, STREET_Y - 0.30, FG_Z - 0.55),
+					Vector3(px + 1.6, STREET_Y - 0.30, FG_Z - 0.55), 1.5, {
+						"seed": 300 + pi, "band": 0.22, "min_gap": 0.5,
+						"shadows": false,
+						"heights": {"grass": Vector2(0.62, 1.05),
+							"tamarisk": Vector2(0.9, 1.4)},
+						"mix": {"grass": 0.72, "tamarisk": 0.28},
+					}.merged(_fg_foliage_tint(), true))
+		px += rng.randf_range(26.0, 38.0)
+		pi += 1
+
+	# The whole band is in front of every shadow caster in the level and its own
+	# shadows would fall behind it, out of sight. Off.
+	AjdabiyaKit.cull_shadows(fg)
 
 
 
@@ -291,6 +426,10 @@ func _extend_palette() -> void:
 func _street() -> void:
 	var span := X_END - X_START
 	var mid := (X_START + X_END) * 0.5
+	# Depth 18, ending at z +3. Everything from there to the bottom of the frame
+	# is AjdabiyaKit's NearPavement and NearVerge, which already exist for
+	# exactly that reason — extending this slab to meet the camera duplicates
+	# them and puts two coplanar surfaces at y = 0.
 	LevelKit.box(geometry, Vector3(mid, STREET_Y - 1.0, -6.0),
 		Vector3(span + 80.0, 2.0, 18.0), mats["road"], "Street")
 	LevelKit.prop(geometry, Vector3(mid, STREET_Y + 0.06, 2.6),
