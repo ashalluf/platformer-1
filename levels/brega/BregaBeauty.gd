@@ -223,11 +223,135 @@ func _build_level() -> void:
 	_layer_green()
 	_layer_colour()
 	_atmosphere()
+	_layer_vfx()
 	_practicals()
 	_cull_background_shadows(deep)
 
 
 
+
+
+## Particulate life.
+##
+## The scene had fog volumes and no particles at all: FXKit is a full VFX
+## library -- eroded smoke lit by the scene key, additive spark cards, heat
+## haze -- and it was called from nowhere in any level. A refinery at sunset
+## with no steam, no embers and no dust in the air is a photograph of a model.
+##
+## Everything here is placed off coordinates that are already proven to be in
+## frame: the flare's own base, and the two shaft volumes _atmosphere() builds.
+## Motes belong exactly where the shafts are, because a mote is only visible
+## when something lights it.
+func _layer_vfx() -> void:
+	# Particles take their key from the rig, so a plume is lit by the same sun
+	# as the geometry it drifts past instead of being a flat grey card.
+	FXKit.set_key(Color(1.0, 0.76, 0.52), Color(0.34, 0.42, 0.72),
+		LightingRig.key_direction(_mood()))
+
+	var flare_base := Vector3(22.2, YARD_Y - 1.0, -30.0)
+	var flare_tip := flare_base + Vector3(0.45, 21.9, 0.0)
+
+	# 1. Flare smoke. A gas flare makes a dirty, fast, wind-sheared plume, and
+	#    it is the one thing in this frame that should be moving hard.
+	var smoke := _puff("FlareSmoke", flare_tip + Vector3(0.0, 1.6, 0.0), 26, 5.2,
+		FXKit.smoke_material(Color(0.30, 0.26, 0.26), {
+			"alpha": 0.42, "erode": 0.78, "erode_scale": 1.1,
+			"softness": 0.85, "depth_fade": 0.10, "brightness": 1.25,
+		}),
+		Vector3(-0.34, 1.0, 0.0), 22.0, 3.4, 7.5, 2.6, 9.0)
+	smoke.draw_pass_1 = _billboard(3.2)
+
+	# 2. Embers off the flare tip. Small, additive, and they die out before the
+	#    top of their arc, so the eye reads heat rather than fireworks.
+	var embers := _puff("FlareEmbers", flare_tip, 34, 2.6,
+		FXKit.spark_material(Color(1.0, 0.52, 0.16), 0.9), 
+		Vector3(-0.22, 1.0, 0.0), 26.0, 5.0, 9.0, 0.10, -1.4)
+	embers.draw_pass_1 = _billboard(0.14)
+
+	# 3. Heat shimmer over the flare. Refraction, not a sprite -- it distorts
+	#    the plant behind it, which is what sells the temperature.
+	var shimmer := FXKit.haze(Vector2(9.0, 16.0), 0.020,
+		{"source_v": 1.0, "sorting_offset": 0.8})
+	shimmer.position = flare_tip + Vector3(0.0, 5.0, 0.6)
+	geometry.add_child(shimmer)
+
+	# 4. Dust in the shafts. Placed on the same volumes _atmosphere() uses,
+	#    because a mote that is not inside a shaft is an invisible mote. This
+	#    is the cheapest atmosphere in any sunset scene and the frame had none.
+	var motes := _puff("ShaftMotes", Vector3(16.0, 4.0, -13.0), 150, 13.0,
+		FXKit.spark_material(Color(1.0, 0.88, 0.70), 0.30),
+		Vector3(-1.0, 0.12, 0.0), 46.0, 0.22, 0.75, 0.035, -0.06)
+	motes.draw_pass_1 = _billboard(0.075)
+	_box_emitter(motes, Vector3(52.0, 15.0, 18.0))
+
+	# A second, denser bank close to the lens. Near motes travel visibly across
+	# frame and are most of what reads as depth in air.
+	var near_motes := _puff("NearMotes", Vector3(4.0, -1.0, 3.0), 90, 11.0,
+		FXKit.spark_material(Color(1.0, 0.90, 0.76), 0.34),
+		Vector3(-1.0, 0.16, 0.0), 40.0, 0.26, 0.85, 0.05, -0.05)
+	near_motes.draw_pass_1 = _billboard(0.10)
+	_box_emitter(near_motes, Vector3(26.0, 10.0, 8.0))
+
+	# 5. Ground steam in the yard. Low, slow, and wide -- it separates the yard
+	#    floor from everything standing on it.
+	for x: float in [8.0, 27.0, 41.0]:
+		var steam := _puff("YardSteam", Vector3(x, YARD_Y + 0.2, -17.0), 14, 6.5,
+			FXKit.smoke_material(Color(0.86, 0.74, 0.70), {
+				"alpha": 0.20, "erode": 0.70, "softness": 0.9,
+				"depth_fade": 0.30, "brightness": 1.5,
+			}),
+			Vector3(-0.5, 1.0, 0.0), 30.0, 0.9, 2.1, 2.2, 7.0)
+		steam.draw_pass_1 = _billboard(2.6)
+		_box_emitter(steam, Vector3(7.0, 0.4, 5.0))
+
+
+## One emitter, configured the way every effect above needs configuring.
+func _puff(name: String, at: Vector3, amount: int, lifetime: float,
+		mat: Material, dir: Vector3, spread: float, vmin: float, vmax: float,
+		scale: float, gravity: float) -> GPUParticles3D:
+	var p := GPUParticles3D.new()
+	p.name = name
+	p.position = at
+	p.amount = amount
+	p.lifetime = lifetime
+	p.preprocess = lifetime          # full when the frame opens, not filling up
+	p.explosiveness = 0.0
+	p.randomness = 0.6
+	p.fixed_fps = 30
+	p.draw_order = GPUParticles3D.DRAW_ORDER_VIEW_DEPTH
+	p.material_override = mat
+	var pm := ParticleProcessMaterial.new()
+	pm.direction = dir
+	pm.spread = spread
+	pm.initial_velocity_min = vmin
+	pm.initial_velocity_max = vmax
+	pm.gravity = Vector3(0.0, gravity, 0.0)
+	pm.scale_min = scale * 0.7
+	pm.scale_max = scale * 1.35
+	pm.damping_min = 0.10
+	pm.damping_max = 0.45
+	# Everything in this level is on the X/Y plane, so Z spread is wasted
+	# particles the camera will never separate.
+	pm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
+	pm.emission_sphere_radius = 0.35
+	p.process_material = pm
+	geometry.add_child(p)
+	return p
+
+
+func _box_emitter(p: GPUParticles3D, extents: Vector3) -> void:
+	var pm := p.process_material as ParticleProcessMaterial
+	pm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
+	pm.emission_box_extents = extents * 0.5
+	# A volume emitter has to be told its own bounds or Godot culls it by the
+	# node origin and the whole bank pops out at the frame edge.
+	p.visibility_aabb = AABB(-extents * 0.5, extents)
+
+
+func _billboard(size: float) -> QuadMesh:
+	var q := QuadMesh.new()
+	q.size = Vector2(size, size)
+	return q
 
 ## Colour, placed where the camera is actually pointed.
 ##
