@@ -110,15 +110,15 @@ static func palette() -> Dictionary:
 static func mood() -> LightingRig.Mood:
 	var m := LightingRig.Mood.new()
 
-	m.sun_angles = Vector2(-3.5, 150.0)
-	m.sun_color = Color(1.0, 0.565, 0.251)      # 2200 K
-	m.sun_energy = 2.0
+	m.sun_angles = Vector2(38.0, 126.0)
+	m.sun_color = Color(1.0, 0.945, 0.860)      # ~5200 K, mid-morning
+	m.sun_energy = 3.1
 	m.sun_angular_distance = 1.1
 	# 3.0 is a beauty-frame number. In gameplay the camera spends its life
 	# looking along the key, and at that energy the volumetrics put a hot white
 	# wash across the bottom right of every frame.
-	m.sun_fog_energy = 1.3
-	m.sun_disc_size = 0.34
+	m.sun_fog_energy = 0.55
+	m.sun_disc_size = 0.5
 
 	# Cool and weak: everything the key can reach is behind the geometry, so
 	# the playing field is in shade and has to stay there. He is the brightest
@@ -128,8 +128,8 @@ static func mood() -> LightingRig.Mood:
 	m.fill_color = Color(0.475, 0.545, 0.720)
 	m.fill_energy = 0.54
 
-	m.rim_angles = Vector2(-4.0, 128.0)
-	m.rim_color = Color(1.0, 0.722, 0.467)
+	m.rim_angles = Vector2(32.0, 130.0)
+	m.rim_color = Color(1.0, 0.930, 0.820)
 	m.rim_energy = 8.0
 	m.rim_cull_mask = 2
 
@@ -140,11 +140,11 @@ static func mood() -> LightingRig.Mood:
 	m.hero_fill_color = Color(0.82, 0.83, 0.90)
 	m.hero_fill_angles = Vector2(-14.0, -30.0)
 
-	m.sky_top = Color(0.106, 0.325, 0.694)
-	m.sky_horizon = Color(0.980, 0.729, 0.420)
-	m.ground_horizon = Color(0.835, 0.804, 0.741)
-	m.ground_bottom = Color(0.376, 0.345, 0.306)
-	m.sky_energy = 1.30
+	m.sky_top = Color(0.086, 0.325, 0.760)
+	m.sky_horizon = Color(0.690, 0.845, 0.930)
+	m.ground_horizon = Color(0.780, 0.835, 0.820)
+	m.ground_bottom = Color(0.300, 0.368, 0.330)
+	m.sky_energy = 1.08
 	m.sky_curve = 0.11
 	m.ambient_energy = 0.58
 
@@ -182,7 +182,7 @@ static func mood() -> LightingRig.Mood:
 	m.grade_shadow_tint = Color(0.30, 0.45, 0.76)
 	m.grade_highlight_tint = Color(0.74, 0.64, 0.46)
 	m.grade_strength = 0.80
-	m.glow_intensity = 0.18
+	m.glow_intensity = 0.12
 	m.glow_hdr_threshold = 2.2
 	m.adjustment_saturation = 1.34
 	m.adjustment_contrast = 1.06
