@@ -111,7 +111,7 @@ static func mood() -> LightingRig.Mood:
 	var m := LightingRig.Mood.new()
 
 	m.sun_angles = Vector2(26.0, 32.0)
-	m.sun_color = Color(1.0, 0.845, 0.640)      # ~3600 K, the port's gold
+	m.sun_color = Color(1.0, 0.900, 0.760)      # ~4300 K: warm, not amber
 	m.sun_energy = 3.5
 	m.sun_angular_distance = 1.1
 	# 3.0 is a beauty-frame number. In gameplay the camera spends its life
@@ -140,12 +140,12 @@ static func mood() -> LightingRig.Mood:
 	m.hero_fill_color = Color(0.82, 0.83, 0.90)
 	m.hero_fill_angles = Vector2(-14.0, -30.0)
 
-	m.sky_top = Color(0.330, 0.500, 0.720)
-	m.sky_horizon = Color(0.985, 0.820, 0.580)
+	m.sky_top = Color(0.235, 0.435, 0.700)
+	m.sky_horizon = Color(0.980, 0.860, 0.680)
 	m.ground_horizon = Color(0.780, 0.835, 0.820)
 	m.ground_bottom = Color(0.300, 0.368, 0.330)
 	m.sky_energy = 1.08
-	m.sky_curve = 0.11
+	m.sky_curve = 0.22
 	m.ambient_energy = 0.58
 
 	m.fog_color = Color(0.835, 0.804, 0.741)
@@ -171,7 +171,7 @@ static func mood() -> LightingRig.Mood:
 	# down to meet the exposure reference instead of fighting it. The difference
 	# is made up with bounce, which is light that has been somewhere first.
 	m.agx_white = 9.5
-	m.agx_contrast = 1.45
+	m.agx_contrast = 1.58
 	m.bounce_energy = 0.46
 	m.bounce_color = Color(0.98, 0.80, 0.62)
 

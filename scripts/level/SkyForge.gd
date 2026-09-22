@@ -92,8 +92,8 @@ static func _brega_gold() -> Dictionary:
 		# the same coast three hours later -- a real blue zenith, big white
 		# cumulus with genuine shadow sides, and the sun up and out of shot.
 		"zenith_color": Color("#4f7bb0"),
-		"mid_color": Color("#dfa878"),
-		"horizon_color": Color("#ffd79a"),
+		"mid_color": Color("#c9a68f"),
+		"horizon_color": Color("#ffdfb4"),
 		"ground_color": Color("#6a6250"),
 		"horizon_falloff": 0.18,
 		"zenith_compression": 1.05,
@@ -104,7 +104,7 @@ static func _brega_gold() -> Dictionary:
 		"band_strength": 0.22,
 		"band_height": 0.055,
 		"dust_color": Color("#e8c9a4"),
-		"dust": 0.20,
+		"dust": 0.12,
 		"dust_height": 0.18,
 
 		# Matched to the rig key. A sky sun and a scene key that disagree is the
@@ -143,8 +143,8 @@ static func _brega_gold() -> Dictionary:
 		"cirrus_horizon_fade": 0.20,
 		"cumulus_color": Color("#ffe3c2"),
 		"cumulus_shadow_color": Color("#8b8098"),
-		"cumulus_opacity": 0.88,
-		"cumulus_coverage": 0.40,
+		"cumulus_opacity": 0.95,
+		"cumulus_coverage": 0.46,
 		"cumulus_softness": 0.26,
 		"cumulus_scale": 0.42,
 		"cumulus_height": 0.80,

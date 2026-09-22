@@ -98,7 +98,7 @@ func _mood() -> LightingRig.Mood:
 	# arrives broken into pieces by the plant that killed this town, instead of
 	# arriving as a smear off the right edge. See deviation 2 in the header.
 	m.sun_angles = Vector2(26.0, 32.0)
-	m.sun_color = Color(1.0, 0.845, 0.640)      # ~3600 K, the port's gold
+	m.sun_color = Color(1.0, 0.900, 0.760)      # ~4300 K: warm, not amber
 	m.sun_energy = 3.5
 	m.sun_angular_distance = 1.1
 	# A disc you can actually see is the point now that something is standing in
@@ -137,12 +137,12 @@ func _mood() -> LightingRig.Mood:
 	m.dof_near_distance = 0.0
 	m.dof_distance = 0.0
 
-	m.sky_top = Color(0.330, 0.500, 0.720)      # colder zenith; see fill note
-	m.sky_horizon = Color(0.985, 0.820, 0.580)  # #C97B45
+	m.sky_top = Color(0.235, 0.435, 0.700)      # colder zenith; see fill note
+	m.sky_horizon = Color(0.980, 0.860, 0.680)  # #C97B45
 	m.ground_horizon = Color(0.780, 0.835, 0.820)
 	m.ground_bottom = Color(0.300, 0.368, 0.330)
 	m.sky_energy = 1.08
-	m.sky_curve = 0.11
+	m.sky_curve = 0.22
 	# Halved. Volumetric density is a global and it was doing the job of eight
 	# local volumes badly — everything past 30 units went to one value.
 	m.volumetric_density = 0.00034
@@ -174,7 +174,7 @@ func _mood() -> LightingRig.Mood:
 	# down to meet the exposure reference instead of fighting it. The difference
 	# is made up with bounce, which is light that has been somewhere first.
 	m.agx_white = 9.5
-	m.agx_contrast = 1.45
+	m.agx_contrast = 1.58
 	m.bounce_energy = 0.46
 	m.bounce_color = Color(0.98, 0.80, 0.62)
 
@@ -390,18 +390,18 @@ func _layer_sky_and_sea() -> void:
 	# thicker than any temperate sky would carry. Pulled down and thinned: at
 	# 34 units tall it was a grey ceiling over the top third of the sky and it
 	# was the reason the zenith never read as pre-dawn blue.
-	var haze := MaterialLab.emissive(Color(0.980, 0.880, 0.760), 0.48)
+	var haze := MaterialLab.emissive(Color(0.950, 0.915, 0.870), 0.30)
 	haze.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	haze.albedo_color = Color(0.980, 0.880, 0.760, 0.30)
+	haze.albedo_color = Color(0.950, 0.915, 0.870, 0.13)
 	LevelKit.prop(geometry, Vector3(60.0, 9.0, -420.0), Vector3(1400.0, 20.0, 1.0),
 		haze, "DustBand")
 
 	# A thin cloud deck catching the first light, well above the dust band. Two
 	# long shallow slabs at different heights, so the sky is not a bare ramp —
 	# an empty gradient is what makes a sky read as a Godot default.
-	var cloud := MaterialLab.emissive(Color(1.00, 0.86, 0.70), 0.72)
+	var cloud := MaterialLab.emissive(Color(1.00, 0.90, 0.78), 0.55)
 	cloud.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	cloud.albedo_color = Color(1.00, 0.86, 0.70, 0.36)
+	cloud.albedo_color = Color(1.00, 0.90, 0.78, 0.22)
 	for spec: Array in [[40.0, 58.0, 380.0, 6.0], [200.0, 84.0, 300.0, 4.2],
 			[-140.0, 44.0, 260.0, 3.4]]:
 		LevelKit.prop(geometry, Vector3(spec[0], spec[1], -430.0),
