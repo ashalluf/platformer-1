@@ -118,7 +118,7 @@ func _mood() -> LightingRig.Mood:
 	# and pushed bluer, so the shaded wall reads COOL grey against a warm sky.
 	m.fill_angles = Vector2(18.0, -28.0)
 	m.fill_color = Color(0.480, 0.580, 0.790)
-	m.fill_energy = 1.10
+	m.fill_energy = 0.76
 
 	# Rim: hero layer only. Swung round to sit with the new key azimuth, or the
 	# rim lands on the wrong edge of him and reads as a second light.
@@ -146,7 +146,7 @@ func _mood() -> LightingRig.Mood:
 	# Halved. Volumetric density is a global and it was doing the job of eight
 	# local volumes badly — everything past 30 units went to one value.
 	m.volumetric_density = 0.00034
-	m.ambient_energy = 0.24
+	m.ambient_energy = 0.40
 
 	m.fog_color = Color(0.835, 0.804, 0.741)
 	m.fog_density = 0.00026
@@ -176,7 +176,7 @@ func _mood() -> LightingRig.Mood:
 	m.agx_white = 9.5
 	m.agx_contrast = 1.58
 	m.bounce_energy = 0.33
-	m.bounce_color = Color(0.98, 0.86, 0.74)
+	m.bounce_color = Color(0.98, 0.80, 0.62)
 
 	# Cool the shadows, keep the highlights warm. This is the one lever that
 	# stops five levels sliding into a single orange, and it is the lever
