@@ -636,13 +636,22 @@ func _tube(parent: Node3D, pos: Vector3, radius: float, height: float,
 # --- Layer 0-2: sky, sea, horizon ------------------------------------------
 
 func _layer_sky_and_sea() -> void:
-	# The Gulf of Sidra, a thin band in the gap between the towers. Flat coast:
-	# no cliffs, no hills, and that flatness is the point.
-	var sea := MaterialLab.emissive(Color(0.145, 0.520, 0.620), 0.32)
-	sea.roughness = 0.12
-	sea.metallic = 0.4
-	LevelKit.prop(geometry, Vector3(120.0, -2.0, -150.0), Vector3(700.0, 6.0, 1.0),
-		sea, "Sea")
+	# The Gulf of Sidra. This was an emissive slab -- a vertical card, 700 by 6
+	# by 1, standing in for water -- while WaterKit sat unused with a swell
+	# shader, a shore fade and a surf line in it. A card cannot hold a glitter
+	# path, and the glitter path is the only reason to put the sea in frame at
+	# all at this distance.
+	#
+	# Seen from a side-on camera a horizontal plane reads as the thin band the
+	# old card was imitating, except now the swell moves and the sun lays a
+	# track across it.
+	var sea := WaterKit.sea(geometry, Vector3(120.0, -3.0, -190.0),
+		Vector2(900.0, 150.0), "gulf_dawn")
+	# Aim the specular at the scene's own key, or the track lands somewhere the
+	# sun is not -- the same sky-versus-rig drift this level has been caught by
+	# twice already.
+	WaterKit.aim_sun(sea.material_override as ShaderMaterial,
+		Vector2(6.0, 32.0), Color(1.0, 0.760, 0.520), 3.0)
 	# Sabkha plain running flat to the horizon, blinding pale.
 	LevelKit.prop(geometry, Vector3(40.0, -9.5, -150.0), Vector3(900.0, 5.0, 220.0),
 		mats["sabkha"], "SabkhaPlain")
