@@ -91,14 +91,30 @@ func _mood() -> LightingRig.Mood:
 	mood.dof_transition = 58.0
 	mood.dof_amount = 0.09
 
-	mood.tonemap = Environment.TONE_MAPPER_ACES
+	# Was ACES while Brega, Ajdabiya, the menus and IceBonus03 all run AgX.
+	# Two levels in one game on different response curves is the definition of
+	# scenes built to different standards: different highlight rolloff,
+	# different saturation behaviour under exposure. The canon numbers are in
+	# ART_DIRECTION.md and IceBonus03 already uses them.
+	mood.tonemap = Environment.TONE_MAPPER_AGX
 	mood.exposure = 0.86
-	mood.white = 7.0
+	mood.agx_white = 9.5
+	mood.agx_contrast = 1.45
+	# Aerial perspective: the ice levels are built in receding bands and this is
+	# what separates them.
+	mood.fog_aerial = 0.70
 	mood.glow_intensity = 0.55
 	mood.glow_hdr_threshold = 1.35
 	mood.adjustment_saturation = 1.14
 	mood.adjustment_contrast = 1.06
 	return mood
+
+
+## SkyForge has a purpose-built ice preset and these two levels never asked
+## for it, so they rendered a flat ProceduralSkyMaterial gradient while a
+## shader with five octaves of cloud and anisotropic cirrus sat unused.
+func _sky_preset() -> String:
+	return "ice_twilight"
 
 
 func _build_level() -> void:

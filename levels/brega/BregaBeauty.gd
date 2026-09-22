@@ -361,7 +361,7 @@ func _layer_vfx() -> void:
 	# 2. Embers off the flare tip. Small, additive, and they die out before the
 	#    top of their arc, so the eye reads heat rather than fireworks.
 	var embers := _puff("FlareEmbers", flare_tip, 34, 2.6,
-		FXKit.spark_material(Color(1.0, 0.52, 0.16), 0.9), 
+		FXKit.spark_material(Color(1.0, 0.52, 0.16), 0.85, FXKit.soft_texture()), 
 		Vector3(-0.22, 1.0, 0.0), 26.0, 5.0, 9.0, 0.10, -1.4)
 	embers.draw_pass_1 = _billboard(0.14)
 
@@ -375,18 +375,18 @@ func _layer_vfx() -> void:
 	# 4. Dust in the shafts. Placed on the same volumes _atmosphere() uses,
 	#    because a mote that is not inside a shaft is an invisible mote. This
 	#    is the cheapest atmosphere in any sunset scene and the frame had none.
-	var motes := _puff("ShaftMotes", Vector3(16.0, 4.0, -13.0), 150, 13.0,
-		FXKit.spark_material(Color(1.0, 0.88, 0.70), 0.30),
+	var motes := _puff("ShaftMotes", Vector3(16.0, 4.0, -13.0), 90, 13.0,
+		FXKit.spark_material(Color(1.0, 0.88, 0.70), 0.16, FXKit.soft_texture()),
 		Vector3(-1.0, 0.12, 0.0), 46.0, 0.22, 0.75, 0.035, -0.06)
-	motes.draw_pass_1 = _billboard(0.075)
+	motes.draw_pass_1 = _billboard(0.030)
 	_box_emitter(motes, Vector3(52.0, 15.0, 18.0))
 
 	# A second, denser bank close to the lens. Near motes travel visibly across
 	# frame and are most of what reads as depth in air.
-	var near_motes := _puff("NearMotes", Vector3(4.0, -1.0, 3.0), 90, 11.0,
-		FXKit.spark_material(Color(1.0, 0.90, 0.76), 0.34),
+	var near_motes := _puff("NearMotes", Vector3(4.0, -1.0, 3.0), 55, 11.0,
+		FXKit.spark_material(Color(1.0, 0.90, 0.76), 0.20, FXKit.soft_texture()),
 		Vector3(-1.0, 0.16, 0.0), 40.0, 0.26, 0.85, 0.05, -0.05)
-	near_motes.draw_pass_1 = _billboard(0.10)
+	near_motes.draw_pass_1 = _billboard(0.042)
 	_box_emitter(near_motes, Vector3(26.0, 10.0, 8.0))
 
 	# 5. Ground steam in the yard. Low, slow, and wide -- it separates the yard

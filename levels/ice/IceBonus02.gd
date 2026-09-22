@@ -99,14 +99,24 @@ func _mood() -> LightingRig.Mood:
 	mood.dof_transition = 48.0
 	mood.dof_amount = 0.10
 
-	mood.tonemap = Environment.TONE_MAPPER_ACES
+	# See IceBonus01: AgX at the canon values, matching every other level.
+	mood.tonemap = Environment.TONE_MAPPER_AGX
 	mood.exposure = 0.90
-	mood.white = 7.0
+	mood.agx_white = 9.5
+	mood.agx_contrast = 1.45
+	mood.fog_aerial = 0.70
 	mood.glow_intensity = 0.50
 	mood.glow_hdr_threshold = 1.30
 	mood.adjustment_saturation = 1.12
 	mood.adjustment_contrast = 1.05
 	return mood
+
+
+## SkyForge has a purpose-built ice preset and these two levels never asked
+## for it, so they rendered a flat ProceduralSkyMaterial gradient while a
+## shader with five octaves of cloud and anisotropic cirrus sat unused.
+func _sky_preset() -> String:
+	return "ice_twilight"
 
 
 func _build_level() -> void:
