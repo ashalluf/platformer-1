@@ -114,6 +114,14 @@ func _configure_viewport() -> void:
 	window.size = Vector2i(w, h)
 	window.content_scale_size = Vector2i(w, h)
 	GraphicsDirector.enter_capture_mode(int(opts["quality"]))
+	# Print what the viewport is ACTUALLY doing. Four separate wrong diagnoses
+	# were made of a soft ice capture (DOF, glow, fog volumes, refraction)
+	# before anyone checked whether the 3D buffer was being rendered at full
+	# resolution in the first place. It costs one line.
+	var _vp := get_viewport()
+	print("  render scale=%.2f mode=%d msaa=%d ssaa=%d taa=%s size=%s"
+		% [_vp.scaling_3d_scale, _vp.scaling_3d_mode, _vp.msaa_3d,
+			_vp.screen_space_aa, _vp.use_taa, _vp.get_visible_rect().size])
 	GraphicsDirector.apply_to_viewport(window)
 
 

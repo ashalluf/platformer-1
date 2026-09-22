@@ -254,6 +254,7 @@ func _section_a_walkway() -> void:
 		mats["slab"], {
 			"name": "CellBlock", "joint_mat": mats["joint"], "dark_mat": mats["dark"],
 			"hole_mat": mats["joint"], "depth": 5.0, "open_holes": 3,
+			"tone_mats": [mats["slab_grey"], mats["slab_pale"]], "tone_ratio": 0.38,
 		})
 	# The wall the player spends the opening minute looking at.
 	DecalKit.scatter_on_wall(geometry, X_START - 40.0, YARD_Y, 74.0, 10.6, -5.0, {

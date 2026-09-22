@@ -139,9 +139,26 @@ func _mood() -> LightingRig.Mood:
 	mood.volumetric_density = 0.0014
 	mood.fog_anisotropy = 0.62
 
-	mood.glow_intensity = 1.10
-	mood.glow_bloom = 0.16
-	mood.glow_hdr_threshold = 1.5
+	# GLOW, and the reason these levels looked out of focus.
+	#
+	# A white snowfield puts nearly every pixel it has above an HDR threshold
+	# of 1.3, so glow was not picking out speculars and sparkle — it was
+	# picking up the entire image, blurring it at the two widest mip levels and
+	# compositing it back over itself. That is a full-frame haze, and it is
+	# what made the seracs, the hero and the near ledge all read as soft in
+	# every capture of these levels.
+	#
+	# The threshold now sits well above the snow's own level, so only the ice
+	# speculars, the collectibles and the aurora cross it, and the levels are
+	# weighted toward the tight mips so what crosses reads as a halo rather
+	# than as fog. Brega, which never had this problem, runs 0.12 at 2.2.
+	# glow_bloom stays at zero. LightingRig.Mood documents it as
+	# "guaranteed washout; keep it at zero" and this level was running 0.16.
+	mood.glow_intensity = 0.22
+	mood.glow_bloom = 0.0
+	mood.glow_hdr_threshold = 3.0
+	mood.glow_luminance_cap = 6.0
+	mood.glow_levels = [0.0, 0.8, 1.0, 0.5, 0.0, 0.0, 0.0]
 
 	mood.agx_white = 9.5
 	mood.agx_contrast = 1.45

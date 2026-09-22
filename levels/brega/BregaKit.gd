@@ -42,6 +42,13 @@ const LM_MINARET := 352.0
 static func palette() -> Dictionary:
 	var p := {
 		"slab": MaterialLab.plaster(Color(0.505, 0.442, 0.330), 1.0),
+		# Alternate pours. A precast block is cast in batches months apart from
+		# whatever sand the yard had, and the panels do not match — which is the
+		# only thing that gives a wall this size a value structure. One batch
+		# greyer and a stop down, one paler and warmer, both inside the World 1
+		# chroma law.
+		"slab_grey": MaterialLab.plaster(Color(0.352, 0.330, 0.288), 1.0),
+		"slab_pale": MaterialLab.plaster(Color(0.588, 0.520, 0.396), 0.8),
 		"joint": MaterialLab.concrete(Color(0.170, 0.156, 0.138), 1.0),
 		"dark": MaterialLab.concrete(Color(0.055, 0.050, 0.050), 0.2),
 		"wall": MaterialLab.plaster(Color(0.180, 0.172, 0.162), 1.0),

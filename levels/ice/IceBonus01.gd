@@ -54,10 +54,24 @@ func _mood() -> LightingRig.Mood:
 	mood.sun_angles = Vector2(-8.0, 138.0)
 
 	# --- contrast budget (see LightingRig.Mood.set_contrast) ---
-	# Snow genuinely does bounce, so this is the one place a low ratio is
-	# correct — but it measured 1.5:1 with 0.0% of the frame in shadow, which
-	# is not bounce, it is no key. 3.2:1 keeps the seracs modelled.
-	mood.set_contrast(3.0, 3.2, 0.78)
+	# This level is BACKLIT: the key runs (-0.66, -0.14, +0.74) at eight degrees
+	# of elevation, so the sun is behind the serac field shining toward camera.
+	# Nothing the camera can see is lit by it and every cast shadow falls away
+	# from the lens.
+	#
+	# That makes the usual reasoning about snow backwards here. A low ratio was
+	# set on the grounds that snow bounces — and with no key reaching the
+	# visible faces, all a low ratio does is flood the near field with ambient
+	# until it matches the sky. Measured: 2.3:1 contrast, 0.1% of the frame in
+	# shadow, and a serac field whose four authored value bands (0.07 / 0.17 /
+	# 0.34 / 0.50 albedo) all arrived on screen as the same pale blue. An image
+	# with no form reads as out of focus, which is what every capture of this
+	# level looked like.
+	#
+	# A backlit glacier is a HIGH-contrast subject: dark masses against a blown
+	# sky, with the rim doing the separating. 6:1, and the sky's share of the
+	# shade side cut from 0.78 to 0.55 so the near band can actually be dark.
+	mood.set_contrast(3.2, 6.0, 0.55)
 	mood.sun_color = Color(0.76, 0.90, 1.0)
 	mood.sun_angular_distance = 0.9
 	mood.sun_fog_energy = 2.6
@@ -111,9 +125,24 @@ func _mood() -> LightingRig.Mood:
 	# Aerial perspective tints distance toward the sky. In a desert that gives
 	# depth; in a white scene under a white sky it dissolves the serac field
 	# into the background entirely. Half as much, so the ridgelines survive.
-	mood.fog_aerial = 0.42
-	mood.glow_intensity = 0.55
-	mood.glow_hdr_threshold = 1.35
+	mood.fog_aerial = 0.30
+	# GLOW, and the reason these levels looked out of focus.
+	#
+	# A white snowfield puts nearly every pixel it has above an HDR threshold
+	# of 1.3, so glow was not picking out speculars and sparkle — it was
+	# picking up the entire image, blurring it at the two widest mip levels and
+	# compositing it back over itself. That is a full-frame haze, and it is
+	# what made the seracs, the hero and the near ledge all read as soft in
+	# every capture of these levels.
+	#
+	# The threshold now sits well above the snow's own level, so only the ice
+	# speculars, the collectibles and the aurora cross it, and the levels are
+	# weighted toward the tight mips so what crosses reads as a halo rather
+	# than as fog. Brega, which never had this problem, runs 0.12 at 2.2.
+	mood.glow_intensity = 0.18
+	mood.glow_hdr_threshold = 3.0
+	mood.glow_luminance_cap = 6.0
+	mood.glow_levels = [0.0, 0.8, 1.0, 0.5, 0.0, 0.0, 0.0]
 	mood.adjustment_saturation = 1.14
 	mood.adjustment_contrast = 1.06
 	return mood
@@ -150,11 +179,35 @@ func _build_level() -> void:
 ## directional shadow atlas is a fixed per-frame cost that does not shrink with
 ## resolution and buys nothing the eye can find in a twilight scene lit by a sun
 ## eight degrees above the horizon.
+## ...except the big ones.
+##
+## The blanket version of this turned cast_shadow off for every decorative
+## child of `geometry`, which is every serac in the field. Measured result:
+## 0.1% of the frame below 0.25 luminance and a contrast ratio of 2.3:1 in a
+## level whose lighting budget was set to 3.2:1. A serac field where nothing
+## shadows anything has no form at all, and an image with no form reads to the
+## eye as out of focus — which is exactly what four separate captures of this
+## level looked like, and what sent four wrong diagnoses (depth of field,
+## glow, fog volumes, refraction) chasing a blur that was never there. The
+## framebuffer was 1280x720 at render scale 1.0 the whole time.
+##
+## The cost argument in the original was sound for the dressing and wrong for
+## the masses. Three hundred small boxes in the shadow atlas buy nothing; a
+## twelve-metre serac casting across the route is the only thing that says the
+## route has a shape. So the rule is size, not category.
+const SHADOW_MIN_SIZE := 3.2
+
 func _no_prop_shadows() -> void:
 	for child in geometry.get_children():
-		if child is GeometryInstance3D:
-			(child as GeometryInstance3D).cast_shadow = \
-				GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		if child is not GeometryInstance3D:
+			continue
+		var gi := child as GeometryInstance3D
+		var span := 0.0
+		if gi is MeshInstance3D and (gi as MeshInstance3D).mesh != null:
+			var ab := (gi as MeshInstance3D).get_aabb().size * gi.scale
+			span = maxf(ab.x, maxf(ab.y, ab.z))
+		if span < SHADOW_MIN_SIZE:
+			gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
 
 # --- Materials --------------------------------------------------------------
@@ -177,7 +230,8 @@ func _ice(clarity: float, tint: Color, o := {}) -> ShaderMaterial:
 	mat.set_shader_parameter("rime_amount", o.get("rime", 1.0))
 	mat.set_shader_parameter("frost_relief", o.get("relief", 0.9))
 	mat.set_shader_parameter("sheen", o.get("sheen", 0.6))
-	mat.set_shader_parameter("refraction", o.get("refraction", 0.45))
+	mat.set_shader_parameter("refraction", o.get("refraction", 0.18))
+	mat.set_shader_parameter("refraction_offset", o.get("refract_px", 0.008))
 	mat.set_shader_parameter("ice_bright", o.get("bright", Color(0.54, 0.80, 0.97)))
 	mat.set_shader_parameter("frost_color", o.get("frost", Color(0.87, 0.93, 1.0)))
 	if o.has("sparkle"):
@@ -231,10 +285,10 @@ func _materials() -> void:
 		# Meltwater: almost no roughness, no rime, and it takes the sky.
 		"melt": _ice(1.0, Color(0.020, 0.110, 0.230),
 			{"sheen": 1.0, "rime": 0.0, "cracks": 0.0, "bubbles": 0.0,
-			 "refraction": 0.9, "sparkle": 0.4, "thickness": 0.9}),
+			 "refraction": 0.36, "sparkle": 0.4, "thickness": 0.9}),
 		"icicle": _ice(1.0, Color(0.130, 0.380, 0.600),
 			{"thickness": 0.55, "interior": false, "sparkle": 4.2, "sheen": 0.9,
-			 "refraction": 0.7}),
+			 "refraction": 0.28}),
 
 		# Band 1 — near field. Deep, so the route sits on top of it in value.
 		"near": _ice(0.82, Color(0.070, 0.220, 0.400), {"thickness": 0.42}),
@@ -845,10 +899,20 @@ func _atmosphere_ice() -> void:
 	var fv := FogVolume.new()
 	fv.name = "GlacierMist"
 	fv.shape = RenderingServer.FOG_VOLUME_SHAPE_BOX
-	fv.size = Vector3(300.0, 9.0, 80.0)
-	fv.position = Vector3(56.0, -6.5, -34.0)
+	# BEHIND the play plane, not across it. At size 80 centred on z -34 this
+	# volume ran from z -74 to z +6 — and the camera sits at about z +16, so
+	# the hero was being viewed THROUGH eighty units of it. Volumetric fog is
+	# rendered into a low-resolution froxel grid, so what that produced was not
+	# atmosphere, it was the whole upper two-thirds of the frame out of focus
+	# in every capture of this level. The bottom band stayed sharp because it
+	# was the only thing in front of the volume.
+	#
+	# Now z -79 .. -17: it fogs the serac field, which is what it is for, and
+	# nothing between the camera and the action.
+	fv.size = Vector3(300.0, 9.0, 62.0)
+	fv.position = Vector3(56.0, -6.5, -48.0)
 	var fm := FogMaterial.new()
-	fm.density = 0.060
+	fm.density = 0.024
 	fm.albedo = Color(0.80, 0.90, 1.0)
 	fm.emission = Color(0.05, 0.10, 0.20)
 	fm.height_falloff = 1.0
@@ -861,10 +925,10 @@ func _atmosphere_ice() -> void:
 	var deep := FogVolume.new()
 	deep.name = "CrevasseMist"
 	deep.shape = RenderingServer.FOG_VOLUME_SHAPE_BOX
-	deep.size = Vector3(200.0, 5.0, 26.0)
-	deep.position = Vector3(62.0, -7.4, -15.0)
+	deep.size = Vector3(200.0, 5.0, 24.0)
+	deep.position = Vector3(62.0, -7.4, -20.0)
 	var dfm := FogMaterial.new()
-	dfm.density = 0.085
+	dfm.density = 0.034
 	dfm.albedo = Color(0.72, 0.86, 1.0)
 	dfm.emission = Color(0.03, 0.08, 0.18)
 	dfm.height_falloff = 1.8

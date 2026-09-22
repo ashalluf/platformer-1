@@ -121,6 +121,124 @@ static func prefab_facade(parent: Node3D, left_x: float, base_y: float, width: f
 	_fill_multimesh(vert_mm, verts)
 	_mm_node(root, "JointsV", vert_mm, joint)
 
+	# --- Relief -------------------------------------------------------------
+	#
+	# Everything above this point draws the wall as a flat slab with joint
+	# lines 0.03 deep — i.e. painted on. Measured across a Brega frame, every
+	# horizontal band of the image came back between 0.70 and 0.74 luminance:
+	# sky, wall, walkway and ground were the same value, because the largest
+	# surface in the level had nothing on it that could catch the light at a
+	# different angle from anything else.
+	#
+	# A precast panel wall is not flat. The ribs between bays stand proud, the
+	# plinth steps out, and the coping oversails. Those three things are what
+	# give a concrete facade its value structure, and they cost almost nothing
+	# here because each is one MultiMesh.
+	#
+	# Proud, not recessed, on purpose: a rib standing out shows the camera two
+	# faces the flat wall does not have — a right cheek turned toward the key
+	# and a left cheek turned away from it.
+	#
+	# The depth matters more than it looks. Brega's key runs (-0.53, -0.11,
+	# -0.84): mostly INTO the wall rather than along it, so a rib's cast shadow
+	# only reaches about 0.63 of its own projection and a shallow rib produces
+	# a shadow a few centimetres wide. What reads at this sun angle is the side
+	# cheeks themselves, and at 0.085 proud those are a couple of pixels tall.
+	# 0.16 — a 32 cm rib on a heavy precast block, which is honest — makes them
+	# a band you can actually see.
+	var relief: float = opts.get("relief", 0.16)
+	if relief > 0.001:
+		# Bay ribs, full height.
+		var rib_mm := _joint_multimesh(
+			_box(Vector3(0.14, height, relief * 2.0)))
+		var ribs: Array[Transform3D] = []
+		var rib_x := 0.0
+		for w: float in bays:
+			ribs.append(Transform3D(Basis.IDENTITY,
+				Vector3(left_x + rib_x, base_y + height * 0.5, front)))
+			rib_x += w
+		ribs.append(Transform3D(Basis.IDENTITY,
+			Vector3(left_x + width, base_y + height * 0.5, front)))
+		_fill_multimesh(rib_mm, ribs)
+		_mm_node(root, "Ribs", rib_mm, mat)
+
+		# Floor bands every third panel course. A wall this tall needs a
+		# horizontal to break it as much as it needs verticals.
+		var band_mm := _joint_multimesh(
+			_box(Vector3(width, 0.26, relief * 1.5)))
+		var bands: Array[Transform3D] = []
+		var course := 3
+		var r := course
+		while float(r) * panel_h < height - 0.4:
+			bands.append(Transform3D(Basis.IDENTITY,
+				Vector3(left_x + width * 0.5, base_y + float(r) * panel_h, front)))
+			r += course
+		if not bands.is_empty():
+			_fill_multimesh(band_mm, bands)
+			_mm_node(root, "Bands", band_mm, mat)
+
+		# The plinth. A wall that meets the ground with no step reads as a
+		# cardboard flat pushed into the dirt, and this is also the shadow that
+		# separates the wall from whatever is standing in front of it.
+		_mi(root, "Plinth", _box(Vector3(width, 0.95, relief * 3.2)), mat,
+			Vector3(left_x + width * 0.5, base_y + 0.46, front))
+
+		# The coping, oversailing both ends. Its shadow is the darkest line on
+		# the whole facade and it lands right where the wall meets the sky,
+		# which is the edge the eye reads first.
+		_mi(root, "Coping", _box(Vector3(width + 0.5, 0.34, relief * 4.0)), mat,
+			Vector3(left_x + width * 0.5, base_y + height - 0.10, front))
+
+	# --- Panel tone ---------------------------------------------------------
+	#
+	# Precast panels are cast in batches, months apart, from whatever sand and
+	# cement the yard had that week, and they do not match. On a real block you
+	# can read the pour sequence off the wall.
+	#
+	# This is also the only thing that gives a facade this size a value
+	# structure. Measured on a Brega frame, every horizontal band of the image
+	# came back between 0.70 and 0.74 — sky, wall, walkway and ground at one
+	# value — because a 74-metre wall drawn in a single material cannot have
+	# one. Relief alone does not fix it: at a key that runs mostly INTO the
+	# wall, a rib and the panel beside it are lit almost identically.
+	#
+	# Thin slabs proud of the face rather than a second mass, so they cost one
+	# MultiMesh and cannot z-fight with the wall behind them.
+	var pours: Array = opts.get("tone_mats", [])
+	if not pours.is_empty():
+		var tone_ratio: float = opts.get("tone_ratio", 0.34)
+		var per_pour: Array[Array] = []
+		for _t in pours.size():
+			per_pour.append([] as Array[Transform3D])
+		var course_h := panel_h * 2.0
+		var courses := maxi(1, int(height / course_h))
+		var tx := 0.0
+		for bi in bays.size():
+			var bw: float = bays[bi]
+			for c in courses:
+				if rng.randf() > tone_ratio:
+					continue
+				var ch := minf(course_h, height - float(c) * course_h)
+				if ch < 0.3:
+					continue
+				var ti := rng.randi() % pours.size()
+				# Inset from the bay edges so the rib and the joint still read
+				# as the module; a tone that runs edge to edge erases them.
+				var xf := Transform3D(
+					Basis.IDENTITY.scaled(Vector3((bw - 0.22) / 1.0, ch - 0.10, 1.0)),
+					Vector3(left_x + tx + bw * 0.5,
+						base_y + float(c) * course_h + ch * 0.5,
+						front + relief * 2.0 + 0.012))
+				(per_pour[ti] as Array[Transform3D]).append(xf)
+			tx += bw
+		for ti in pours.size():
+			var list: Array[Transform3D] = per_pour[ti]
+			if list.is_empty():
+				continue
+			var tm := _joint_multimesh(_box(Vector3(1.0, 1.0, 0.02)))
+			_fill_multimesh(tm, list)
+			_mm_node(root, "PanelTone%d" % ti, tm, pours[ti])
+
 	var horiz_mm := _joint_multimesh(_box(Vector3(width, 0.022, 0.03)))
 	var horiz: Array[Transform3D] = []
 	for r in rows + 1:

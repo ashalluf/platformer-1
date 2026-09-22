@@ -3,7 +3,8 @@
 
 Three numbers decide whether a frame is lit or merely bright:
 
-  contrast    brightest / darkest ground, ignoring the extreme 2% each way.
+  contrast    brightest / darkest of the WHOLE frame below the sky line,
+              ignoring the extreme 2% each way.
               Mid-morning Libyan sun on concrete is 4:1 to 6:1. Below 2:1
               means ambient is drowning the key and no normal map, no
               modelling and no form will read no matter how good the mesh is.
@@ -20,7 +21,6 @@ import sys, os, glob
 from PIL import Image
 
 SKY_ROWS = 150      # skip sky and the HUD block
-GROUND_FROM = 0.76  # ground band as a fraction of frame height
 
 
 def report(path):
@@ -35,7 +35,7 @@ def report(path):
         im = Image.open(p).convert("RGB")
         px = im.load()
         w, h = im.size
-        ground, world = [], []
+        world = []
         for y in range(SKY_ROWS, h, 3):
             for x in range(0, w, 3):
                 r, g, b = px[x, y]
@@ -46,13 +46,14 @@ def report(path):
                 # warm level chasing an exposure problem it did not have.
                 v = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255.0
                 world.append(v)
-                if y > h * GROUND_FROM:
-                    ground.append(v)
-        ground.sort()
         world.sort()
-        n, m = len(ground), len(world)
-        lo = ground[n * 2 // 100]
-        hi = ground[n * 98 // 100]
+        m = len(world)
+        # Whole frame, not a ground band. The first version measured only the
+        # bottom 24% of the image, which on IceBonus01 is a flat sheet of water
+        # — so it reported 2.3:1 no matter what the lighting did, and several
+        # rounds of changes were judged against a number that could not move.
+        lo = world[m * 2 // 100]
+        hi = world[m * 98 // 100]
         contrast = hi / max(lo, 1e-4)
         shadow = sum(1 for v in world if v < 0.25) / m * 100.0
         clip = sum(1 for v in world if v > 0.98) / m * 100.0

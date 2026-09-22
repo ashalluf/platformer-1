@@ -71,14 +71,55 @@ Two dead ends on the way there, both recorded so they are not repeated:
   frame". There was no hole: `AjdabiyaKit` already builds `NearPavement` and `NearVerge`
   for exactly that reason, with the diagnosis written above them. Reverted.
 
-### Ice fog
+### Ice — five corrections, and an unsolved problem
 
-IceBonus01/02/03 ran volumetric density at 0.0045 / 0.0070 / 0.0030 — three to seventeen
-times every other level. Volumetric fog renders at a low internal resolution, so at that
-density in an already-white scene it does not read as atmosphere, it reads as the whole
-frame being out of focus, which is exactly what the captures showed. Now 0.0018 / 0.0022
-/ 0.0014, aerial perspective 0.70 -> 0.42, DOF far planes pushed off the mid-ground.
-Not yet re-captured.
+Every capture of IceBonus01 reads as though the whole frame above the water
+line is out of focus. Five things were diagnosed as the cause, in order, and
+all five were wrong. Each was genuinely mis-set and each is now fixed, but none
+of them was it:
+
+1. **Depth of field.** Near blur was already disabled and the far plane starts
+   at 96 units; the hero is at 16. Not it.
+2. **Glow.** Intensity 0.55 at an HDR threshold of 1.35 in a white snowfield
+   means glow picks up the entire image and composites a wide blur of it back
+   over itself. Genuinely wrong — now 0.18 at 3.0, weighted to the tight mips,
+   and clipping fell from 4.4% to 1.3%. Not the blur.
+3. **Fog volumes.** GlacierMist ran from z -74 to z **+6** with the camera at
+   z +16, so the hero was being viewed through eighty units of low-resolution
+   froxels; IceBonus02 had three volumes crossing the play plane, one at
+   density 0.11. All now stop behind the action. Not the blur.
+4. **Refraction.** `refraction_offset` was 0.035 of SCREEN_UV — a 45-pixel
+   displaced copy of the framebuffer, *added* rather than blended, compounding
+   across overlapping seracs. Now 0.008. Not the blur.
+5. **Frost relief.** The shader swung NORMAL by the frost gradient times 5.0,
+   which is more than the surface's own orientation contributes, so every
+   up-facing face shaded as noise. Now 1.5, and the snow crust along the
+   ledges is visibly cleaner for it. Still not the blur.
+
+What it is not: the framebuffer. `tools/capture.gd` now prints the viewport
+state on every run and it reports render scale 1.00, no TAA, 1280x720. That
+line exists because four wrong diagnoses were made before anyone checked.
+
+Standing hypothesis, **unverified**: there is no blur. The level is pale blue
+geometry on a pale blue sky in heavy fog at 2.7:1 whole-frame contrast with
+0.1% of the frame in shadow, and an image with no form reads to the eye as
+unfocused. Its key is also backlit — (-0.66, -0.14, +0.74) at 8 degrees — so
+the sun illuminates nothing the camera can see and every cast shadow falls
+away from the lens. Re-lighting it as a proper backlit subject (6:1, sky share
+of the shade side cut to 0.55) moved the measurement by 0.03 and the image not
+at all, which does not support the hypothesis so much as fail to kill it.
+
+Next thing to try, for whoever picks this up: give the near band real darkness
+by taking the ambient right down and checking whether the four authored ice
+value bands (albedo 0.07 / 0.17 / 0.34 / 0.50) actually arrive on screen as
+four different values. They currently do not.
+
+**tools/light_report.py measured the wrong region for most of this work.** Its
+first version took contrast from the bottom 24% of the frame, which on
+IceBonus01 is a flat sheet of water — so it reported 2.3:1 regardless of what
+the lighting did, and several rounds of changes were judged against a number
+that could not move. It reads the whole frame below the sky line now. Ice
+figures quoted above 2.7:1 come from the corrected tool.
 
 ---
 

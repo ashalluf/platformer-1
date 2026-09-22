@@ -82,8 +82,18 @@ group_uniforms Refraction;
 // makes the renderer build a whole mip chain every frame, and a one-tap
 // refraction offset of three screen percent has no use for them.
 uniform sampler2D screen_tex : hint_screen_texture, filter_linear;
-uniform float refraction : hint_range(0.0, 2.0) = 0.45;
-uniform float refraction_offset : hint_range(0.0, 0.2) = 0.035;
+// 0.035 of SCREEN_UV is forty-five pixels at 1280 wide. That is not a one-tap
+// refraction, it is a displaced copy of the framebuffer laid over every ice
+// surface in the scene — and because the result is ADDED to the emission term
+// below rather than blended, overlapping seracs compound it. Measured on an
+// IceBonus01 capture that produced two things at once: an image that read as
+// uniformly out of focus above the water line, and a contrast ratio of 2.3:1
+// in a scene whose lighting budget was set to 3.2:1, because every ice surface
+// was adding a smeared copy of its own background back into itself.
+//
+// Ten pixels is a refraction. Forty-five is a smear.
+uniform float refraction : hint_range(0.0, 2.0) = 0.18;
+uniform float refraction_offset : hint_range(0.0, 0.2) = 0.008;
 
 group_uniforms Sheen;
 // A second, much smoother specular lobe over whatever the surface is. It is
@@ -234,8 +244,13 @@ void fragment() {
 		float e = 0.6;
 		float gx = texture(frost_noise, rp + vec2(e, 0.0)).r - grain;
 		float gz = texture(frost_noise, rp + vec2(0.0, e)).r - grain;
+		// x1.5, not x5.0. At five, a rimed surface has its normal swung further
+		// by the frost noise than the surface's own orientation contributes —
+		// so every up-facing face in the level shaded as noise rather than as
+		// a plane, and the serac field lost its form. Frost relief is meant to
+		// be a texture on a surface, not a replacement for it.
 		NORMAL = normalize(NORMAL
-			+ mat3(VIEW_MATRIX) * vec3(-gx, 0.0, -gz) * frost_relief * rime * 5.0);
+			+ mat3(VIEW_MATRIX) * vec3(-gx, 0.0, -gz) * frost_relief * rime * 1.5);
 	}
 
 	// Thin ice lets the world through. Offsetting the screen sample along the

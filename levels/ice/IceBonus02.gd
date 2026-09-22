@@ -105,8 +105,23 @@ func _mood() -> LightingRig.Mood:
 	mood.agx_white = 9.5
 	mood.agx_contrast = 1.45
 	mood.fog_aerial = 0.42
-	mood.glow_intensity = 0.50
-	mood.glow_hdr_threshold = 1.30
+	# GLOW, and the reason these levels looked out of focus.
+	#
+	# A white snowfield puts nearly every pixel it has above an HDR threshold
+	# of 1.3, so glow was not picking out speculars and sparkle — it was
+	# picking up the entire image, blurring it at the two widest mip levels and
+	# compositing it back over itself. That is a full-frame haze, and it is
+	# what made the seracs, the hero and the near ledge all read as soft in
+	# every capture of these levels.
+	#
+	# The threshold now sits well above the snow's own level, so only the ice
+	# speculars, the collectibles and the aurora cross it, and the levels are
+	# weighted toward the tight mips so what crosses reads as a halo rather
+	# than as fog. Brega, which never had this problem, runs 0.12 at 2.2.
+	mood.glow_intensity = 0.18
+	mood.glow_hdr_threshold = 3.0
+	mood.glow_luminance_cap = 6.0
+	mood.glow_levels = [0.0, 0.8, 1.0, 0.5, 0.0, 0.0, 0.0]
 	mood.adjustment_saturation = 1.12
 	mood.adjustment_contrast = 1.05
 	return mood
@@ -139,11 +154,21 @@ func _build_level() -> void:
 ## comes from the platform bodies, which are StaticBody3D and so are untouched
 ## by this. Two hundred decorative boxes in the directional shadow atlas is a
 ## fixed per-frame cost that does not shrink with resolution.
+## Small dressing only — see IceBonus01._no_prop_shadows for why the blanket
+## version of this is what made these levels read as out of focus.
+const SHADOW_MIN_SIZE := 3.2
+
 func _no_prop_shadows() -> void:
 	for child in geometry.get_children():
-		if child is GeometryInstance3D:
-			(child as GeometryInstance3D).cast_shadow = \
-				GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		if child is not GeometryInstance3D:
+			continue
+		var gi := child as GeometryInstance3D
+		var span := 0.0
+		if gi is MeshInstance3D and (gi as MeshInstance3D).mesh != null:
+			var ab := (gi as MeshInstance3D).get_aabb().size * gi.scale
+			span = maxf(ab.x, maxf(ab.y, ab.z))
+		if span < SHADOW_MIN_SIZE:
+			gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
 
 # --- Materials --------------------------------------------------------------
@@ -163,7 +188,8 @@ func _ice(clarity: float, tint: Color, o := {}) -> ShaderMaterial:
 	mat.set_shader_parameter("rime_amount", o.get("rime", 1.0))
 	mat.set_shader_parameter("frost_relief", o.get("relief", 0.9))
 	mat.set_shader_parameter("sheen", o.get("sheen", 0.6))
-	mat.set_shader_parameter("refraction", o.get("refraction", 0.45))
+	mat.set_shader_parameter("refraction", o.get("refraction", 0.18))
+	mat.set_shader_parameter("refraction_offset", o.get("refract_px", 0.008))
 	mat.set_shader_parameter("ice_bright", o.get("bright", Color(0.54, 0.80, 0.97)))
 	mat.set_shader_parameter("frost_color", o.get("frost", Color(0.88, 0.94, 1.0)))
 	if o.has("sparkle"):
@@ -209,10 +235,10 @@ func _materials() -> void:
 			{"thickness": 1.5, "interior": false, "sparkle": 0.0, "refraction": 0.0}),
 		"melt": _ice(1.0, Color(0.020, 0.100, 0.215),
 			{"sheen": 1.0, "rime": 0.0, "cracks": 0.0, "bubbles": 0.0,
-			 "refraction": 0.9, "sparkle": 0.4, "thickness": 0.9}),
+			 "refraction": 0.36, "sparkle": 0.4, "thickness": 0.9}),
 		"icicle": _ice(1.0, Color(0.120, 0.360, 0.580),
 			{"thickness": 0.55, "interior": false, "sparkle": 4.2, "sheen": 0.9,
-			 "refraction": 0.7}),
+			 "refraction": 0.28}),
 		# Everything above and beyond the rim.
 		"peak": _ice(0.20, Color(0.430, 0.570, 0.760),
 			{"thickness": 0.06, "interior": false, "sparkle": 0.0,
@@ -611,10 +637,15 @@ func _atmosphere_shaft() -> void:
 	var fv := FogVolume.new()
 	fv.name = "ShaftLight"
 	fv.shape = RenderingServer.FOG_VOLUME_SHAPE_BOX
+	# All three fog volumes in this level used to extend past the play plane
+	# toward the camera (to z +3, +7 and +5), so the hero and the near ledges
+	# were being rendered THROUGH low-resolution froxels. That is what made
+	# every capture of these levels look out of focus. Each one now stops at
+	# z -3, behind the climb, where its job actually is.
 	fv.size = Vector3(14.0, 70.0, 12.0)
-	fv.position = Vector3(0.0, 26.0, -3.0)
+	fv.position = Vector3(0.0, 26.0, -9.0)
 	var fm := FogMaterial.new()
-	fm.density = 0.030
+	fm.density = 0.018
 	fm.albedo = Color(0.88, 0.95, 1.0)
 	fm.emission = Color(0.04, 0.07, 0.14)
 	fm.height_falloff = 0.0
@@ -629,9 +660,9 @@ func _atmosphere_shaft() -> void:
 	rim.name = "RimGlare"
 	rim.shape = RenderingServer.FOG_VOLUME_SHAPE_BOX
 	rim.size = Vector3(46.0, 26.0, 30.0)
-	rim.position = Vector3(0.0, 54.0, -8.0)
+	rim.position = Vector3(0.0, 54.0, -18.0)
 	var rfm := FogMaterial.new()
-	rfm.density = 0.075
+	rfm.density = 0.038
 	rfm.albedo = Color(0.95, 0.98, 1.0)
 	rfm.emission = Color(0.30, 0.42, 0.62)
 	rfm.height_falloff = -0.6
@@ -645,9 +676,9 @@ func _atmosphere_shaft() -> void:
 	sump.name = "Sump"
 	sump.shape = RenderingServer.FOG_VOLUME_SHAPE_BOX
 	sump.size = Vector3(34.0, 12.0, 22.0)
-	sump.position = Vector3(0.0, -5.0, -6.0)
+	sump.position = Vector3(0.0, -5.0, -14.0)
 	var sfm := FogMaterial.new()
-	sfm.density = 0.11
+	sfm.density = 0.045
 	sfm.albedo = Color(0.58, 0.74, 0.96)
 	sfm.emission = Color(0.012, 0.030, 0.075)
 	sfm.height_falloff = 1.6
