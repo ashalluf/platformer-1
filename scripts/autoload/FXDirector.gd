@@ -10,15 +10,26 @@ signal camera_zoom_punch(amount: float, duration: float)
 var _hitstop_left := 0.0
 var _timewarp_left := 0.0
 var _timewarp_scale := 1.0
+var _last_usec := 0
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_last_usec = Time.get_ticks_usec()
 
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	# Hit-stop must tick in real time, not scaled time, or it never ends.
-	var real_delta := delta / maxf(Engine.time_scale, 0.0001)
+	#
+	# `delta` cannot provide that. The engine has already multiplied it by
+	# Engine.time_scale before _process sees it, so at scale 0.0 it arrives as
+	# exactly 0.0, and dividing 0.0 by the scale is still 0.0: the countdown
+	# never advanced, time scale never came back, and the first hit-stop of the
+	# session froze the game permanently. Read the wall clock instead -- it is
+	# the one source of time here that time_scale cannot reach.
+	var now := Time.get_ticks_usec()
+	var real_delta := float(now - _last_usec) / 1_000_000.0
+	_last_usec = now
 
 	if _hitstop_left > 0.0:
 		_hitstop_left -= real_delta

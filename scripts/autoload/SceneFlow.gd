@@ -105,6 +105,7 @@ func return_position() -> Vector3:
 func _cover(duration: float) -> void:
 	_rect.visible = true
 	var tw := create_tween()
+	tw.set_ignore_time_scale(true)
 	tw.tween_method(_set_progress, 0.0, 1.0, duration)\
 		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
 	await tw.finished
@@ -113,6 +114,7 @@ func _cover(duration: float) -> void:
 
 func _uncover(duration: float) -> void:
 	var tw := create_tween()
+	tw.set_ignore_time_scale(true)
 	tw.tween_method(_set_progress, 1.0, 0.0, duration)\
 		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
 	await tw.finished
