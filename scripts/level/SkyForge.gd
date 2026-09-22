@@ -4,7 +4,7 @@ class_name SkyForge
 ## A level adopts it in one line, straight after LightingRig has built the rig:
 ## [codeblock]
 ## var we := LightingRig.build(self, mood)
-## SkyForge.apply(we.environment, "brega_dawn")
+## SkyForge.apply(we.environment, "brega_morning")
 ## [/codeblock]
 ## That swaps out the [ProceduralSkyMaterial] LightingRig installs and points
 ## the Environment's ambient and reflections at the new sky. Nothing else needs
@@ -12,7 +12,7 @@ class_name SkyForge
 ## for the sun, so the disc always lands where the key actually is and the two
 ## can never drift apart.
 ##
-## Presets: [code]brega_dawn[/code], [code]ajdabiya_morning[/code],
+## Presets: [code]brega_morning[/code], [code]ajdabiya_morning[/code],
 ## [code]ice_twilight[/code], [code]studio[/code]. Use [method material] instead
 ## of [method apply] when a level wants to tune a knob on top of a preset.
 
@@ -68,8 +68,8 @@ static func sun_direction(pitch_deg: float, yaw_deg: float) -> Vector3:
 
 static func _preset(name_: String) -> Dictionary:
 	match name_:
-		"brega_dawn":
-			return _brega_dawn()
+		"brega_morning":
+			return _brega_morning()
 		"ajdabiya_morning":
 			return _ajdabiya_morning()
 		"ice_twilight":
@@ -84,65 +84,78 @@ static func _preset(name_: String) -> Dictionary:
 ## still up and a high cirrus deck already catching light the ground has not
 ## seen yet. The warm band is tight and low because the sun has not cleared the
 ## horizon — it is a glow behind the prilling towers, not a light source.
-static func _brega_dawn() -> Dictionary:
+static func _brega_morning() -> Dictionary:
 	return {
-		"zenith_color": Color("#2b3a55"),
-		"mid_color": Color("#6b5f6e"),
-		"horizon_color": Color("#c97b45"),
-		"ground_color": Color("#3c352c"),
-		"horizon_falloff": 0.13,
-		"zenith_compression": 1.25,
-		"ground_falloff": 0.30,
-		"sky_energy": 1.0,
+		# Level 1, 09:30. The brief asked for bright, colourful and lush, and a
+		# dawn cannot be any of those: a sky whose only light is a 2200 K glow
+		# below the horizon gives the whole frame one hue to work with. This is
+		# the same coast three hours later -- a real blue zenith, big white
+		# cumulus with genuine shadow sides, and the sun up and out of shot.
+		"zenith_color": Color("#1f6fd0"),
+		"mid_color": Color("#79b4e6"),
+		"horizon_color": Color("#d7ecf6"),
+		"ground_color": Color("#4c5a43"),
+		"horizon_falloff": 0.18,
+		"zenith_compression": 1.05,
+		"ground_falloff": 0.32,
+		"sky_energy": 1.15,
 
-		"band_color": Color("#d5cdbd"),
-		"band_strength": 0.40,
-		"band_height": 0.085,
-		"dust_color": Color("#b9a78c"),
-		"dust": 0.42,
-		"dust_height": 0.24,
+		"band_color": Color("#eef7fd"),
+		"band_strength": 0.22,
+		"band_height": 0.055,
+		"dust_color": Color("#cadfeb"),
+		"dust": 0.20,
+		"dust_height": 0.18,
 
-		"sun_direction": sun_direction(-3.5, 140.0),
-		"sun_color": Color("#ffa657"),
-		"sun_intensity": 4.5,
-		"sun_angular_radius": 1.6,
-		"sun_edge_softness": 0.22,
-		"sun_limb_darkening": 0.70,
-		"sun_glow_color": Color("#ff8a2e"),
-		"sun_glow_strength": 2.2,
-		"sun_glow_falloff": 300.0,
-		"sun_halo_color": Color("#e08a4e"),
-		"sun_halo_strength": 0.35,
-		"sun_halo_falloff": 4.5,
-		"sun_horizon_spread": 1.1,
-		"sun_haze_extinction": 2.2,
+		# Matched to the rig key. A sky sun and a scene key that disagree is the
+		# one error this whole class exists to make impossible.
+		"sun_direction": sun_direction(38.0, 126.0),
+		"sun_color": Color("#fff7e6"),
+		"sun_intensity": 3.0,
+		"sun_angular_radius": 0.55,
+		"sun_edge_softness": 0.14,
+		"sun_limb_darkening": 0.55,
+		# The old glow was 2.2 of #ff8a2e, which is what burned a hole through
+		# the right third of every Brega frame.
+		"sun_glow_color": Color("#ffeecb"),
+		"sun_glow_strength": 0.50,
+		"sun_glow_falloff": 640.0,
+		"sun_halo_color": Color("#dceaf6"),
+		"sun_halo_strength": 0.14,
+		"sun_halo_falloff": 6.5,
+		"sun_horizon_spread": 0.28,
+		"sun_haze_extinction": 1.0,
 
+		# Real cumulus is the cheapest colour in any outdoor frame: a white top
+		# and a blue-grey underside give the sky its own value range, so it
+		# stops being a gradient behind the level and becomes part of the shot.
 		"wind_direction": 0.55,
-		"cloud_horizon_fade": 0.09,
-		"cirrus_color": Color("#ffc48a"),
-		"cirrus_shadow_color": Color("#59536a"),
-		"cirrus_opacity": 0.46,
-		"cirrus_coverage": 0.46,
+		"cloud_horizon_fade": 0.10,
+		"cirrus_color": Color("#ffffff"),
+		"cirrus_shadow_color": Color("#a9c4dc"),
+		"cirrus_opacity": 0.42,
+		"cirrus_coverage": 0.40,
 		"cirrus_scale": 0.45,
 		"cirrus_stretch": 5.5,
 		"cirrus_angle": 0.42,
 		"cirrus_speed": 0.006,
 		"cirrus_height": 3.0,
 		"cirrus_horizon_fade": 0.20,
-		"cumulus_color": Color("#c8a98e"),
-		"cumulus_shadow_color": Color("#4a4657"),
-		"cumulus_opacity": 0.55,
-		"cumulus_coverage": 0.22,
-		"cumulus_softness": 0.20,
-		"cumulus_scale": 0.45,
-		"cumulus_height": 0.75,
+		"cumulus_color": Color("#ffffff"),
+		"cumulus_shadow_color": Color("#8fb0cf"),
+		"cumulus_opacity": 0.88,
+		"cumulus_coverage": 0.40,
+		"cumulus_softness": 0.26,
+		"cumulus_scale": 0.42,
+		"cumulus_height": 0.80,
 		"cumulus_speed": 0.010,
-		"cumulus_detail": 0.45,
+		"cumulus_detail": 0.50,
 		"cumulus_silver": 3.2,
 		"cumulus_light_step": 0.30,
 
+		# Daylight: no stars.
 		"star_color": Color("#b9c6e8"),
-		"star_strength": 0.50,
+		"star_strength": 0.0,
 		"star_density": 170.0,
 		"star_threshold": 0.962,
 		"star_twinkle": 0.35,
