@@ -99,7 +99,7 @@ func _mood() -> LightingRig.Mood:
 	# arriving as a smear off the right edge. See deviation 2 in the header.
 	m.sun_angles = Vector2(26.0, 32.0)
 	m.sun_color = Color(1.0, 0.900, 0.760)      # ~4300 K: warm, not amber
-	m.sun_energy = 2.3
+	m.sun_energy = 2.8
 	m.sun_angular_distance = 1.1
 	# A disc you can actually see is the point now that something is standing in
 	# front of it. 0.34 deg was 9 px at 900 and read as a stuck highlight.
@@ -141,7 +141,7 @@ func _mood() -> LightingRig.Mood:
 	m.sky_horizon = Color(0.980, 0.860, 0.680)  # #C97B45
 	m.ground_horizon = Color(0.780, 0.835, 0.820)
 	m.ground_bottom = Color(0.300, 0.368, 0.330)
-	m.sky_energy = 0.92
+	m.sky_energy = 1.30
 	m.sky_curve = 0.22
 	# Halved. Volumetric density is a global and it was doing the job of eight
 	# local volumes badly — everything past 30 units went to one value.
@@ -159,7 +159,7 @@ func _mood() -> LightingRig.Mood:
 	m.fog_anisotropy = 0.70
 
 	m.tonemap = Environment.TONE_MAPPER_AGX
-	m.exposure = 0.94
+	m.exposure = 1.06
 	m.white = 8.5
 
 	# --- The grade ------------------------------------------------------------
@@ -184,11 +184,11 @@ func _mood() -> LightingRig.Mood:
 	# is already there, it cannot put blue into a shadow that has none.
 	m.grade_shadow_tint = Color(0.40, 0.50, 0.74)
 	m.grade_highlight_tint = Color(0.84, 0.71, 0.47)
-	m.grade_strength = 0.80
+	m.grade_strength = 0.92
 	m.glow_intensity = 0.12
 	m.glow_hdr_threshold = 2.2
-	m.adjustment_saturation = 1.40
-	m.adjustment_contrast = 1.10
+	m.adjustment_saturation = 1.72
+	m.adjustment_contrast = 1.18
 	return m
 
 

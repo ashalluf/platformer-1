@@ -112,7 +112,7 @@ static func mood() -> LightingRig.Mood:
 
 	m.sun_angles = Vector2(26.0, 32.0)
 	m.sun_color = Color(1.0, 0.900, 0.760)      # ~4300 K: warm, not amber
-	m.sun_energy = 2.3
+	m.sun_energy = 2.8
 	m.sun_angular_distance = 1.1
 	# 3.0 is a beauty-frame number. In gameplay the camera spends its life
 	# looking along the key, and at that energy the volumetrics put a hot white
@@ -144,7 +144,7 @@ static func mood() -> LightingRig.Mood:
 	m.sky_horizon = Color(0.980, 0.860, 0.680)
 	m.ground_horizon = Color(0.780, 0.835, 0.820)
 	m.ground_bottom = Color(0.300, 0.368, 0.330)
-	m.sky_energy = 0.92
+	m.sky_energy = 1.30
 	m.sky_curve = 0.22
 	m.ambient_energy = 0.40
 
@@ -184,8 +184,8 @@ static func mood() -> LightingRig.Mood:
 	m.grade_strength = 0.80
 	m.glow_intensity = 0.12
 	m.glow_hdr_threshold = 2.2
-	m.adjustment_saturation = 1.34
-	m.adjustment_contrast = 1.06
+	m.adjustment_saturation = 1.68
+	m.adjustment_contrast = 1.16
 	m.dof_near_distance = 0.0
 	m.dof_distance = 0.0
 	return m
