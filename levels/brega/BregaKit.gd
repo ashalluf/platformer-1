@@ -149,7 +149,8 @@ static func mood() -> LightingRig.Mood:
 	m.ambient_energy = 0.40
 
 	m.fog_color = Color(0.835, 0.804, 0.741)
-	m.fog_density = 0.00034
+	m.fog_density = 0.0070
+	m.fog_aerial = 0.76
 	m.fog_sun_scatter = 0.15
 	m.fog_emission = Color(0.06, 0.045, 0.035)
 	m.fog_anisotropy = 0.78

@@ -148,8 +148,9 @@ func _mood() -> LightingRig.Mood:
 	m.volumetric_density = 0.00034
 	m.ambient_energy = 0.40
 
-	m.fog_color = Color(0.835, 0.804, 0.741)
-	m.fog_density = 0.00026
+	m.fog_color = Color(0.960, 0.705, 0.585)
+	m.fog_density = 0.0075
+	m.fog_aerial = 0.78
 	# 0.35 puts a hot bloom on everything within 40 degrees of the key and the
 	# whole right of frame goes to white paper.
 	m.fog_sun_scatter = 0.10

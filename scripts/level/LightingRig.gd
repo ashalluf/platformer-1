@@ -238,6 +238,17 @@ class Mood extends RefCounted:
 	var ambient_energy := 0.30
 	var fog_color := Color(0.62, 0.58, 0.52)
 	var fog_density := 0.0022
+	## Atmospheric perspective: how far distant geometry is blended toward the
+	## sky colour.
+	##
+	## This is the single strongest depth cue available to a 2.5D game and it
+	## was hardcoded at 0.16, which is close enough to nothing that a frame's
+	## foreground railing and its distant refinery came back at the same value
+	## and the same haze -- one flat wall of clutter with no read of what is
+	## near and what is far. Painters have used it since Leonardo; every
+	## background in the reference art has it; Godot gives it away for free on
+	## an Environment property.
+	var fog_aerial := 0.62
 	var fog_sun_scatter := 0.35
 	var fog_emission := Color(0.35, 0.30, 0.26)
 	var fog_anisotropy := 0.72
@@ -525,7 +536,7 @@ static func build(parent: Node3D, mood: Mood) -> WorldEnvironment:
 	env.fog_density = mood.fog_density
 	env.fog_sun_scatter = mood.fog_sun_scatter
 	env.fog_sky_affect = 0.0
-	env.fog_aerial_perspective = 0.16
+	env.fog_aerial_perspective = mood.fog_aerial
 
 	env.volumetric_fog_enabled = true
 	env.volumetric_fog_density = mood.volumetric_density
