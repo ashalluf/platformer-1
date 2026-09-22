@@ -426,13 +426,19 @@ static func _build_thobe(outfit: Outfit) -> MeshForge.Builder:
 	var flare := 1.0 if outfit == Outfit.STREET else 0.72
 
 	# y, rx, rz, bones, weights
+	# Silhouette: broad at the shoulder, nipped at the waist, flared at the hem.
+	# It was none of those -- shoulders measured ~0.50 across against a ~0.43
+	# hem, which is a straight column, and a straight column under a robe reads
+	# as a cone with a head on it. Widening the chest and taking the waist in
+	# costs nothing and is most of what makes a character read at silhouette
+	# size, which is the size this camera works at.
 	var spec := [
 		[1.45, 0.124, 0.130, [B.NECK, B.CHEST], [0.45, 0.55]],
-		[1.41, 0.190, 0.196, [B.CHEST], [1.0]],
-		[1.33, 0.192, 0.214, [B.CHEST], [1.0]],
-		[1.20, 0.178, 0.208, [B.CHEST, B.SPINE], [0.55, 0.45]],
-		[1.06, 0.166, 0.192, [B.SPINE], [1.0]],
-		[0.94, 0.172, 0.188, [B.SPINE, B.HIPS], [0.4, 0.6]],
+		[1.41, 0.222, 0.204, [B.CHEST], [1.0]],
+		[1.33, 0.226, 0.222, [B.CHEST], [1.0]],
+		[1.20, 0.196, 0.212, [B.CHEST, B.SPINE], [0.55, 0.45]],
+		[1.06, 0.152, 0.184, [B.SPINE], [1.0]],
+		[0.94, 0.158, 0.182, [B.SPINE, B.HIPS], [0.4, 0.6]],
 		[0.80, 0.184, 0.192, [B.HIPS], [1.0]],
 		[0.68, 0.194, 0.200, [B.HIPS], [1.0]],
 		[0.56, 0.204, 0.210, [B.HIPS], [1.0]],
@@ -473,7 +479,7 @@ static func _build_thobe(outfit: Outfit) -> MeshForge.Builder:
 		var hd: int = B.HAND_L if side < 0 else B.HAND_R
 		var x := side * 0.205
 		var sleeve := [
-			MeshForge.ring(Vector3(side * 0.160, 1.41, 0), 0.088, 0.094, [sh, B.CHEST], [0.65, 0.35], 2.4),
+			MeshForge.ring(Vector3(side * 0.188, 1.41, 0), 0.100, 0.100, [sh, B.CHEST], [0.65, 0.35], 2.4),
 			MeshForge.ring(Vector3(x, 1.32, 0), 0.078, 0.084, [ar, sh], [0.7, 0.3], 2.4),
 			MeshForge.ring(Vector3(x, 1.18, 0), 0.072, 0.078, [ar], [1.0], 2.4),
 			MeshForge.ring(Vector3(x, 1.08, 0), 0.072, 0.078, [ar, fa], [0.45, 0.55], 2.4),
