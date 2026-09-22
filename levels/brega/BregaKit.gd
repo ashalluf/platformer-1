@@ -110,9 +110,9 @@ static func palette() -> Dictionary:
 static func mood() -> LightingRig.Mood:
 	var m := LightingRig.Mood.new()
 
-	m.sun_angles = Vector2(42.0, 28.0)
-	m.sun_color = Color(1.0, 0.945, 0.860)      # ~5200 K, mid-morning
-	m.sun_energy = 3.1
+	m.sun_angles = Vector2(26.0, 32.0)
+	m.sun_color = Color(1.0, 0.845, 0.640)      # ~3600 K, the port's gold
+	m.sun_energy = 3.5
 	m.sun_angular_distance = 1.1
 	# 3.0 is a beauty-frame number. In gameplay the camera spends its life
 	# looking along the key, and at that energy the volumetrics put a hot white
@@ -125,11 +125,11 @@ static func mood() -> LightingRig.Mood:
 	# value in the frame and that is the whole readability strategy. Matches
 	# the benchmark's colour script exactly — see BregaBeauty._mood.
 	m.fill_angles = Vector2(18.0, -28.0)
-	m.fill_color = Color(0.580, 0.655, 0.800)
+	m.fill_color = Color(0.480, 0.580, 0.790)
 	m.fill_energy = 0.54
 
-	m.rim_angles = Vector2(36.0, 36.0)
-	m.rim_color = Color(1.0, 0.930, 0.820)
+	m.rim_angles = Vector2(24.0, 40.0)
+	m.rim_color = Color(1.0, 0.870, 0.690)
 	m.rim_energy = 8.0
 	m.rim_cull_mask = 2
 
@@ -140,8 +140,8 @@ static func mood() -> LightingRig.Mood:
 	m.hero_fill_color = Color(0.82, 0.83, 0.90)
 	m.hero_fill_angles = Vector2(-14.0, -30.0)
 
-	m.sky_top = Color(0.086, 0.325, 0.760)
-	m.sky_horizon = Color(0.690, 0.845, 0.930)
+	m.sky_top = Color(0.330, 0.500, 0.720)
+	m.sky_horizon = Color(0.985, 0.820, 0.580)
 	m.ground_horizon = Color(0.780, 0.835, 0.820)
 	m.ground_bottom = Color(0.300, 0.368, 0.330)
 	m.sky_energy = 1.08
@@ -179,8 +179,8 @@ static func mood() -> LightingRig.Mood:
 	# stops five levels sliding into a single orange, and it is the lever
 	# `adjustment_saturation` structurally cannot pull: saturation scales what
 	# is already there, it cannot put blue into a shadow that has none.
-	m.grade_shadow_tint = Color(0.44, 0.54, 0.72)
-	m.grade_highlight_tint = Color(0.74, 0.64, 0.46)
+	m.grade_shadow_tint = Color(0.40, 0.50, 0.74)
+	m.grade_highlight_tint = Color(0.84, 0.71, 0.47)
 	m.grade_strength = 0.80
 	m.glow_intensity = 0.12
 	m.glow_hdr_threshold = 2.2
@@ -241,9 +241,9 @@ static func _sky_band(parent: Node3D, x_from: float, x_to: float) -> void:
 	# ever a rectangle.
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 30211
-	var warm := _sky_card(Color(1.00, 0.97, 0.92), 0.26)
-	var cool := _sky_card(Color(0.62, 0.78, 0.92), 0.20)
-	var pale := _sky_card(Color(0.90, 0.95, 0.99), 0.18)
+	var warm := _sky_card(Color(1.00, 0.84, 0.62), 0.28)
+	var cool := _sky_card(Color(0.55, 0.68, 0.86), 0.20)
+	var pale := _sky_card(Color(0.99, 0.92, 0.82), 0.18)
 	var x := x_from - span * 1.2
 	while x < x_to + span * 1.2:
 		x += rng.randf_range(58.0, 132.0)

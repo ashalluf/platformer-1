@@ -96,7 +96,7 @@ func _mood() -> LightingRig.Mood:
 ## sky is not part of the mood: SkyForge reads the scene's own key light for the
 ## sun, so the disc, the warm band around it and the aerial haze all follow
 ## wherever the rig aimed, and a level that re-times its sun gets a correct sky
-## for free. Presets: brega_morning, ajdabiya_morning, ice_twilight, studio.
+## for free. Presets: brega_gold, ajdabiya_morning, ice_twilight, studio.
 func _sky_preset() -> String:
 	return ""
 

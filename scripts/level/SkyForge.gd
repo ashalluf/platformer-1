@@ -4,7 +4,7 @@ class_name SkyForge
 ## A level adopts it in one line, straight after LightingRig has built the rig:
 ## [codeblock]
 ## var we := LightingRig.build(self, mood)
-## SkyForge.apply(we.environment, "brega_morning")
+## SkyForge.apply(we.environment, "brega_gold")
 ## [/codeblock]
 ## That swaps out the [ProceduralSkyMaterial] LightingRig installs and points
 ## the Environment's ambient and reflections at the new sky. Nothing else needs
@@ -12,7 +12,7 @@ class_name SkyForge
 ## for the sun, so the disc always lands where the key actually is and the two
 ## can never drift apart.
 ##
-## Presets: [code]brega_morning[/code], [code]ajdabiya_morning[/code],
+## Presets: [code]brega_gold[/code], [code]ajdabiya_morning[/code],
 ## [code]ice_twilight[/code], [code]studio[/code]. Use [method material] instead
 ## of [method apply] when a level wants to tune a knob on top of a preset.
 
@@ -68,8 +68,8 @@ static func sun_direction(pitch_deg: float, yaw_deg: float) -> Vector3:
 
 static func _preset(name_: String) -> Dictionary:
 	match name_:
-		"brega_morning":
-			return _brega_morning()
+		"brega_gold":
+			return _brega_gold()
 		"ajdabiya_morning":
 			return _ajdabiya_morning()
 		"ice_twilight":
@@ -84,41 +84,41 @@ static func _preset(name_: String) -> Dictionary:
 ## still up and a high cirrus deck already catching light the ground has not
 ## seen yet. The warm band is tight and low because the sun has not cleared the
 ## horizon — it is a glow behind the prilling towers, not a light source.
-static func _brega_morning() -> Dictionary:
+static func _brega_gold() -> Dictionary:
 	return {
 		# Level 1, 09:30. The brief asked for bright, colourful and lush, and a
 		# dawn cannot be any of those: a sky whose only light is a 2200 K glow
 		# below the horizon gives the whole frame one hue to work with. This is
 		# the same coast three hours later -- a real blue zenith, big white
 		# cumulus with genuine shadow sides, and the sun up and out of shot.
-		"zenith_color": Color("#1f6fd0"),
-		"mid_color": Color("#79b4e6"),
-		"horizon_color": Color("#d7ecf6"),
-		"ground_color": Color("#4c5a43"),
+		"zenith_color": Color("#4f7bb0"),
+		"mid_color": Color("#dfa878"),
+		"horizon_color": Color("#ffd79a"),
+		"ground_color": Color("#6a6250"),
 		"horizon_falloff": 0.18,
 		"zenith_compression": 1.05,
 		"ground_falloff": 0.32,
 		"sky_energy": 1.15,
 
-		"band_color": Color("#eef7fd"),
+		"band_color": Color("#ffeccb"),
 		"band_strength": 0.22,
 		"band_height": 0.055,
-		"dust_color": Color("#cadfeb"),
+		"dust_color": Color("#e8c9a4"),
 		"dust": 0.20,
 		"dust_height": 0.18,
 
 		# Matched to the rig key. A sky sun and a scene key that disagree is the
 		# one error this whole class exists to make impossible.
-		"sun_direction": sun_direction(42.0, 28.0),
-		"sun_color": Color("#fff7e6"),
-		"sun_intensity": 3.0,
+		"sun_direction": sun_direction(26.0, 32.0),
+		"sun_color": Color("#fff0cf"),
+		"sun_intensity": 3.2,
 		"sun_angular_radius": 0.55,
 		"sun_edge_softness": 0.14,
 		"sun_limb_darkening": 0.55,
 		# The old glow was 2.2 of #ff8a2e, which is what burned a hole through
 		# the right third of every Brega frame.
-		"sun_glow_color": Color("#ffeecb"),
-		"sun_glow_strength": 0.50,
+		"sun_glow_color": Color("#ffdca6"),
+		"sun_glow_strength": 0.85,
 		"sun_glow_falloff": 640.0,
 		"sun_halo_color": Color("#dceaf6"),
 		"sun_halo_strength": 0.14,
@@ -131,8 +131,8 @@ static func _brega_morning() -> Dictionary:
 		# stops being a gradient behind the level and becomes part of the shot.
 		"wind_direction": 0.55,
 		"cloud_horizon_fade": 0.10,
-		"cirrus_color": Color("#ffffff"),
-		"cirrus_shadow_color": Color("#a9c4dc"),
+		"cirrus_color": Color("#ffdcb4"),
+		"cirrus_shadow_color": Color("#94879f"),
 		"cirrus_opacity": 0.42,
 		"cirrus_coverage": 0.40,
 		"cirrus_scale": 0.45,
@@ -141,8 +141,8 @@ static func _brega_morning() -> Dictionary:
 		"cirrus_speed": 0.006,
 		"cirrus_height": 3.0,
 		"cirrus_horizon_fade": 0.20,
-		"cumulus_color": Color("#ffffff"),
-		"cumulus_shadow_color": Color("#8fb0cf"),
+		"cumulus_color": Color("#ffe3c2"),
+		"cumulus_shadow_color": Color("#8b8098"),
 		"cumulus_opacity": 0.88,
 		"cumulus_coverage": 0.40,
 		"cumulus_softness": 0.26,

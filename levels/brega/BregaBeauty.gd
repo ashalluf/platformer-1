@@ -97,9 +97,9 @@ func _mood() -> LightingRig.Mood:
 	# which is exactly where the live flare's lattice stands. The sun therefore
 	# arrives broken into pieces by the plant that killed this town, instead of
 	# arriving as a smear off the right edge. See deviation 2 in the header.
-	m.sun_angles = Vector2(42.0, 28.0)
-	m.sun_color = Color(1.0, 0.945, 0.860)      # ~5200 K, mid-morning
-	m.sun_energy = 3.1
+	m.sun_angles = Vector2(26.0, 32.0)
+	m.sun_color = Color(1.0, 0.845, 0.640)      # ~3600 K, the port's gold
+	m.sun_energy = 3.5
 	m.sun_angular_distance = 1.1
 	# A disc you can actually see is the point now that something is standing in
 	# front of it. 0.34 deg was 9 px at 900 and read as a stuck highlight.
@@ -117,13 +117,13 @@ func _mood() -> LightingRig.Mood:
 	# argument: every pixel in the first capture was the same hue. Up to 0.76
 	# and pushed bluer, so the shaded wall reads COOL grey against a warm sky.
 	m.fill_angles = Vector2(18.0, -28.0)
-	m.fill_color = Color(0.560, 0.640, 0.800)
+	m.fill_color = Color(0.480, 0.580, 0.790)
 	m.fill_energy = 0.76
 
 	# Rim: hero layer only. Swung round to sit with the new key azimuth, or the
 	# rim lands on the wrong edge of him and reads as a second light.
-	m.rim_angles = Vector2(36.0, 36.0)
-	m.rim_color = Color(1.0, 0.930, 0.820)
+	m.rim_angles = Vector2(24.0, 40.0)
+	m.rim_color = Color(1.0, 0.870, 0.690)
 	m.rim_energy = 9.0
 	m.rim_cull_mask = 2
 
@@ -137,8 +137,8 @@ func _mood() -> LightingRig.Mood:
 	m.dof_near_distance = 0.0
 	m.dof_distance = 0.0
 
-	m.sky_top = Color(0.086, 0.325, 0.760)      # colder zenith; see fill note
-	m.sky_horizon = Color(0.690, 0.845, 0.930)  # #C97B45
+	m.sky_top = Color(0.330, 0.500, 0.720)      # colder zenith; see fill note
+	m.sky_horizon = Color(0.985, 0.820, 0.580)  # #C97B45
 	m.ground_horizon = Color(0.780, 0.835, 0.820)
 	m.ground_bottom = Color(0.300, 0.368, 0.330)
 	m.sky_energy = 1.08
@@ -182,8 +182,8 @@ func _mood() -> LightingRig.Mood:
 	# stops five levels sliding into a single orange, and it is the lever
 	# `adjustment_saturation` structurally cannot pull: saturation scales what
 	# is already there, it cannot put blue into a shadow that has none.
-	m.grade_shadow_tint = Color(0.44, 0.54, 0.72)
-	m.grade_highlight_tint = Color(0.74, 0.64, 0.46)
+	m.grade_shadow_tint = Color(0.40, 0.50, 0.74)
+	m.grade_highlight_tint = Color(0.84, 0.71, 0.47)
 	m.grade_strength = 0.80
 	m.glow_intensity = 0.12
 	m.glow_hdr_threshold = 2.2
@@ -198,7 +198,7 @@ func _mood() -> LightingRig.Mood:
 ## it and the aerial haze all land wherever the rig aimed the sun — the sky and
 ## the lighting cannot drift apart.
 func _sky_preset() -> String:
-	return "brega_morning"
+	return "brega_gold"
 
 
 func _build_level() -> void:
@@ -219,9 +219,58 @@ func _build_level() -> void:
 	_layer_facade()
 	_layer_gameplay()
 	_layer_foreground()
+	_layer_green()
 	_atmosphere()
 	_practicals()
 	_cull_background_shadows(deep)
+
+
+
+## Green. There was none in this frame at all -- a refinery yard rendered in
+## concrete, steel and rust, which is why no amount of grading made it colourful.
+## The reference set carries colour in saturated objects rather than in the sky,
+## and living plants are the cheapest saturated object there is.
+##
+## Placed in three bands so the green reads as depth rather than a hedge:
+## palms standing above the yard wall in the mid ground, scrub breaking the line
+## where the yard meets the concrete, and bougainvillea over the near wall where
+## it can sit against the hero's exit.
+func _layer_green() -> void:
+	# Mid ground: date palms clearing the yard wall. Tall enough to break the
+	# horizontal run of the perimeter, which is the flattest line in the shot.
+	FoliageKit.street_trees(deep, Vector3(6.0, YARD_Y, -24.0),
+		Vector3(46.0, YARD_Y, -24.0), 11.0, {
+			"seed": 4, "gap": 0.10, "jitter": 0.9, "whitewash": true,
+			"mix": {"date_palm": 0.62, "fan_palm": 0.38},
+		})
+
+	# A second, deeper row well behind the first: two rows at different depths
+	# and scales is what stops planting reading as a single cut-out band.
+	FoliageKit.street_trees(deep, Vector3(-4.0, YARD_Y - 1.2, -46.0),
+		Vector3(58.0, YARD_Y - 1.2, -46.0), 15.0, {
+			"seed": 9, "gap": 0.18, "jitter": 1.4,
+			"mix": {"date_palm": 0.5, "fan_palm": 0.5},
+		})
+
+	# Where the yard slab meets the wall. Scrub softens a junction that is
+	# otherwise two flat planes meeting at a hard line.
+	FoliageKit.scrub_band(deep, Vector3(0.0, YARD_Y, -19.4),
+		Vector3(52.0, YARD_Y, -19.4), 0.5, {
+			"seed": 12, "band": 1.3, "min_gap": 0.7,
+			"mix": {"grass": 0.52, "tamarisk": 0.28, "prickly_pear": 0.20},
+		})
+
+	# Foreground growth at the catwalk footings, close enough to read as
+	# individual leaves rather than mass.
+	FoliageKit.scrub_band(geometry, Vector3(-6.0, -9.2, 6.0),
+		Vector3(26.0, -9.2, 6.0), 0.42, {
+			"seed": 17, "band": 1.0, "min_gap": 1.1,
+			"mix": {"grass": 0.45, "prickly_pear": 0.35, "tamarisk": 0.20},
+		})
+
+	# The one saturated magenta the palette allows, run along the near wall top.
+	FoliageKit.bougainvillea(geometry, Vector3(-7.0, -3.4, 3.2),
+		Vector3(9.5, -3.4, 3.2), {"seed": 21, "density": 1.1})
 
 
 ## The key sits at 3.5 degrees, so every background object throws a shadow more
@@ -329,7 +378,7 @@ func _tube(parent: Node3D, pos: Vector3, radius: float, height: float,
 func _layer_sky_and_sea() -> void:
 	# The Gulf of Sidra, a thin band in the gap between the towers. Flat coast:
 	# no cliffs, no hills, and that flatness is the point.
-	var sea := MaterialLab.emissive(Color(0.180, 0.620, 0.820), 0.30)
+	var sea := MaterialLab.emissive(Color(0.145, 0.520, 0.620), 0.32)
 	sea.roughness = 0.12
 	sea.metallic = 0.4
 	LevelKit.prop(geometry, Vector3(120.0, -2.0, -150.0), Vector3(700.0, 6.0, 1.0),
@@ -341,18 +390,18 @@ func _layer_sky_and_sea() -> void:
 	# thicker than any temperate sky would carry. Pulled down and thinned: at
 	# 34 units tall it was a grey ceiling over the top third of the sky and it
 	# was the reason the zenith never read as pre-dawn blue.
-	var haze := MaterialLab.emissive(Color(0.870, 0.925, 0.960), 0.45)
+	var haze := MaterialLab.emissive(Color(0.980, 0.880, 0.760), 0.48)
 	haze.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	haze.albedo_color = Color(0.870, 0.925, 0.960, 0.28)
+	haze.albedo_color = Color(0.980, 0.880, 0.760, 0.30)
 	LevelKit.prop(geometry, Vector3(60.0, 9.0, -420.0), Vector3(1400.0, 20.0, 1.0),
 		haze, "DustBand")
 
 	# A thin cloud deck catching the first light, well above the dust band. Two
 	# long shallow slabs at different heights, so the sky is not a bare ramp —
 	# an empty gradient is what makes a sky read as a Godot default.
-	var cloud := MaterialLab.emissive(Color(0.99, 0.99, 1.00), 0.70)
+	var cloud := MaterialLab.emissive(Color(1.00, 0.86, 0.70), 0.72)
 	cloud.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	cloud.albedo_color = Color(0.99, 0.99, 1.00, 0.34)
+	cloud.albedo_color = Color(1.00, 0.86, 0.70, 0.36)
 	for spec: Array in [[40.0, 58.0, 380.0, 6.0], [200.0, 84.0, 300.0, 4.2],
 			[-140.0, 44.0, 260.0, 3.4]]:
 		LevelKit.prop(geometry, Vector3(spec[0], spec[1], -430.0),
@@ -644,9 +693,12 @@ func _layer_plant() -> void:
 		LevelKit.prop(geometry, Vector3(7.7 + (i % 2) * 3.4, YARD_Y + 5.6, tz + (i / 2) * 1.4),
 			Vector3(0.20, 11.2, 0.20), frame, "TowerLegB%d" % i)
 
-	PropKit.drum_stack(geometry, Vector3(15.0, YARD_Y, -21.0), 6, 3, mats["rust"])
-	PropKit.drum_stack(geometry, Vector3(30.0, YARD_Y, -19.5), 4, 2, mats["rust"])
-	PropKit.drum_stack(geometry, Vector3(40.5, YARD_Y, -23.0), 5, 3, mats["rust"])
+	PropKit.drum_stack(geometry, Vector3(15.0, YARD_Y, -21.0), 6, 3,
+		MaterialLab.painted_metal(Color(0.780, 0.215, 0.150), 0.55))
+	PropKit.drum_stack(geometry, Vector3(30.0, YARD_Y, -19.5), 4, 2,
+		MaterialLab.painted_metal(Color(0.110, 0.360, 0.620), 0.60))
+	PropKit.drum_stack(geometry, Vector3(40.5, YARD_Y, -23.0), 5, 3,
+		MaterialLab.painted_metal(Color(0.145, 0.470, 0.290), 0.58))
 
 	# Pipe runs on sleepers, walking off to the right along the ground.
 	for i in 3:
