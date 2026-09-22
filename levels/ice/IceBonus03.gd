@@ -104,7 +104,7 @@ func _mood() -> LightingRig.Mood:
 	# that impossible cyan.
 	mood.fill_angles = Vector2(20.0, -140.0)
 	mood.fill_color = Color(0.26, 0.52, 0.86)
-	mood.fill_energy = 0.74
+	mood.fill_energy = 0.46
 	mood.bounce_energy = 0.28
 	mood.bounce_color = Color(0.46, 0.66, 0.92)
 
@@ -120,17 +120,22 @@ func _mood() -> LightingRig.Mood:
 	mood.sky_horizon = Color(0.62, 0.74, 0.92)
 	mood.ground_horizon = Color(0.10, 0.20, 0.38)
 	mood.ground_bottom = Color(0.015, 0.035, 0.085)
-	mood.sky_energy = 1.1
+	mood.sky_energy = 0.85
 	mood.sky_curve = 0.26
-	mood.ambient_energy = 0.30
+	# Ambient is the enemy of a slot canyon: it is the one light with no
+	# direction, and a place defined entirely by how deep you are needs every
+	# light in it to fall off.
+	mood.ambient_energy = 0.16
 
-	mood.fog_color = Color(0.36, 0.54, 0.80)
-	mood.fog_density = 0.0075
-	mood.fog_sun_scatter = 0.30
-	# Volumetric is on whenever the density is non-zero, and it is the whole
-	# point here: a hundred metres of depth needs air in it or the far wall and
-	# the near wall sit at the same distance.
-	mood.volumetric_density = 0.030
+	# Fog is charged per unit of DEPTH, and this level is a hundred and ten
+	# units deep. The first pass ran 0.0075 / 0.030 — Brega's numbers multiplied
+	# up rather than divided down — and the whole crevasse rendered as one sheet
+	# of pale blue with a hero stencilled on it. Depth this large wants LESS fog
+	# per unit, not more: the distance does the work.
+	mood.fog_color = Color(0.30, 0.46, 0.72)
+	mood.fog_density = 0.0016
+	mood.fog_sun_scatter = 0.22
+	mood.volumetric_density = 0.0030
 	mood.fog_anisotropy = 0.62
 
 	mood.glow_intensity = 1.10
@@ -193,8 +198,15 @@ func _wall_material(t: float) -> Material:
 		return _mats[key]
 	var f := float(band) / 8.0
 	# Pale glacier blue at the lip, near-black indigo at the floor.
-	var c := Color(0.62, 0.76, 0.90).lerp(Color(0.045, 0.085, 0.175), f * f)
-	var m := MaterialLab.ice(lerpf(0.75, 0.30, f), c)
+	# Starts at a mid value, not a bright one. The snow shelves are the only
+	# thing in this level allowed near the top of the range, and a wall that
+	# competes with them is a wall the player tries to stand on.
+	var c := Color(0.20, 0.34, 0.54).lerp(Color(0.018, 0.034, 0.082), f * f)
+	# Low clarity on purpose. Glacier ice a metre thick is not a window: the
+	# light that gets through has scattered, and a wall built out of a clear
+	# refractive material lights itself from behind and joins the snow at the
+	# top of the value range, which is the one thing the read forbids.
+	var m := MaterialLab.ice(lerpf(0.16, 0.06, f), c)
 	_mats[key] = m
 	return m
 
@@ -221,7 +233,7 @@ func _build_walls() -> void:
 			# A solid backing slab behind the flutes so no gap ever shows sky
 			# through the side of the level.
 			LevelKit.prop(geometry, Vector3(side * (hw + 3.4), y - h * 0.5, WALL_Z - 4.0),
-				Vector3(7.0, h + 0.4, 5.0), _wall_material(minf(t + 0.10, 1.0)), "Backing")
+				Vector3(7.0, h + 0.4, 5.0), _wall_material(minf(t + 0.24, 1.0)), "Backing")
 		y -= h
 
 	# The far wall. Kept a value darker than the side flutes at the same depth
@@ -232,7 +244,7 @@ func _build_walls() -> void:
 		var h2 := 8.0
 		var t2 := _depth(yy - h2 * 0.5)
 		LevelKit.prop(geometry, Vector3(0.0, yy - h2 * 0.5, WALL_Z - 7.5),
-			Vector3(30.0, h2 + 0.3, 3.0), _wall_material(minf(t2 + 0.18, 1.0)), "FarWall")
+			Vector3(30.0, h2 + 0.3, 3.0), _wall_material(minf(t2 + 0.40, 1.0)), "FarWall")
 		yy -= h2
 
 	_hang_icicles()
@@ -319,7 +331,7 @@ func _build_shelves() -> void:
 		# contrast does not depend on the camera finding a good angle.
 		LevelKit.prop(geometry, Vector3(p.x, p.y - 1.0, WALL_Z + 0.9),
 			Vector3(width + 5.0, 6.0, 0.7),
-			_wall_material(minf(_depth(p.y) + 0.26, 1.0)), "ShelfBack%d" % i)
+			_wall_material(minf(_depth(p.y) + 0.34, 1.0)), "ShelfBack%d" % i)
 
 		# One cold practical under each shelf. It is not motivated by anything
 		# in the fiction and does not need to be: it is the light that stops a

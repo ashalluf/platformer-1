@@ -112,7 +112,7 @@ static func mood() -> LightingRig.Mood:
 
 	m.sun_angles = Vector2(-3.5, 150.0)
 	m.sun_color = Color(1.0, 0.565, 0.251)      # 2200 K
-	m.sun_energy = 3.1
+	m.sun_energy = 2.0
 	m.sun_angular_distance = 1.1
 	# 3.0 is a beauty-frame number. In gameplay the camera spends its life
 	# looking along the key, and at that energy the volumetrics put a hot white
@@ -158,9 +158,33 @@ static func mood() -> LightingRig.Mood:
 	m.tonemap = Environment.TONE_MAPPER_AGX
 	m.exposure = 1.08
 	m.white = 8.5
+
+	# --- The grade ------------------------------------------------------------
+	#
+	# AgX ignores `white` entirely, so the 8.5 above was doing nothing and the
+	# frame was running on the engine's 16.29 — a shoulder so long that a
+	# two-stop-hot key put the pale ground and the white thobe on the same part
+	# of it. He could not separate from the floor by value because he WAS the
+	# floor's value.
+	#
+	# 9.5 pulls the shoulder in, 1.45 puts the contrast back, and the key comes
+	# down to meet the exposure reference instead of fighting it. The difference
+	# is made up with bounce, which is light that has been somewhere first.
+	m.agx_white = 9.5
+	m.agx_contrast = 1.45
+	m.bounce_energy = 0.30
+	m.bounce_color = Color(0.98, 0.80, 0.62)
+
+	# Cool the shadows, keep the highlights warm. This is the one lever that
+	# stops five levels sliding into a single orange, and it is the lever
+	# `adjustment_saturation` structurally cannot pull: saturation scales what
+	# is already there, it cannot put blue into a shadow that has none.
+	m.grade_shadow_tint = Color(0.40, 0.46, 0.62)
+	m.grade_highlight_tint = Color(0.58, 0.52, 0.44)
+	m.grade_strength = 0.80
 	m.glow_intensity = 0.12
 	m.glow_hdr_threshold = 2.2
-	m.adjustment_saturation = 1.14
+	m.adjustment_saturation = 1.04
 	m.adjustment_contrast = 1.06
 	m.dof_near_distance = 0.0
 	m.dof_distance = 0.0

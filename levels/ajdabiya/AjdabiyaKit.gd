@@ -185,7 +185,7 @@ static func mood() -> LightingRig.Mood:
 	# left across everything he has to read.
 	m.sun_angles = Vector2(-47.0, 38.0)
 	m.sun_color = Color(1.0, 0.925, 0.815)     # ~4800 K, two hours after dawn
-	m.sun_energy = 4.2
+	m.sun_energy = 2.3
 	m.sun_angular_distance = 0.6
 	m.sun_disc_size = 0.30
 	m.sun_fog_energy = 0.9
@@ -232,6 +232,25 @@ static func mood() -> LightingRig.Mood:
 	m.tonemap = Environment.TONE_MAPPER_AGX
 	m.exposure = 1.0
 	m.white = 9.0
+
+	# AgX ignores `white`, so the 9.0 above was doing nothing and the frame ran
+	# on the engine's 16.29. Mid-morning at 4.2 put every render face on the far
+	# end of that shoulder, which is why a town with nine albedo values on
+	# screen rendered as three.
+	m.agx_white = 9.5
+	m.agx_contrast = 1.45
+	# A white-rendered street at ten in the morning throws a lot of light back
+	# up. Without the bounce the undersides of the awnings and the stall tops go
+	# to a flat shadow value and the hero reads as a sticker on the frame.
+	m.bounce_energy = 0.34
+	m.bounce_color = Color(0.96, 0.88, 0.74)
+
+	# The daytime level takes the grade further than Brega does: this is the one
+	# frame in World 1 with real sky in it, and the sky is the only cool thing
+	# available to put into the shadows.
+	m.grade_shadow_tint = Color(0.38, 0.46, 0.66)
+	m.grade_highlight_tint = Color(0.58, 0.53, 0.45)
+	m.grade_strength = 0.85
 	m.glow_intensity = 0.10
 	m.glow_hdr_threshold = 2.4
 	# The town now supplies its own colour in the mids, so the global boost
@@ -1414,9 +1433,19 @@ static func street_dressing(parent: Node3D, mats: Dictionary,
 	# enough apart that one is never over him for more than a stride.
 	var fx := x_from + 24.0
 	var fi := 0
+	# Its own material, two stops under the street's. A foreground occluder that
+	# renders at the same value as the buildings behind it stops being a layer
+	# and becomes a pole standing in the middle of the frame — which is exactly
+	# what the first capture of this street caught it doing.
+	var fg_trunk := MaterialLab.plaster(Color(0.268, 0.236, 0.196), 1.0, -0.85)
+	var fg_frond := PropKit.foliage_material(Color(0.088, 0.112, 0.070), STREET_Y, 7.0, 0.5)
 	while fx < x_to:
+		# Short enough that the lowest fronds enter the top of the frame. At 9.5
+		# to 12.5 metres the crown cleared the camera entirely and what crossed
+		# the screen was a bare pole — the comment above claimed fronds, the
+		# geometry delivered a post.
 		PropKit.palm(parent, Vector3(fx, STREET_Y + 0.11, 4.9),
-			rng.randf_range(9.5, 12.5), mats["trunk"], mats["palm"], 900 + fi)
+			rng.randf_range(6.6, 8.1), fg_trunk, fg_frond, 900 + fi)
 		# A ring of kerb round the base, because a palm growing straight out of
 		# a pavement slab is a detail everyone gets wrong.
 		LevelKit.prop(parent, Vector3(fx, STREET_Y + 0.20, 4.9),

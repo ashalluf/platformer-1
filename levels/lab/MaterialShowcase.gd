@@ -18,7 +18,13 @@ const CELL_Y := 3.70
 
 
 func _ready() -> void:
-	LightingRig.build(self, _mood())
+	var we := LightingRig.build(self, _mood())
+	# A polished metal is a mirror, and a mirror in a room with nothing in it
+	# renders black — which is exactly what gold and chrome did on the first
+	# chart. They are not broken; they had nothing to reflect. A real sky gives
+	# every metal here an environment, and judging a metal without one is
+	# judging the absence of one.
+	SkyForge.apply(we.environment, "studio")
 	_build_chart()
 	_build_camera()
 
@@ -122,7 +128,7 @@ func _build_chart() -> void:
 		l.outline_modulate = Color(0.04, 0.04, 0.05, 0.85)
 		l.billboard = BaseMaterial3D.BILLBOARD_DISABLED
 		l.shaded = false
-		l.position = Vector3(x, y - 1.58, 0.9)
+		l.position = Vector3(x, y - 1.50, 0.9)
 		add_child(l)
 
 	# Neutral backwall. Deliberately a flat grey, not a plaster preset: the
@@ -139,14 +145,17 @@ func _build_chart() -> void:
 func _build_camera() -> void:
 	var entries := _entries().size()
 	var rows := int(ceil(float(entries) / float(COLUMNS)))
-	var half_w := COLUMNS * CELL_X * 0.5 + 0.6
 	var cam := Camera3D.new()
 	cam.name = "ChartCamera"
 	cam.fov = 38.0
-	# Frame the grid by its width, which is always the binding dimension here.
-	var hfov := atan(tan(deg_to_rad(cam.fov) * 0.5) * 16.0 / 9.0)
-	cam.position = Vector3(0.0, 0.0, half_w / tan(hfov))
+
+	# Frame by whichever dimension binds. Solving for width alone cropped the
+	# top and bottom rows clean off the frame, which on a chart is not a
+	# composition choice — it is four materials nobody signed off.
+	var half_w := COLUMNS * CELL_X * 0.5 + 0.7
+	var half_h := rows * CELL_Y * 0.5 + 0.4
+	var vfov := deg_to_rad(cam.fov) * 0.5
+	var hfov := atan(tan(vfov) * 16.0 / 9.0)
+	cam.position = Vector3(0.0, 0.0, maxf(half_w / tan(hfov), half_h / tan(vfov)))
 	add_child(cam)
 	cam.current = true
-	# rows is read above only to keep the layout maths in one place.
-	assert(rows > 0)

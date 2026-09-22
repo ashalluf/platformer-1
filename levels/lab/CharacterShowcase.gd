@@ -11,11 +11,38 @@ func _ready() -> void:
 	spawn_point = Vector3(0.0, 1.2, 0.0)
 	kill_plane_y = -20.0
 	super._ready()
-	camera.distance = 4.2
-	camera.base_fov = 30.0
-	camera.height_offset = 0.95
-	camera.look_ahead = 0.0
-	camera.speed_fov_gain = 0.0
+	# A locked-off camera, not the gameplay one. GameCamera derives its height
+	# from a ground reference it resolves while the subject moves, and the whole
+	# point of a stand is that the subject does not move — so the follow camera
+	# never settles and shoots over his head. A lookdev frame is composed once
+	# and then left alone.
+	camera.queue_free()
+	var cam := Camera3D.new()
+	cam.name = "StandCamera"
+	cam.fov = 30.0
+	# Three-quarter front, not the side-on gameplay angle. The first frame off
+	# this stand was the back of his head: beauty_pose turns him upstage, which
+	# is right in a marketing frame with a level behind him and useless on a
+	# sign-off stand, where the face, the chain and the rifle are the things
+	# being signed off.
+	cam.position = Vector3(-2.55, 1.16, 3.35)
+	add_child(cam)
+	cam.look_at(Vector3(0.0, 0.98, 0.0), Vector3.UP)
+	cam.current = true
+
+	# A sign-off stand is not a level. The controller is switched off and he is
+	# pinned to the plinth, because the capture tool's traversal autopilot does
+	# what it is built to do — the first shot of this scene was the backdrop,
+	# with the subject seven metres off the right of the plinth at 12.6 m/s.
+	if is_instance_valid(player):
+		player.set_physics_process(false)
+		player.velocity = Vector3.ZERO
+		player.global_position = Vector3(0.0, 0.0, 0.0)
+		var rig := player.get_node_or_null("Rig") as WanisRig
+		if rig != null:
+			# The gameplay idle is symmetrical, which is right in play and is a
+			# mannequin on a stand. This is the authored contrapposto.
+			rig.beauty_pose = true
 
 
 func _mood() -> LightingRig.Mood:

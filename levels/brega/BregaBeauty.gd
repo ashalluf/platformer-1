@@ -99,7 +99,7 @@ func _mood() -> LightingRig.Mood:
 	# arriving as a smear off the right edge. See deviation 2 in the header.
 	m.sun_angles = Vector2(-3.5, 157.5)
 	m.sun_color = Color(1.0, 0.565, 0.251)      # 2200 K
-	m.sun_energy = 3.1
+	m.sun_energy = 2.0
 	m.sun_angular_distance = 1.1
 	# A disc you can actually see is the point now that something is standing in
 	# front of it. 0.34 deg was 9 px at 900 and read as a stuck highlight.
@@ -161,11 +161,44 @@ func _mood() -> LightingRig.Mood:
 	m.tonemap = Environment.TONE_MAPPER_AGX
 	m.exposure = 1.08
 	m.white = 8.5
+
+	# --- The grade ------------------------------------------------------------
+	#
+	# AgX ignores `white` entirely, so the 8.5 above was doing nothing and the
+	# frame was running on the engine's 16.29 — a shoulder so long that a
+	# two-stop-hot key put the pale ground and the white thobe on the same part
+	# of it. He could not separate from the floor by value because he WAS the
+	# floor's value.
+	#
+	# 9.5 pulls the shoulder in, 1.45 puts the contrast back, and the key comes
+	# down to meet the exposure reference instead of fighting it. The difference
+	# is made up with bounce, which is light that has been somewhere first.
+	m.agx_white = 9.5
+	m.agx_contrast = 1.45
+	m.bounce_energy = 0.30
+	m.bounce_color = Color(0.98, 0.80, 0.62)
+
+	# Cool the shadows, keep the highlights warm. This is the one lever that
+	# stops five levels sliding into a single orange, and it is the lever
+	# `adjustment_saturation` structurally cannot pull: saturation scales what
+	# is already there, it cannot put blue into a shadow that has none.
+	m.grade_shadow_tint = Color(0.40, 0.46, 0.62)
+	m.grade_highlight_tint = Color(0.58, 0.52, 0.44)
+	m.grade_strength = 0.80
 	m.glow_intensity = 0.14
 	m.glow_hdr_threshold = 2.2
 	m.adjustment_saturation = 1.14
 	m.adjustment_contrast = 1.10
 	return m
+
+
+## The benchmark frame is 40% sky. A ProceduralSkyMaterial gradient is the one
+## thing in it that could never pass as a photograph of that coast.
+## SkyForge reads the scene's own key light, so the disc, the warm band round
+## it and the aerial haze all land wherever the rig aimed the sun — the sky and
+## the lighting cannot drift apart.
+func _sky_preset() -> String:
+	return "brega_dawn"
 
 
 func _build_level() -> void:

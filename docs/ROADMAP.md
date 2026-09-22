@@ -7,7 +7,15 @@ this week: **1) visual quality, 2) game feel, 3) everything else, content
 quantity included.** A screenshot that would not pass as official marketing for
 a 2026 AAA release is a bug with the same severity as a crash.
 
-## Now — the kits exist, the frames do not use them
+## Now
+
+0. **The hero.** He is the weakest thing in the game and the captures make it
+   plain: mitts for hands, a shemagh that hangs like a board, a thobe that is a
+   cone, and a rifle hidden behind the shemagh from the only angle the game
+   uses. The rig driving him is good. The model is not, and he is on screen in
+   every frame of the product.
+
+## Then — the kits exist, the frames do not use them
 
 A large parallel build pass produced a library that is, today, mostly dead code:
 `SkyForge`, `WaterKit`, `DecalKit`, `FoliageKit`, `DetailKit`, `VehicleKit`,
@@ -16,19 +24,15 @@ volumetrics, three-way fill, physically-anchored exposure). Almost none of it is
 called from a level yet, which means it improves exactly zero pixels. Nothing
 else on this list matters until that is fixed.
 
-1. **Adopt `SkyForge`.** Every level still ships a `ProceduralSkyMaterial`. The
-   straw dust band at the horizon — the most location-specific decision in the
-   whole art direction — is not on screen anywhere in the game.
-2. **Fix the exposure.** Both shipped moods run a key two to three stops hot
-   (3.1 and 4.2 against the 1.0–2.0 the reference calls for), which puts the
-   pale ground and the white thobe on the same part of the AgX shoulder — the
-   hero cannot separate from the floor by value because he is the same value.
-   Set `agx_white = 9.5` / `agx_contrast = 1.45` (nothing was feeding AgX at
-   all; `Mood.white` is dead), bring the keys down, and recover the difference
-   with `bounce_energy` and rim rather than with more key.
-3. **Give each level a grade.** Cool shadows, warm highlights, per level. This
-   is the direct fix for five levels sliding into one orange, and it is the
-   lever `adjustment_saturation` structurally cannot pull.
+1. **Adopt `SkyForge`.** Done in Brega, BregaBeauty, Ajdabiya, the greybox and
+   the material chart, through a `_sky_preset()` hook on `Stage`. Still to do:
+   the ice levels, the title screen, the world map, the collection room.
+2. ~~**Fix the exposure.**~~ **Done** for Brega and Ajdabiya: `agx_white 9.5`,
+   `agx_contrast 1.45`, keys down from 3.1/4.2 to 2.0/2.3, bounce turned on.
+   Still to do for the ice levels and the menus.
+3. ~~**Give each level a grade.**~~ **Done** for Brega and Ajdabiya — cool
+   shadows, warm highlights. It is the largest single visual change the project
+   has had. Still to do for the ice levels and the menus.
 4. **Weather every wall.** `DecalKit.scatter_on_wall` at 12–20 decals per screen
    of wall, `salt_masonry` in the bottom two metres of anything near the Gulf,
    `run_off` under every coping. Flat plaster is the other half of "blocky".

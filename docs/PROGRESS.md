@@ -277,3 +277,98 @@ What landed:
 
 Verified after integration: `tools/verify_all.sh` reports ALL CLEAN — 14 scenes boot under
 real Vulkan, every script parses, all twelve shaders compile.
+
+
+---
+
+## Session record — 2026-09-22, the parallel build pass
+
+Twenty-eight agents ran at once against disjoint file ownership, on a four-core box with
+no GPU. Most of them delivered; most of them could not get a screenshot, because forty
+concurrent software Vulkan renders on four cores is not a render farm. **So a large part
+of what landed in this pass is verified by parse, by headless runtime and by geometry
+measurement, and NOT by eye.** That is the honest state of it, and the next pass's first
+job is to look at all of it.
+
+What landed:
+
+- **`MaterialLab`** grew to 28 presets and moved every metal to a physically correct 0.0
+  or 1.0 (heavy rust is a dielectric; paint is a dielectric; bare mill sheet is a
+  conductor). The chroma law is now enforced in code by `world_tint`, feathered over 10°
+  around the reserved red band because iron oxide sits at hue 23. A `tone` dial on every
+  world preset moves colour and dirt together, so shaded faces stop being hand-darkened.
+- **`LightingRig`** gained grading (a real 33³ LUT with a soft knee), per-mood shadow
+  splits expressed as fractions, a three-way fill with a ground bounce, `shafts()` /
+  `ground_mist()` / `hero_pocket()`, eight bulb presets with flicker, and a physically
+  anchored exposure reference. Its finding is the most important one in this pass:
+  **nothing was feeding AgX at all** — `Mood.white` is dead — and both shipped keys run
+  two to three stops hot, which is why the pale ground and the white thobe land on the
+  same part of the shoulder.
+- **New kits, none of them adopted by a level yet**: `SkyForge` (4 sky presets, and the
+  straw dust band the art direction calls the most location-specific decision in the game
+  is still not on screen anywhere), `WaterKit`, `DecalKit`, `FoliageKit`, `DetailKit`,
+  `VehicleKit`, `FXKit`. This is now roadmap item one: a kit that no frame calls is dead
+  code, however good it is.
+- **Hero**: the rig found and fixed five real bugs — run arm swing was ipsilateral, the
+  acceleration lean was applied to the screen-depth axis where nobody could see it, run
+  and dash both leaned backwards, the rifle aim sign was inverted, and two lerps were
+  fighting over the glide's body pitch. The rifle had no visible pistol grip at all: the
+  old one extended into the inside of the receiver.
+- **`MeshForge.loft`** had a seam on every closed loft — the last quad interpolated U from
+  0.94 back to 0, giving near-zero averaged tangents and a hard crease down every lofted
+  mesh in the game. One extra vertex column fixes it.
+- **ICE bonus 3, "THE CREVASSE"** — a descent built around the thobe glide, which nothing
+  else in the game showcases. The pool is three.
+- **Verification that actually compiles shaders.** `levels/lab/ShaderLab` mounts every
+  `.gdshader` on the carrier its mode requires and `verify_all.sh` boots it, because
+  neither `--import` nor `--check-only` validates shader source — both run the dummy
+  rasterizer and will pass a file that is pure syntax error.
+
+Verified after integration: `tools/verify_all.sh` reports ALL CLEAN — 14 scenes boot
+under real Vulkan, every script parses, all twelve shaders compile.
+
+
+### Post-integration capture pass, 2026-09-22
+
+Every scene was re-shot at 1920x1080 on a quiet box and looked at. What the
+frames actually say:
+
+**The grade is the single biggest change this project has had.** Before it, the
+Brega benchmark was one orange from the foreground column to the sky — the
+near tower, the water tower and the far cracking plant all landed within about
+a tenth of each other in value, and the frame read as a wash. `agx_white 9.5`,
+`agx_contrast 1.45`, the key down from 3.1 to 2.0 and a cool-shadow / warm-
+highlight split put four separate depth layers back in the frame in one pass.
+The foreground now silhouettes cool against a warm sky, which is what the
+colour script said it should do all along. Same treatment on Ajdabiya (key 4.2
+to 2.3) took the street off the top of the AgX shoulder: nine albedo values
+that were rendering as three now render as nine.
+
+**Three real bugs the captures caught that nothing else would have:**
+- `CharacterShowcase` shot the backdrop. The capture tool's traversal autopilot
+  walked the subject seven metres off the plinth at 12.6 m/s, because a
+  sign-off stand is not a level and nothing had told it so. It now pins him and
+  runs a locked-off camera: `GameCamera` derives its height from a ground
+  reference it resolves while the subject moves, so on a stand it never settles
+  and shoots over his head.
+- `MaterialShowcase` framed by width only and cropped four materials off the
+  top and bottom. On a chart that is not composition, it is four materials
+  nobody signed off.
+- Gold and chrome rendered black on that chart. They were not broken — they are
+  mirrors, and the studio had nothing in it to reflect. `SkyForge.apply(env,
+  "studio")` fixed both, and is now the third scene adopting the sky kit.
+
+**ICE 3 shipped fogged into a white-out.** Fog is charged per unit of depth and
+the level is 110 units deep; it had been given Brega's numbers multiplied up
+rather than divided down, so the whole crevasse rendered as one sheet of pale
+blue. Fixed, plus the wall gradient now starts at a mid value rather than a
+bright one — the snow shelves are the only thing in that level allowed near the
+top of the range.
+
+**The honest verdict: the environments are getting close, the hero is not.** On
+the stand at 1080p he is the weakest thing in the game. The hands are mitts
+with no fingers, the shemagh hangs like a board rather than cloth, the thobe is
+a cone with no sleeve break or hem structure, and the rifle — which just got a
+556-line detail pass — is almost entirely hidden behind the shemagh from the
+angle the game actually uses. **He is now weakness #1, ahead of everything
+currently listed.** The rig work underneath him is good; the model is not.

@@ -128,6 +128,15 @@ func _mood() -> LightingRig.Mood:
 	return BregaKit.mood()
 
 
+## The level is played against the sky for its whole length — every gap in the
+## plant is a hole with dawn behind it. A two-stop gradient cannot carry that.
+## SkyForge reads the scene's own key light, so the disc, the warm band round
+## it and the aerial haze all land wherever the rig aimed the sun — the sky and
+## the lighting cannot drift apart.
+func _sky_preset() -> String:
+	return "brega_dawn"
+
+
 func _build_level() -> void:
 	mats = BregaKit.palette()
 	dress = _dress_palette()
