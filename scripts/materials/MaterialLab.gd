@@ -155,10 +155,19 @@ static func surface(p: Dictionary) -> ShaderMaterial:
 	m.set_shader_parameter("emission_color", p.get("emission", Color.BLACK))
 	m.set_shader_parameter("emission_strength", p.get("emission_strength", 0.0))
 
+	# Micro-surface comes from a CC0 scan now, keyed by material family. The
+	# shader always had the slots; what it was being fed was FastNoiseLite, and
+	# fractal noise has no structure -- it undulates. Concrete has aggregate,
+	# cloth has a weave, steel has pitting, and a light needs those to read a
+	# surface as a material instead of as coloured clay.
+	#
+	# Albedo stays generated, so nothing here can smuggle a colour past
+	# world_tint(): the chroma law and the whole weathering system are
+	# untouched, and only the surface under them changes.
+	var fam: String = p.get("family", "concrete")
 	m.set_shader_parameter("macro_noise", p.get("macro", NoiseBank.macro(p.get("seed", 11))))
-	m.set_shader_parameter("detail_mask", p.get("mask", NoiseBank.grain(p.get("seed", 11) + 12)))
-	m.set_shader_parameter("detail_normal", p.get("normal",
-		NoiseBank.detail_normal(p.get("seed", 11) + 60, p.get("normal_freq", 0.12), p.get("bump", 1.6))))
+	m.set_shader_parameter("detail_mask", p.get("mask", TextureBank.detail(fam)))
+	m.set_shader_parameter("detail_normal", p.get("normal", TextureBank.normal(fam)))
 	m.set_shader_parameter("macro_scale", p.get("macro_scale", 0.09))
 	m.set_shader_parameter("detail_scale", p.get("detail_scale", 0.85))
 	m.set_shader_parameter("normal_strength", p.get("normal_strength", 1.0))
@@ -274,7 +283,7 @@ static func plaster(tint := Color(0.86, 0.80, 0.68), wear := 1.0, tone := 0.0) -
 		"variation_strength": 0.50,
 		"roughness_min": 0.72, "roughness_max": 0.98,
 		"mask": NoiseBank.streaks(53),
-		"normal": NoiseBank.detail_normal(71, 0.09, 1.1),
+		"family": "plaster",
 		"detail_scale": 0.42, "macro_scale": 0.07,
 		"normal_strength": 0.55,
 		"dust": 0.18 * wear * _dust_gain(tone),
@@ -329,7 +338,7 @@ static func painted_metal(tint := Color(0.18, 0.32, 0.42), wear := 0.6, tone := 
 		"metallic": 0.0,
 		"roughness_min": 0.26, "roughness_max": 0.60,
 		"mask": NoiseBank.worn_edge(103, 0.52),
-		"normal": NoiseBank.detail_normal(67, 0.16, 0.8),
+		"family": "metal",
 		"detail_scale": 1.2, "macro_scale": 0.12,
 		"normal_strength": 0.45,
 		# Chipped paint shows a pale primer or bright steel at every knocked
@@ -382,7 +391,7 @@ static func sand(tint := Color(0.78, 0.68, 0.50), tone := 0.0) -> ShaderMaterial
 		"variation_strength": 0.45,
 		"roughness_min": 0.85, "roughness_max": 1.0,
 		"mask": NoiseBank.grain(19),
-		"normal": NoiseBank.detail_normal(77, 0.42, 0.45),
+		"family": "ground",
 		"detail_scale": 3.2, "macro_scale": 0.16,
 		"normal_strength": 0.7,
 		# Sand has no edges to rub bright. Leaving the shader's default edge wear
@@ -494,7 +503,7 @@ static func terracotta(tint := Color(0.48, 0.29, 0.19), tone := 0.0) -> ShaderMa
 		"metallic": 0.0,
 		"roughness_min": 0.60, "roughness_max": 0.95,
 		"mask": NoiseBank.pits(191),
-		"normal": NoiseBank.detail_normal(193, 0.16, 1.3),
+		"family": "plaster",
 		"detail_scale": 0.9, "macro_scale": 0.13,
 		"normal_strength": 0.8,
 		"edge_wear": 0.55, "edge_lift": 0.30,
@@ -518,7 +527,7 @@ static func limewash(tint := Color(0.80, 0.78, 0.72), wear := 1.0, tone := 0.0) 
 		"metallic": 0.0,
 		"roughness_min": 0.78, "roughness_max": 1.0,
 		"mask": NoiseBank.cracks(163, 0.05, 0.085),
-		"normal": NoiseBank.detail_normal(197, 0.07, 0.9),
+		"family": "plaster",
 		"detail_scale": 0.30, "macro_scale": 0.06,
 		"normal_strength": 0.5,
 		# Cracks are thin and dark: give them a little depth and a lot of
@@ -545,7 +554,7 @@ static func bitumen(tint := Color(0.135, 0.128, 0.126), tone := 0.0) -> ShaderMa
 		"metallic": 0.0,
 		"roughness_min": 0.68, "roughness_max": 0.98,
 		"mask": NoiseBank.granule(173),
-		"normal": NoiseBank.detail_normal(199, 0.55, 0.8),
+		"family": "ground",
 		"detail_scale": 2.4, "macro_scale": 0.09,
 		"normal_strength": 0.75,
 		# Laid flat and walked on; there is nothing here to rub bright.
@@ -572,7 +581,7 @@ static func galvanised(tint := Color(0.58, 0.59, 0.60), age := 0.6, tone := 0.0)
 		"metallic": 1.0 if age < 0.4 else 0.0,
 		"roughness_min": lerpf(0.22, 0.62, age), "roughness_max": lerpf(0.55, 0.95, age),
 		"mask": NoiseBank.blooms(211, 0.05),
-		"normal": NoiseBank.detail_normal(213, 0.30, 0.6),
+		"family": "metal",
 		"detail_scale": 1.6, "macro_scale": 0.14,
 		"normal_strength": 0.5,
 		"edge_wear": 0.40, "wear_color": Color(0.64, 0.65, 0.66, 1.0),
