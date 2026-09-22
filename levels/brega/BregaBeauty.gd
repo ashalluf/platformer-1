@@ -424,26 +424,12 @@ func _layer_sky_and_sea() -> void:
 	# Sabkha plain running flat to the horizon, blinding pale.
 	LevelKit.prop(geometry, Vector3(40.0, -9.5, -150.0), Vector3(900.0, 5.0, 220.0),
 		mats["sabkha"], "SabkhaPlain")
-	# The bleached straw aerosol band above the horizon glow — Saharan dust,
-	# thicker than any temperate sky would carry. Pulled down and thinned: at
-	# 34 units tall it was a grey ceiling over the top third of the sky and it
-	# was the reason the zenith never read as pre-dawn blue.
-	var haze := MaterialLab.emissive(Color(0.950, 0.915, 0.870), 0.30)
-	haze.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	haze.albedo_color = Color(0.950, 0.915, 0.870, 0.13)
-	LevelKit.prop(geometry, Vector3(60.0, 9.0, -420.0), Vector3(1400.0, 20.0, 1.0),
-		haze, "DustBand")
-
-	# A thin cloud deck catching the first light, well above the dust band. Two
-	# long shallow slabs at different heights, so the sky is not a bare ramp —
-	# an empty gradient is what makes a sky read as a Godot default.
-	var cloud := MaterialLab.emissive(Color(1.00, 0.90, 0.78), 0.55)
-	cloud.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	cloud.albedo_color = Color(1.00, 0.90, 0.78, 0.22)
-	for spec: Array in [[40.0, 58.0, 380.0, 6.0], [200.0, 84.0, 300.0, 4.2],
-			[-140.0, 44.0, 260.0, 3.4]]:
-		LevelKit.prop(geometry, Vector3(spec[0], spec[1], -430.0),
-			Vector3(spec[2], spec[3], 1.0), cloud, "CloudDeck")
+	# There used to be a dust band and three emissive cloud-deck slabs hanging
+	# here, painted for a sunset. They were cards in FRONT of the sky, so the
+	# real thing -- SkyForge's shader, with five octaves of noise, anisotropic
+	# cirrus and silver-lined cumulus -- was mostly hidden behind them, and no
+	# amount of tuning the shader could show through. The sky is drawn by the
+	# sky now.
 
 
 ## The horizon itself: the fertiliser complex as one long dark bank at Z -190.

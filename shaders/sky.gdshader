@@ -108,6 +108,14 @@ uniform float cumulus_speed : hint_range(0.0, 0.3) = 0.012;
 uniform float cumulus_detail : hint_range(0.0, 1.0) = 0.40;
 uniform float cumulus_silver : hint_range(0.0, 8.0) = 2.4;
 uniform float cumulus_light_step : hint_range(0.01, 2.0) = 0.32;
+// Domain warp. The single biggest difference between "procedural cloud" and
+// "photograph of a cloud": distort the sampling coordinates by more noise
+// before reading the density, and the smooth fbm lobes fold into the billowing
+// cauliflower stacks real cumulus actually has. Costs two extra fbm3 taps.
+uniform float cumulus_warp : hint_range(0.0, 2.0) = 0.62;
+// Second, finer erosion pass. The existing single tap eats the fbm edge; this
+// one eats the edge of THAT, which is where the small-scale frill comes from.
+uniform float cumulus_frill : hint_range(0.0, 1.0) = 0.45;
 group_uniforms;
 
 group_uniforms Night;
@@ -310,6 +318,7 @@ void sky() {
 		cp = mat2(vec2(ca, sa), vec2(-sa, ca)) * cp;
 		cp.x /= max(cirrus_stretch, 1.0);
 		cp += wind * TIME * cirrus_speed;
+		cp += (vec2(fbm3(cp * 0.8 + 4.4), fbm3(cp * 0.8 + 11.9)) - 0.5) * 0.35;
 		float c = fbm4(cp);
 		cirrus_a = smoothstep(1.0 - cirrus_coverage, 1.0 - cirrus_coverage + 0.26, c);
 		cirrus_a *= cirrus_opacity * smoothstep(cirrus_floor, cirrus_horizon_fade * 2.0, up);
@@ -323,10 +332,21 @@ void sky() {
 	vec3 cumulus_rgb = cumulus_color;
 	if (cumulus_opacity > 0.001) {
 		vec2 cp = cloud_plane(dir, cumulus_height, cumulus_scale) + wind * TIME * cumulus_speed * 10.0;
+		// Domain warp, sampled on its own slow drift so the cloud shapes
+		// evolve rather than sliding past as a rigid sheet. Weather changes
+		// shape as it crosses the sky and a rigid sheet is the tell that this
+		// is a texture on a dome.
+		if (cumulus_warp > 0.001) {
+			vec2 q = vec2(fbm3(cp * 0.63 + vec2(1.7, 9.2) + wind * TIME * cumulus_speed * 2.0),
+						  fbm3(cp * 0.63 + vec2(8.3, 2.8) - wind * TIME * cumulus_speed * 1.4));
+			cp += (q - 0.5) * cumulus_warp;
+		}
 		float d = fbm5(cp);
-		// One high-frequency tap eats the smooth fbm edge into something
-		// cauliflower-shaped. A second full fbm here is not worth the cost.
+		// Two erosion taps. The first eats the smooth fbm edge into a
+		// cauliflower; the second eats the edge of that, which is where the
+		// small-scale frill along a sunlit rim comes from.
 		d -= vnoise(cp * 5.3 + 13.0) * cumulus_detail * 0.22;
+		d -= vnoise(cp * 13.1 + 41.0) * cumulus_frill * 0.085;
 		float thr = 1.0 - cumulus_coverage;
 		cumulus_a = smoothstep(thr, thr + cumulus_softness, d);
 		cumulus_a *= cumulus_opacity * deck_fade;
