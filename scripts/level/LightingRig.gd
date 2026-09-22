@@ -249,6 +249,10 @@ class Mood extends RefCounted:
 	## background in the reference art has it; Godot gives it away for free on
 	## an Environment property.
 	var fog_aerial := 0.62
+	## Height at which the height-fog term starts, in world Y, and how fast it
+	## accumulates below that. Negative density thins upward from `fog_height`.
+	var fog_height := 4.0
+	var fog_height_density := 0.9
 	var fog_sun_scatter := 0.35
 	var fog_emission := Color(0.35, 0.30, 0.26)
 	var fog_anisotropy := 0.72
@@ -537,6 +541,15 @@ static func build(parent: Node3D, mood: Mood) -> WorldEnvironment:
 	env.fog_sun_scatter = mood.fog_sun_scatter
 	env.fog_sky_affect = 0.0
 	env.fog_aerial_perspective = mood.fog_aerial
+	# Height falloff, so the haze thins as it rises off the ground plane.
+	#
+	# Uniform density lifted the foreground along with the background -- the
+	# near band measured 0.46 to 0.58 when aerial perspective came up, which is
+	# a milkier picture rather than a deeper one. Depth needs the far plane to
+	# go pale WHILE the near plane stays dense, and ground haze does exactly
+	# that: it pools where the distance is and thins where the camera is.
+	env.fog_height = mood.fog_height
+	env.fog_height_density = mood.fog_height_density
 
 	env.volumetric_fog_enabled = true
 	env.volumetric_fog_density = mood.volumetric_density
