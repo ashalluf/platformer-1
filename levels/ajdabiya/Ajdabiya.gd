@@ -113,7 +113,92 @@ func _build_level() -> void:
 	_section_d_backstreet()
 	_section_e_east_gate()
 	_atmosphere()
+	_layer_vfx()
 
+
+
+## Particulate life for the street.
+##
+## Brega got a VFX pass and this level got none, which is precisely the
+## "scenes built to different standards" the brief warns about: side by side,
+## Ajdabiya reads as the prototype. A Libyan street at 09:10 in summer is not
+## still air -- it has dust off the road, heat coming off every lit surface,
+## and smoke from whatever is cooking.
+##
+## Everything is keyed to STREET_Y and the section coordinates the level
+## already uses, and all of it sits behind or above the play line.
+func _layer_vfx() -> void:
+	FXKit.set_key(Color(1.0, 0.94, 0.82), Color(0.42, 0.50, 0.78),
+		LightingRig.key_direction(AjdabiyaKit.mood()))
+
+	# Road dust, drifting the length of the street. Low, slow, and thin enough
+	# that it never sits between the camera and a platform edge.
+	var dust := _street_puff("StreetDust", Vector3(60.0, STREET_Y + 1.1, -2.0),
+		70, 14.0, FXKit.spark_material(Color(0.96, 0.88, 0.70), 0.13,
+			FXKit.soft_texture()), Vector3(-1.0, 0.10, 0.0), 34.0, 0.30, 0.90)
+	dust.draw_pass_1 = _street_quad(0.050)
+	_street_box(dust, Vector3(150.0, 7.0, 7.0))
+
+	# Heat off the road. Mid-morning in summer on dark asphalt: the shimmer is
+	# the single most recognisable thing about the place and heat_haze.gdshader
+	# was written for it and never used outside the shader lab.
+	for x: float in [24.0, 78.0, 132.0]:
+		var haze := FXKit.haze(Vector2(26.0, 3.2), 0.010,
+			{"source_v": 1.0, "sorting_offset": 0.4})
+		haze.position = Vector3(x, STREET_Y + 1.5, -1.2)
+		geometry.add_child(haze)
+
+	# Smoke off the market -- something is always on a grill. Warm, thin, and
+	# it gives the middle of the frame a moving vertical.
+	var grill := _street_puff("GrillSmoke", Vector3(18.0, STREET_Y + 1.8, -3.4),
+		12, 5.0, FXKit.smoke_material(Color(0.80, 0.74, 0.66), {
+			"alpha": 0.17, "erode": 0.72, "softness": 0.9,
+			"depth_fade": 0.35, "brightness": 1.35,
+		}), Vector3(-0.35, 1.0, 0.0), 24.0, 1.1, 2.4)
+	grill.draw_pass_1 = _street_quad(1.7)
+
+
+func _street_puff(name: String, at: Vector3, amount: int, lifetime: float,
+		mat: Material, dir: Vector3, spread: float, vmin: float,
+		vmax: float) -> GPUParticles3D:
+	var p := GPUParticles3D.new()
+	p.name = name
+	p.position = at
+	p.amount = amount
+	p.lifetime = lifetime
+	p.preprocess = lifetime
+	p.randomness = 0.6
+	p.fixed_fps = 30
+	p.draw_order = GPUParticles3D.DRAW_ORDER_VIEW_DEPTH
+	p.material_override = mat
+	var pm := ParticleProcessMaterial.new()
+	pm.direction = dir
+	pm.spread = spread
+	pm.initial_velocity_min = vmin
+	pm.initial_velocity_max = vmax
+	pm.gravity = Vector3(0.0, 0.35, 0.0)
+	pm.scale_min = 0.7
+	pm.scale_max = 1.35
+	pm.damping_min = 0.10
+	pm.damping_max = 0.40
+	pm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
+	pm.emission_sphere_radius = 0.4
+	p.process_material = pm
+	geometry.add_child(p)
+	return p
+
+
+func _street_box(p: GPUParticles3D, extents: Vector3) -> void:
+	var pm := p.process_material as ParticleProcessMaterial
+	pm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
+	pm.emission_box_extents = extents * 0.5
+	p.visibility_aabb = AABB(-extents * 0.5, extents)
+
+
+func _street_quad(size: float) -> QuadMesh:
+	var q := QuadMesh.new()
+	q.size = Vector2(size, size)
+	return q
 
 ## Materials this level owns on top of the shared town palette. They are built
 ## once and shared, because every one of them is used a few hundred times.

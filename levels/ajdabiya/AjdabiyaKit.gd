@@ -216,18 +216,19 @@ static func mood() -> LightingRig.Mood:
 	m.ground_bottom = Color(0.270, 0.240, 0.205)
 	m.sky_energy = 1.35
 	m.sky_curve = 0.20
-	m.ambient_energy = 0.66
+	m.ambient_energy = 0.44
 
 	# Depth fog carries the four town bands apart. At 0.00055 they all sat on
 	# the same plane and the skyline read as a decal; this is still gentle
 	# (about a third of the way to the fog colour at the far ridge) but it is
 	# the difference between a backdrop and a distance.
 	m.fog_color = Color(0.762, 0.700, 0.588)
-	m.fog_density = 0.0010
+	m.fog_density = 0.0042
+	m.fog_aerial = 0.72
 	m.fog_sun_scatter = 0.10
 	m.fog_emission = Color(0.05, 0.05, 0.055)
 	m.fog_anisotropy = 0.55
-	m.volumetric_density = 0.00060
+	m.volumetric_density = 0.0016
 
 	m.tonemap = Environment.TONE_MAPPER_AGX
 	m.exposure = 1.0
