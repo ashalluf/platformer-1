@@ -145,6 +145,30 @@ Capability that exists in the repo and is improving no frame yet, as of this wri
 
 ---
 
+## Fixed
+
+**The hit-stop froze the game permanently on first use.** `FXDirector` counted the
+hit-stop down with `delta / maxf(Engine.time_scale, 0.0001)`. The engine scales
+`delta` by `time_scale` before `_process` sees it, so at scale 0.0 delta arrives as
+0.0 and the quotient is still 0.0: `_hitstop_left` never decreased and time scale
+never came back. Every `_process` delta in the game then read 0.0 forever.
+
+On the title screen that surfaced as a dead menu. The hero spawns on the catwalk and
+lands, `PlayerController` fires a landing hit-stop, `_t += delta` stops advancing, `_t`
+never reaches `CAM_SETTLE`, and `_menu.accept_input` is never set true — while the menu
+is already visible, because that happens earlier at `MENU_IN`. A drawn, highlighted,
+permanently unresponsive title screen. It would have frozen on the first landing in
+Brega just the same.
+
+Now counted off `Time.get_ticks_usec()`. `SceneFlow`'s two transition tweens also
+ignore time scale, so a wipe finishes whatever gameplay time is doing.
+
+Also: `Enter` was bound to nothing. Every menu took "jump or attack" as confirm. There
+is now a `confirm` action (Enter, keypad Enter, gamepad A) accepted everywhere those
+were, and a key pressed during the title entrance skips it instead of being swallowed.
+
+---
+
 ## Weak — the honest list
 
 1. **The key is two to three stops hot.** `LightingRig`'s exposure reference works the
