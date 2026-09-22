@@ -509,6 +509,11 @@ static func _far_run(parent: Node3D, mats: Dictionary, x: float,
 		else:
 			town_facade(parent, mats, x + 0.6, STREET_Y + 3.9, w - 1.2, h - 4.4,
 				zf + 0.04, int(x) + 17)
+			DecalKit.scatter_on_wall(parent, x + 0.6, STREET_Y + 3.9,
+				w - 1.2, h - 4.4, zf + 0.10, {
+					"preset": "town", "density": 0.85, "name": "BackTerraceWeather",
+					"posters": 0.3,
+				}, int(x) * 53 + 29)
 
 		# Every unit steps. Down more often than up, so a run reads as falling
 		# away toward the next hole in the frontage.

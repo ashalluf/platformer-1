@@ -191,6 +191,14 @@ func _section_a_walkway() -> void:
 			"name": "CellBlock", "joint_mat": mats["joint"], "dark_mat": mats["dark"],
 			"hole_mat": mats["joint"], "depth": 5.0, "open_holes": 3,
 		})
+	# The wall the player spends the opening minute looking at.
+	DecalKit.scatter_on_wall(geometry, X_START - 40.0, YARD_Y, 74.0, 10.6, -5.0, {
+		"preset": "plant", "density": 1.2, "name": "CellBlockWeather",
+		"graffiti": 0.40,
+	}, 4021)
+	DecalKit.run_off(geometry, X_START - 40.0, YARD_Y + 10.6, 74.0, -5.0, {
+		"length": 3.1, "width": 0.30, "clusters": 10,
+	}, 4022)
 	LevelKit.prop(geometry, Vector3(34.0, YARD_Y + 5.3, -5.0), Vector3(0.5, 10.6, 5.2),
 		mats["joint"], "BlockEndWall")
 

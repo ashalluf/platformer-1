@@ -683,6 +683,16 @@ func _terrace(left_x: float, right_x: float, height: float, seed_: int) -> void:
 		mats["render_c"], mats["block"], 0, seed_)
 	AjdabiyaKit.town_facade(geometry, mats, left_x + 0.6, STREET_Y + 3.8,
 		w - 1.2, height - 4.3, -4.96, seed_ + 3)
+	# "town": less soot than the plant, more sand at the base, hands at
+	# shoulder height, paper on it. A street wall is dirtied by people, not by
+	# process, and DecalKit has a preset that says exactly that.
+	DecalKit.scatter_on_wall(geometry, left_x + 0.6, STREET_Y + 3.8,
+		w - 1.2, height - 4.3, -4.90, {
+			"preset": "town", "density": 1.0, "name": "TerraceWeather",
+			"posters": 0.55, "graffiti": 0.30,
+		}, seed_ * 71 + 11)
+	DecalKit.run_off(geometry, left_x + 0.6, STREET_Y + height - 0.5,
+		w - 1.2, -4.90, {"length": 2.2, "width": 0.22}, seed_ * 73 + 5)
 	# One stairwell per terrace, set back behind the play line.
 	PropKit.stair_head(geometry,
 		Vector3(left_x + w * 0.5 + fmod(float(seed_) * 3.7, 4.0) - 2.0,

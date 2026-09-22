@@ -915,6 +915,16 @@ static func _second_block(parent: Node3D, mats: Dictionary,
 				"dark_mat": mats["wall"], "hole_mat": mats["wall"],
 				"depth": 6.0, "open_holes": 1, "seed": 300 + i * 17,
 			})
+		# Weather it here, with the wall's own numbers. DecalKit was dead code
+		# across the whole project; flat plaster is, as ROADMAP puts it, the
+		# other half of "blocky".
+		DecalKit.scatter_on_wall(parent, left, YARD_Y, w, h, z, {
+			"preset": "plant", "density": 0.8, "name": "BlockTwo%dWeather" % i,
+			"posters": 0.0,
+		}, 5100 + i * 31)
+		DecalKit.run_off(parent, left, YARD_Y + h, w, z, {
+			"length": 2.6, "width": 0.26,
+		}, 5200 + i * 31)
 		# A roofline with things on it is the difference between a building and
 		# a box, and at this distance it is all silhouette against bright sky.
 		PropKit.roof_clutter(block, left + 2.0, YARD_Y + h, w - 4.0, z - 1.0,
@@ -1115,6 +1125,12 @@ static func _perimeter(parent: Node3D, mats: Dictionary,
 		var h: float = heights[i]
 		PropKit.perimeter_wall(parent, left, YARD_Y, right - left, h, z,
 			mats["wall"], mats["joint"])
+		# A perimeter wall by the Gulf: salt eats the bottom, sand drifts the
+		# base, and nothing has painted it in thirty years.
+		DecalKit.scatter_on_wall(parent, left, YARD_Y, right - left, h, z, {
+			"preset": "plant", "density": 1.0, "name": "PerimeterWeather%d" % i,
+			"graffiti": 0.5, "drift": true,
+		}, 5300 + i * 37)
 		PropKit.razor_coil(parent, Vector3(left, YARD_Y + h + 0.2, z),
 			Vector3(right, YARD_Y + h + 0.2, z), 0.20,
 			mats["rust"], int((right - left) / 3.0) + 4)

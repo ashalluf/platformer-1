@@ -222,6 +222,8 @@ func _build_level() -> void:
 	_layer_foreground()
 	_layer_green()
 	_layer_colour()
+	_layer_weathering()
+	_layer_services()
 	_atmosphere()
 	_layer_vfx()
 	_practicals()
@@ -230,6 +232,101 @@ func _build_level() -> void:
 
 
 
+
+
+## Weathering. DecalKit is 1573 lines of grime, run-off, cracks, scuffs, salt
+## and stencils, and grep says it was called from nowhere in the entire game.
+## ROADMAP item 4 specifies the intended use almost exactly -- "scatter_on_wall
+## at 12-20 decals per screen of wall, run_off under every coping. Flat plaster
+## is the other half of blocky" -- so this is adoption, not invention.
+##
+## Every wall here is decalled at the coordinates its own PropKit.prefab_facade
+## call already uses. Guessing coordinates produced floating billboards earlier
+## in this level's history; reading them off the geometry that exists cannot.
+func _layer_weathering() -> void:
+	# The cell block. "plant" preset: everything runs, everything rusts, and
+	# the bottom metre is eaten by salt -- which is the Gulf, 400 m that way.
+	DecalKit.scatter_on_wall(geometry, -62.0, YARD_Y, 67.0, 10.6, -5.0, {
+		"preset": "plant", "density": 1.15, "name": "CellBlockWeather",
+		"wind": 1.0, "graffiti": 0.34,
+	}, 4021)
+	# Run-off under the coping. Water leaves a building where the parapet ends,
+	# and the streak below that point is the single most recognisable mark
+	# weather makes on a building.
+	DecalKit.run_off(geometry, -62.0, YARD_Y + 10.6, 67.0, -5.0, {
+		"length": 3.1, "width": 0.30, "clusters": 9,
+	}, 4022)
+
+	# Block two, deeper in and reading as the mid tone between the near-black
+	# block and the lit plain. Lighter density: at that distance heavy decal
+	# work is texture, not story.
+	DecalKit.scatter_on_wall(geometry, 13.0, YARD_Y, 72.0, 8.4, -32.0, {
+		"preset": "plant", "density": 0.7, "name": "BlockTwoWeather",
+		"posters": 0.0, "graffiti": 0.0,
+	}, 4031)
+	DecalKit.run_off(geometry, 13.0, YARD_Y + 8.4, 72.0, -32.0, {
+		"length": 2.4, "width": 0.24, "clusters": 7,
+	}, 4032)
+
+
+## Building services. DetailKit is 1796 lines of the exact vocabulary a
+## refinery is made of -- pipe runs with real terminations, cable trays,
+## conduit banks, junction boxes, isolators, bulkhead lights, ladders, grating,
+## hazard plates -- and it was called from nowhere in the game.
+##
+## All of it goes on the cell block's own face at z = -5.0, which is behind the
+## catwalk the player uses, so nothing here can clutter the gameplay plane. A
+## blank wall behind the action is the cheapest thing to fix and the most
+## visible: every run of conduit throws a hard vertical shadow across the
+## render, which is most of what makes a sunlit facade read as built rather
+## than extruded.
+func _layer_services() -> void:
+	var face := -4.86                     # just proud of the block's -5.0 face
+	var steel := MaterialLab.painted_metal(Color(0.215, 0.230, 0.245), 0.70)
+	var galv := MaterialLab.galvanised(Color(0.55, 0.57, 0.58))
+	var oxide: Material = mats["rust"]
+
+	# One long tray at high level, the way a plant actually routes cable: above
+	# head height, below the roofline, and dead straight for as long as it can.
+	DetailKit.cable_tray(geometry, Vector3(-56.0, 1.85, face),
+		Vector3(2.0, 1.85, face), 0.42, galv, {"name": "BlockTray"})
+
+	# Conduit dropping off the tray, and a second bank lower down.
+	DetailKit.conduit_bank(geometry, Vector3(-40.0, 1.70, face),
+		Vector3(-40.0, -4.30, face), 3, galv, {"name": "ConduitDrop"})
+	DetailKit.conduit_bank(geometry, Vector3(-22.0, 0.35, face),
+		Vector3(-4.0, 0.35, face), 4, galv, {"name": "ConduitRun"})
+
+	# Boxes and isolators where the drops land. These are the small bright
+	# rectangles that break a long wall into readable bays.
+	for x: float in [-40.0, -22.0, -6.0]:
+		DetailKit.junction_box(geometry, Vector3(x, -0.9, face),
+			Vector3(0.44, 0.60, 0.22), steel, {"name": "JBox"})
+	DetailKit.isolator(geometry, Vector3(-31.0, -1.1, face), steel,
+		MaterialLab.painted_metal(Color(0.62, 0.14, 0.10), 0.4), {})
+	DetailKit.distribution_board(geometry, Vector3(-13.5, -1.4, face), steel,
+		MaterialLab.painted_metal(Color(0.28, 0.32, 0.36), 0.55), {})
+
+	# Bulkhead lights. Geometry AND a practical each, so the wall has its own
+	# light sources at sunset instead of being lit only by the sky.
+	for x: float in [-47.0, -28.0, -9.0]:
+		DetailKit.bulkhead_light(geometry, Vector3(x, 2.35, face), galv, {})
+		LightingRig.practical(geometry, Vector3(x, 2.15, face - 0.5),
+			LightingRig.Bulb.SODIUM, 2.4)
+
+	# Ladders to the roof: vertical lines against a horizontal building, and
+	# they say the roofline is reachable, which is true -- it is a platform.
+	DetailKit.ladder(geometry, Vector3(-52.0, YARD_Y, face), 10.2, oxide, {})
+	DetailKit.ladder(geometry, Vector3(-2.5, YARD_Y, face), 10.2, oxide, {})
+
+	# Hazard plates. Arabic signage is canon and this is a working plant: the
+	# plates belong where the services are, not scattered decoratively.
+	DetailKit.hazard_plate(geometry, Vector3(-38.6, -0.2, face),
+		Vector2(0.62, 0.46), MaterialLab.painted_metal(Color(0.82, 0.68, 0.10), 0.5),
+		steel, {})
+	DetailKit.hazard_plate(geometry, Vector3(-12.2, -0.5, face),
+		Vector2(0.54, 0.40), MaterialLab.painted_metal(Color(0.72, 0.16, 0.12), 0.5),
+		steel, {})
 
 ## Particulate life.
 ##
