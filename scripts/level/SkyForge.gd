@@ -70,6 +70,8 @@ static func _preset(name_: String) -> Dictionary:
 	match name_:
 		"brega_gold":
 			return _brega_gold()
+		"brega_sunset":
+			return _brega_sunset()
 		"ajdabiya_morning":
 			return _ajdabiya_morning()
 		"ice_twilight":
@@ -160,6 +162,94 @@ static func _brega_gold() -> Dictionary:
 		"star_threshold": 0.962,
 		"star_twinkle": 0.35,
 		"star_horizon_fade": 0.30,
+		"aurora_strength": 0.0,
+	}
+
+
+## Level 1, alternate: 18:40, the sun on the water.
+##
+## The reference art for this game is a sunset -- bg_brega_yard burns red and
+## bg_benghazi_port is gold over the Gulf -- and a low sun is the one condition
+## where a sky can carry the whole frame. Everything here is built around the
+## disc sitting just above the horizon: the magenta mid-band that only exists
+## when light is travelling through that much atmosphere, cumulus lit from
+## UNDERNEATH with cool blue tops, and cirrus catching the last of it high up
+## where the sun has already set from the ground's point of view.
+##
+## The key that goes with this lives in the level mood and must agree with
+## sun_direction below. A sky sun and a rig key that disagree is the failure
+## this class exists to prevent, and it has happened twice in this file's
+## history.
+static func _brega_sunset() -> Dictionary:
+	return {
+		"zenith_color": Color("#20376f"),
+		"mid_color": Color("#a85c86"),
+		"horizon_color": Color("#ff9d4c"),
+		"ground_color": Color("#40332c"),
+		"horizon_falloff": 0.15,
+		"zenith_compression": 1.30,
+		"ground_falloff": 0.30,
+		"sky_energy": 1.05,
+
+		"band_color": Color("#ffd2a0"),
+		"band_strength": 0.46,
+		"band_height": 0.075,
+		"dust_color": Color("#e0a377"),
+		"dust": 0.34,
+		"dust_height": 0.26,
+
+		# 6 degrees: the disc is up, but only just.
+		"sun_direction": sun_direction(6.0, 32.0),
+		"sun_color": Color("#ffdca6"),
+		"sun_intensity": 5.6,
+		"sun_angular_radius": 1.5,
+		"sun_edge_softness": 0.20,
+		"sun_limb_darkening": 0.68,
+		"sun_glow_color": Color("#ff8f3c"),
+		"sun_glow_strength": 2.0,
+		"sun_glow_falloff": 260.0,
+		"sun_halo_color": Color("#ff7b4e"),
+		"sun_halo_strength": 0.52,
+		"sun_halo_falloff": 4.0,
+		"sun_horizon_spread": 1.5,
+		"sun_haze_extinction": 2.3,
+
+		# Lit from below. This is the entire difference between a sunset sky and
+		# a daytime sky with warm colours poured over it: at this sun angle the
+		# light arrives under the cloud base, so the undersides burn and the
+		# tops go cold. Getting that backwards is what makes a fake sunset look
+		# fake even when the palette is right.
+		"wind_direction": 0.55,
+		"cloud_horizon_fade": 0.07,
+		"cirrus_color": Color("#ffb583"),
+		"cirrus_shadow_color": Color("#6a5580"),
+		"cirrus_opacity": 0.62,
+		"cirrus_coverage": 0.52,
+		"cirrus_scale": 0.42,
+		"cirrus_stretch": 6.2,
+		"cirrus_angle": 0.40,
+		"cirrus_speed": 0.014,
+		"cirrus_height": 3.2,
+		"cirrus_horizon_fade": 0.16,
+		"cumulus_color": Color("#ffc089"),
+		"cumulus_shadow_color": Color("#5d5878"),
+		"cumulus_opacity": 0.92,
+		"cumulus_coverage": 0.50,
+		"cumulus_softness": 0.19,
+		"cumulus_scale": 0.44,
+		"cumulus_height": 0.82,
+		"cumulus_speed": 0.026,
+		"cumulus_detail": 0.74,
+		"cumulus_silver": 4.6,
+		"cumulus_light_step": 0.34,
+
+		# First stars, high up, where the sky has already gone.
+		"star_color": Color("#c2cdf0"),
+		"star_strength": 0.22,
+		"star_density": 170.0,
+		"star_threshold": 0.972,
+		"star_twinkle": 0.40,
+		"star_horizon_fade": 0.52,
 		"aurora_strength": 0.0,
 	}
 

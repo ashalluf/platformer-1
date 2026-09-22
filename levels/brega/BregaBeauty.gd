@@ -97,8 +97,8 @@ func _mood() -> LightingRig.Mood:
 	# which is exactly where the live flare's lattice stands. The sun therefore
 	# arrives broken into pieces by the plant that killed this town, instead of
 	# arriving as a smear off the right edge. See deviation 2 in the header.
-	m.sun_angles = Vector2(26.0, 32.0)
-	m.sun_color = Color(1.0, 0.900, 0.760)      # ~4300 K: warm, not amber
+	m.sun_angles = Vector2(6.0, 32.0)
+	m.sun_color = Color(1.0, 0.760, 0.520)      # ~2900 K: the sun on the water
 	m.sun_energy = 2.8
 	m.sun_angular_distance = 1.1
 	# A disc you can actually see is the point now that something is standing in
@@ -122,8 +122,8 @@ func _mood() -> LightingRig.Mood:
 
 	# Rim: hero layer only. Swung round to sit with the new key azimuth, or the
 	# rim lands on the wrong edge of him and reads as a second light.
-	m.rim_angles = Vector2(24.0, 40.0)
-	m.rim_color = Color(1.0, 0.870, 0.690)
+	m.rim_angles = Vector2(8.0, 44.0)
+	m.rim_color = Color(1.0, 0.800, 0.580)
 	m.rim_energy = 9.0
 	m.rim_cull_mask = 2
 
@@ -137,8 +137,8 @@ func _mood() -> LightingRig.Mood:
 	m.dof_near_distance = 0.0
 	m.dof_distance = 0.0
 
-	m.sky_top = Color(0.235, 0.435, 0.700)      # colder zenith; see fill note
-	m.sky_horizon = Color(0.980, 0.860, 0.680)  # #C97B45
+	m.sky_top = Color(0.125, 0.215, 0.435)      # colder zenith; see fill note
+	m.sky_horizon = Color(1.000, 0.700, 0.420)  # #C97B45
 	m.ground_horizon = Color(0.780, 0.835, 0.820)
 	m.ground_bottom = Color(0.300, 0.368, 0.330)
 	m.sky_energy = 1.30
@@ -176,13 +176,13 @@ func _mood() -> LightingRig.Mood:
 	m.agx_white = 9.5
 	m.agx_contrast = 1.58
 	m.bounce_energy = 0.33
-	m.bounce_color = Color(0.98, 0.80, 0.62)
+	m.bounce_color = Color(1.00, 0.74, 0.54)
 
 	# Cool the shadows, keep the highlights warm. This is the one lever that
 	# stops five levels sliding into a single orange, and it is the lever
 	# `adjustment_saturation` structurally cannot pull: saturation scales what
 	# is already there, it cannot put blue into a shadow that has none.
-	m.grade_shadow_tint = Color(0.40, 0.50, 0.74)
+	m.grade_shadow_tint = Color(0.34, 0.42, 0.72)
 	m.grade_highlight_tint = Color(0.84, 0.71, 0.47)
 	m.grade_strength = 0.92
 	m.glow_intensity = 0.12
@@ -198,7 +198,7 @@ func _mood() -> LightingRig.Mood:
 ## it and the aerial haze all land wherever the rig aimed the sun — the sky and
 ## the lighting cannot drift apart.
 func _sky_preset() -> String:
-	return "brega_gold"
+	return "brega_sunset"
 
 
 func _build_level() -> void:

@@ -110,8 +110,8 @@ static func palette() -> Dictionary:
 static func mood() -> LightingRig.Mood:
 	var m := LightingRig.Mood.new()
 
-	m.sun_angles = Vector2(26.0, 32.0)
-	m.sun_color = Color(1.0, 0.900, 0.760)      # ~4300 K: warm, not amber
+	m.sun_angles = Vector2(6.0, 32.0)
+	m.sun_color = Color(1.0, 0.760, 0.520)      # ~2900 K: the sun on the water
 	m.sun_energy = 2.8
 	m.sun_angular_distance = 1.1
 	# 3.0 is a beauty-frame number. In gameplay the camera spends its life
@@ -128,8 +128,8 @@ static func mood() -> LightingRig.Mood:
 	m.fill_color = Color(0.480, 0.580, 0.790)
 	m.fill_energy = 0.54
 
-	m.rim_angles = Vector2(24.0, 40.0)
-	m.rim_color = Color(1.0, 0.870, 0.690)
+	m.rim_angles = Vector2(8.0, 44.0)
+	m.rim_color = Color(1.0, 0.800, 0.580)
 	m.rim_energy = 8.0
 	m.rim_cull_mask = 2
 
@@ -140,8 +140,8 @@ static func mood() -> LightingRig.Mood:
 	m.hero_fill_color = Color(0.82, 0.83, 0.90)
 	m.hero_fill_angles = Vector2(-14.0, -30.0)
 
-	m.sky_top = Color(0.235, 0.435, 0.700)
-	m.sky_horizon = Color(0.980, 0.860, 0.680)
+	m.sky_top = Color(0.125, 0.215, 0.435)
+	m.sky_horizon = Color(1.000, 0.700, 0.420)
 	m.ground_horizon = Color(0.780, 0.835, 0.820)
 	m.ground_bottom = Color(0.300, 0.368, 0.330)
 	m.sky_energy = 1.30
@@ -173,13 +173,13 @@ static func mood() -> LightingRig.Mood:
 	m.agx_white = 9.5
 	m.agx_contrast = 1.58
 	m.bounce_energy = 0.33
-	m.bounce_color = Color(0.98, 0.80, 0.62)
+	m.bounce_color = Color(1.00, 0.74, 0.54)
 
 	# Cool the shadows, keep the highlights warm. This is the one lever that
 	# stops five levels sliding into a single orange, and it is the lever
 	# `adjustment_saturation` structurally cannot pull: saturation scales what
 	# is already there, it cannot put blue into a shadow that has none.
-	m.grade_shadow_tint = Color(0.40, 0.50, 0.74)
+	m.grade_shadow_tint = Color(0.34, 0.42, 0.72)
 	m.grade_highlight_tint = Color(0.84, 0.71, 0.47)
 	m.grade_strength = 0.80
 	m.glow_intensity = 0.12

@@ -134,7 +134,7 @@ func _mood() -> LightingRig.Mood:
 ## it and the aerial haze all land wherever the rig aimed the sun — the sky and
 ## the lighting cannot drift apart.
 func _sky_preset() -> String:
-	return "brega_gold"
+	return "brega_sunset"
 
 
 func _build_level() -> void:
