@@ -110,7 +110,7 @@ static func palette() -> Dictionary:
 static func mood() -> LightingRig.Mood:
 	var m := LightingRig.Mood.new()
 
-	m.sun_angles = Vector2(38.0, 126.0)
+	m.sun_angles = Vector2(42.0, 28.0)
 	m.sun_color = Color(1.0, 0.945, 0.860)      # ~5200 K, mid-morning
 	m.sun_energy = 3.1
 	m.sun_angular_distance = 1.1
@@ -125,10 +125,10 @@ static func mood() -> LightingRig.Mood:
 	# value in the frame and that is the whole readability strategy. Matches
 	# the benchmark's colour script exactly — see BregaBeauty._mood.
 	m.fill_angles = Vector2(18.0, -28.0)
-	m.fill_color = Color(0.475, 0.545, 0.720)
+	m.fill_color = Color(0.580, 0.655, 0.800)
 	m.fill_energy = 0.54
 
-	m.rim_angles = Vector2(32.0, 130.0)
+	m.rim_angles = Vector2(36.0, 36.0)
 	m.rim_color = Color(1.0, 0.930, 0.820)
 	m.rim_energy = 8.0
 	m.rim_cull_mask = 2
@@ -179,7 +179,7 @@ static func mood() -> LightingRig.Mood:
 	# stops five levels sliding into a single orange, and it is the lever
 	# `adjustment_saturation` structurally cannot pull: saturation scales what
 	# is already there, it cannot put blue into a shadow that has none.
-	m.grade_shadow_tint = Color(0.30, 0.45, 0.76)
+	m.grade_shadow_tint = Color(0.44, 0.54, 0.72)
 	m.grade_highlight_tint = Color(0.74, 0.64, 0.46)
 	m.grade_strength = 0.80
 	m.glow_intensity = 0.12
@@ -241,9 +241,9 @@ static func _sky_band(parent: Node3D, x_from: float, x_to: float) -> void:
 	# ever a rectangle.
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 30211
-	var warm := _sky_card(Color(1.00, 0.60, 0.30), 0.30)
-	var cool := _sky_card(Color(0.52, 0.45, 0.58), 0.22)
-	var pale := _sky_card(Color(0.88, 0.76, 0.66), 0.20)
+	var warm := _sky_card(Color(1.00, 0.97, 0.92), 0.26)
+	var cool := _sky_card(Color(0.62, 0.78, 0.92), 0.20)
+	var pale := _sky_card(Color(0.90, 0.95, 0.99), 0.18)
 	var x := x_from - span * 1.2
 	while x < x_to + span * 1.2:
 		x += rng.randf_range(58.0, 132.0)

@@ -109,7 +109,7 @@ static func _brega_morning() -> Dictionary:
 
 		# Matched to the rig key. A sky sun and a scene key that disagree is the
 		# one error this whole class exists to make impossible.
-		"sun_direction": sun_direction(38.0, 126.0),
+		"sun_direction": sun_direction(42.0, 28.0),
 		"sun_color": Color("#fff7e6"),
 		"sun_intensity": 3.0,
 		"sun_angular_radius": 0.55,

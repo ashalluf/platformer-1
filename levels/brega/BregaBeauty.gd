@@ -97,7 +97,7 @@ func _mood() -> LightingRig.Mood:
 	# which is exactly where the live flare's lattice stands. The sun therefore
 	# arrives broken into pieces by the plant that killed this town, instead of
 	# arriving as a smear off the right edge. See deviation 2 in the header.
-	m.sun_angles = Vector2(38.0, 126.0)
+	m.sun_angles = Vector2(42.0, 28.0)
 	m.sun_color = Color(1.0, 0.945, 0.860)      # ~5200 K, mid-morning
 	m.sun_energy = 3.1
 	m.sun_angular_distance = 1.1
@@ -117,12 +117,12 @@ func _mood() -> LightingRig.Mood:
 	# argument: every pixel in the first capture was the same hue. Up to 0.76
 	# and pushed bluer, so the shaded wall reads COOL grey against a warm sky.
 	m.fill_angles = Vector2(18.0, -28.0)
-	m.fill_color = Color(0.430, 0.515, 0.735)
+	m.fill_color = Color(0.560, 0.640, 0.800)
 	m.fill_energy = 0.76
 
 	# Rim: hero layer only. Swung round to sit with the new key azimuth, or the
 	# rim lands on the wrong edge of him and reads as a second light.
-	m.rim_angles = Vector2(32.0, 130.0)
+	m.rim_angles = Vector2(36.0, 36.0)
 	m.rim_color = Color(1.0, 0.930, 0.820)
 	m.rim_energy = 9.0
 	m.rim_cull_mask = 2
@@ -182,7 +182,7 @@ func _mood() -> LightingRig.Mood:
 	# stops five levels sliding into a single orange, and it is the lever
 	# `adjustment_saturation` structurally cannot pull: saturation scales what
 	# is already there, it cannot put blue into a shadow that has none.
-	m.grade_shadow_tint = Color(0.30, 0.45, 0.76)
+	m.grade_shadow_tint = Color(0.44, 0.54, 0.72)
 	m.grade_highlight_tint = Color(0.74, 0.64, 0.46)
 	m.grade_strength = 0.80
 	m.glow_intensity = 0.12
@@ -329,7 +329,7 @@ func _tube(parent: Node3D, pos: Vector3, radius: float, height: float,
 func _layer_sky_and_sea() -> void:
 	# The Gulf of Sidra, a thin band in the gap between the towers. Flat coast:
 	# no cliffs, no hills, and that flatness is the point.
-	var sea := MaterialLab.emissive(Color(0.310, 0.765, 0.753), 0.25)
+	var sea := MaterialLab.emissive(Color(0.180, 0.620, 0.820), 0.30)
 	sea.roughness = 0.12
 	sea.metallic = 0.4
 	LevelKit.prop(geometry, Vector3(120.0, -2.0, -150.0), Vector3(700.0, 6.0, 1.0),
@@ -341,18 +341,18 @@ func _layer_sky_and_sea() -> void:
 	# thicker than any temperate sky would carry. Pulled down and thinned: at
 	# 34 units tall it was a grey ceiling over the top third of the sky and it
 	# was the reason the zenith never read as pre-dawn blue.
-	var haze := MaterialLab.emissive(Color(0.835, 0.804, 0.741), 0.55)
+	var haze := MaterialLab.emissive(Color(0.870, 0.925, 0.960), 0.45)
 	haze.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	haze.albedo_color = Color(0.835, 0.804, 0.741, 0.42)
+	haze.albedo_color = Color(0.870, 0.925, 0.960, 0.28)
 	LevelKit.prop(geometry, Vector3(60.0, 9.0, -420.0), Vector3(1400.0, 20.0, 1.0),
 		haze, "DustBand")
 
 	# A thin cloud deck catching the first light, well above the dust band. Two
 	# long shallow slabs at different heights, so the sky is not a bare ramp —
 	# an empty gradient is what makes a sky read as a Godot default.
-	var cloud := MaterialLab.emissive(Color(0.96, 0.66, 0.46), 0.55)
+	var cloud := MaterialLab.emissive(Color(0.99, 0.99, 1.00), 0.70)
 	cloud.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	cloud.albedo_color = Color(0.96, 0.66, 0.46, 0.30)
+	cloud.albedo_color = Color(0.99, 0.99, 1.00, 0.34)
 	for spec: Array in [[40.0, 58.0, 380.0, 6.0], [200.0, 84.0, 300.0, 4.2],
 			[-140.0, 44.0, 260.0, 3.4]]:
 		LevelKit.prop(geometry, Vector3(spec[0], spec[1], -430.0),
