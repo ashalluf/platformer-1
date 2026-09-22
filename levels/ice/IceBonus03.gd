@@ -64,7 +64,7 @@ func _ready() -> void:
 	# A glide from the lip to the floor is about forty seconds if you never
 	# waste one. The margin is deliberately thin: the level is a commitment.
 	time_limit = 56.0
-	music_theme = "ice"
+	music_theme = ""   # no score: the game runs on ambience and SFX alone
 	use_camera_bounds = true
 	camera_bounds_min = Vector2(-10.0, FLOOR_Y - 2.0)
 	camera_bounds_max = Vector2(10.0, TOP_Y + 6.0)

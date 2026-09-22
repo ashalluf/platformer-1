@@ -118,7 +118,7 @@ var _bird_wait := 0.0
 func _ready() -> void:
 	# Set before super, because Stage reads these while it builds.
 	show_hud = false
-	music_theme = "title"
+	music_theme = ""   # no score: the game runs on ambience and SFX alone
 	super._ready()
 	level_id = "title"
 	level_title = "LIBYAN GANGSTAS"

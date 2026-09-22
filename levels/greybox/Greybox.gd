@@ -44,6 +44,7 @@ func _build_level() -> void:
 	_section_gaps()
 	_section_corner_and_slopes()
 	_section_dash_gap()
+	_section_dkc()
 	_backdrop()
 	_trails()
 	_enemies()
@@ -102,6 +103,72 @@ func _section_dash_gap() -> void:
 	LevelKit.prop(geometry, Vector3(77.0, GROUND_Y - 8.0, -3.0), Vector3(13.0, 0.4, 4.0),
 		_pal["marker"], "PitFloorMarker")
 
+
+
+## 5. The DKC run. Everything the vocabulary is made of, in the order a player
+## should meet it, each introduced alone before it is combined:
+##
+##   a gap that needs a real jump
+##   a walker to land on, alone, on flat ground where a miss costs nothing
+##   two ropes over a pit too wide to jump
+##   a barrel to carry, and a walker across a gap that can only be answered
+##     by throwing it
+##   a cannon across the final span
+##
+## This is a teaching order, not a difficulty curve. Every one of these is safe
+## to fail here -- the pit respawns you a few metres back.
+func _section_dkc() -> void:
+	var x := 96.0
+
+	# a. Plain gap. Wide enough to need the jump, narrow enough to clear it flat.
+	LevelKit.platform(geometry, x, GROUND_Y + 2.0, 10.0, _pal["floor"], 16.0, 3.2, "DkcStart")
+	x += 16.0
+	LevelKit.platform(geometry, x, GROUND_Y + 2.0, 12.0, _pal["floor"], 16.0, 3.2, "DkcLanding")
+
+	# b. One walker on open ground. First thing the player is ever asked to
+	#    stomp, and there is nothing else happening while they learn it.
+	var w := HeavyWalker.new()
+	w.position = Vector3(x + 3.0, GROUND_Y + 3.2, 0.0)
+	geometry.add_child(w)
+
+	# c. Ropes over a pit. Two, so the crossing needs a release and a re-grab
+	#    rather than one lucky swing.
+	x += 12.0
+	for i in 2:
+		var rope := SwingRope.new()
+		rope.position = Vector3(x + 5.0 + i * 7.5, GROUND_Y + 13.0, 0.0)
+		rope.length = 5.6
+		rope.start_angle_deg = -20.0 if i == 0 else 24.0
+		rope.vine = true
+		geometry.add_child(rope)
+	x += 22.0
+	LevelKit.platform(geometry, x, GROUND_Y + 2.0, 9.0, _pal["floor"], 16.0, 3.2, "DkcRopeLanding")
+
+	# d. A barrel, and across the next gap a walker on a ledge too high to reach.
+	#    Carrying the barrel over is the only answer, which is how the throw
+	#    teaches itself.
+	var barrel := Barrel.new()
+	barrel.mode = Barrel.Mode.THROWN
+	barrel.position = Vector3(x - 2.0, GROUND_Y + 3.4, 0.0)
+	geometry.add_child(barrel)
+
+	x += 15.0
+	LevelKit.platform(geometry, x, GROUND_Y + 4.5, 8.0, _pal["block"], 19.0, 3.2, "DkcLedge")
+	var w2 := HeavyWalker.new()
+	w2.position = Vector3(x, GROUND_Y + 5.7, 0.0)
+	geometry.add_child(w2)
+
+	# e. The cannon, across a span nothing else crosses.
+	x += 12.0
+	var cannon := Barrel.new()
+	cannon.mode = Barrel.Mode.CANNON
+	cannon.aim_deg = 58.0
+	cannon.launch_speed = 24.0
+	cannon.position = Vector3(x, GROUND_Y + 6.0, 0.0)
+	geometry.add_child(cannon)
+
+	x += 26.0
+	LevelKit.platform(geometry, x, GROUND_Y + 7.0, 14.0, _pal["accent"], 22.0, 3.2, "DkcFinish")
 
 ## A patrol of Snitch drones over the runway and the gap section, so the
 ## combat loop gets exercised by the same autopilot run that tests traversal.

@@ -48,6 +48,9 @@ func _setup() -> void:
 	max_health = 4.0
 	health = max_health
 	contact_damage = 0.0
+	# Bolted to a wall with nothing to land on. A stompable turret would let the
+	# player delete the one enemy whose whole design is that you cannot reach it.
+	stompable = false
 	motion_mode = CharacterBody3D.MOTION_MODE_FLOATING
 	# Bolted to a wall: it sags on its bracket rather than falling over.
 	death_tip = 0.75

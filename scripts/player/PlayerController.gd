@@ -12,6 +12,7 @@ class_name PlayerController extends CharacterBody3D
 signal jumped(from_coyote: bool)
 signal landed(impact: float)      ## 0..1, how hard the landing was
 signal air_jumped(index: int)
+signal stomped(target: Node3D)
 signal fired()
 signal weapon_ready_changed(ready: bool)
 signal glide_changed(active: bool)
@@ -23,7 +24,7 @@ signal died()
 signal hit(from: Vector3)
 signal invulnerable_changed(active: bool)
 
-enum State { IDLE, RUN, RISE, FALL, GLIDE, DASH, HURT, DEAD }
+enum State { IDLE, RUN, RISE, FALL, GLIDE, DASH, SWING, BARREL, HURT, DEAD }
 
 @export_group("Run")
 @export var max_run_speed := 9.2
@@ -53,6 +54,11 @@ enum State { IDLE, RUN, RISE, FALL, GLIDE, DASH, HURT, DEAD }
 ## Horizontal boost applied on jump, so jumping out of a run feels committed.
 @export var jump_horizontal_kick := 0.7
 ## Double jump. Refunded on landing, like the air dash.
+## Stomp. The core DKC verb: land on something, it dies, you bounce off it.
+## Two bounce heights, because holding jump through the bounce is what turns a
+## row of enemies into a traversal route instead of a row of hazards.
+@export var stomp_bounce_mult := 0.76
+@export var stomp_bounce_held_mult := 1.12
 @export var air_jumps := 1
 @export var air_jump_mult := 0.92
 
@@ -171,7 +177,14 @@ func _gather_input() -> void:
 		_jump_cut_armed = true
 	if Input.is_action_just_pressed("dash"):
 		_try_dash()
-	_firing = Input.is_action_pressed("attack")
+	# Carrying overrides the rifle: attack throws what is over his head. You
+	# cannot shoot with both arms full, and the read is unambiguous either way.
+	if carrying():
+		_firing = false
+		if Input.is_action_just_pressed("attack"):
+			throw_carried()
+	else:
+		_firing = Input.is_action_pressed("attack")
 	_aim_input = Input.get_axis("move_down", "move_up")
 
 
@@ -230,6 +243,10 @@ func _physics_process(delta: float) -> void:
 	match state:
 		State.DASH:
 			_physics_dash(delta)
+		State.SWING:
+			_physics_swing(delta)
+		State.BARREL:
+			_physics_barrel(delta)
 		_:
 			_physics_normal(delta, on_floor)
 
@@ -239,6 +256,127 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	_apply_plane_lock()
 	_post_move(delta)
+
+
+# --- Barrels ----------------------------------------------------------------
+#
+# Two verbs sharing one prop, as in the games this is built after. A carried
+# barrel is a thrown weapon for the enemy you cannot reach; a cannon barrel is
+# a traversal set piece. The player learns them as one object.
+
+var _barrel: Node3D = null          ## the cannon currently holding him
+var _carried: Node3D = null         ## the barrel currently over his head
+
+
+## Cannon caught him. Returns false if he is in no state to be caught.
+func enter_barrel(barrel: Node3D) -> bool:
+	if state == State.DEAD:
+		return false
+	_barrel = barrel
+	state = State.BARREL
+	velocity = Vector3.ZERO
+	_set_gliding(false)
+	_air_jumps_left = air_jumps
+	return true
+
+
+func launch_from_barrel(launch: Vector3) -> void:
+	_barrel = null
+	velocity = launch
+	state = State.RISE if launch.y > 0.0 else State.FALL
+	_jump_cut_armed = true
+	_air_jumps_left = air_jumps
+
+
+func _physics_barrel(_delta: float) -> void:
+	if _barrel == null or not is_instance_valid(_barrel):
+		_barrel = null
+		state = State.FALL
+		return
+	global_position = _barrel.call("rider_position")
+	velocity = Vector3.ZERO
+	# Jump fires it. A barrel you cannot aim and cannot time is a cutscene.
+	if _buffer_left > 0.0:
+		_buffer_left = 0.0
+		_barrel.call("fire")
+
+
+## Picking a barrel up is automatic on touch; attack throws it.
+func try_carry(barrel: Node3D) -> bool:
+	if _carried != null or state == State.DEAD:
+		return false
+	if not barrel.call("pick_up", self):
+		return false
+	_carried = barrel
+	return true
+
+
+func throw_carried() -> void:
+	if _carried == null:
+		return
+	var b := _carried
+	_carried = null
+	b.call("throw", facing)
+
+
+func carrying() -> bool:
+	return _carried != null and is_instance_valid(_carried)
+
+
+# --- Swing ------------------------------------------------------------------
+#
+# Hanging off a rope is the one place the controller hands its position over to
+# something else. The rope owns the pendulum -- it is the thing that knows its
+# own anchor and length -- and this end only feeds it steering and reads back
+# where the hands ended up. Releasing converts the rope's tangential speed into
+# ordinary velocity, so a well-timed let-go throws further than a jump, which is
+# the whole reason to build a swing instead of a moving platform.
+
+var _rope: Node3D = null
+var _rope_cooldown := 0.0
+
+
+func grab_rope(rope: Node3D) -> bool:
+	if state == State.DEAD or state == State.DASH or _rope_cooldown > 0.0:
+		return false
+	if _rope != null:
+		return false
+	_rope = rope
+	state = State.SWING
+	velocity = Vector3.ZERO
+	_set_gliding(false)
+	_air_jumps_left = air_jumps
+	Audio.play("wind", global_position, -8.0, randf_range(1.1, 1.3))
+	return true
+
+
+func release_rope(launch: Vector3) -> void:
+	if _rope == null:
+		return
+	_rope = null
+	_rope_cooldown = 0.28          # or he re-grabs the rope he just let go of
+	velocity = launch
+	state = State.RISE if launch.y > 0.0 else State.FALL
+	_jump_cut_armed = true
+
+
+func _physics_swing(delta: float) -> void:
+	if _rope == null or not is_instance_valid(_rope):
+		_rope = null
+		state = State.FALL
+		return
+	# Steering is the rider leaning, so it scales with input and nothing else.
+	_rope.call("steer", move_input, delta)
+	global_position = _rope.call("hand_position")
+	velocity = Vector3.ZERO
+	facing = signf(_rope.call("tangent").x) if absf(_rope.call("tangent").x) > 0.05 else facing
+	if _buffer_left > 0.0:
+		_buffer_left = 0.0
+		var t: Vector3 = _rope.call("release_velocity")
+		# A jump off the rope adds its own lift on top of the swing's throw.
+		t.y += jump_velocity * 0.62
+		release_rope(t)
+		Audio.play("jump", global_position, -3.0, randf_range(0.96, 1.04))
 
 
 func _update_weapon(delta: float) -> void:
@@ -274,6 +412,7 @@ func _update_weapon(delta: float) -> void:
 
 
 func _tick_timers(delta: float) -> void:
+	_rope_cooldown = maxf(_rope_cooldown - delta, 0.0)
 	_coyote_left = maxf(_coyote_left - delta, 0.0)
 	_buffer_left = maxf(_buffer_left - delta, 0.0)
 	_dash_cd_left = maxf(_dash_cd_left - delta, 0.0)
@@ -543,6 +682,28 @@ func _accumulate_steps(delta: float) -> void:
 ## One touch costs a life, DKC-style — no health bar, just consequence. The
 ## invulnerability window afterwards is generous because a knockback that lands
 ## you in a second hit is the worst feeling a platformer can produce.
+## Called by whatever got landed on. It has already decided the stomp was
+## valid -- this end only does the bounce and the feedback.
+func stomp_bounce(strength := 1.0) -> void:
+	if state == State.DEAD:
+		return
+	var mult: float = stomp_bounce_held_mult if want_jump_held else stomp_bounce_mult
+	velocity.y = jump_velocity * mult * strength
+	# Refund the air jump. Without this a chain of three enemies is a chain of
+	# one enemy and two falls.
+	_air_jumps_left = air_jumps
+	_coyote_left = 0.0
+	_buffer_left = 0.0
+	_jump_cut_armed = true
+	_set_gliding(false)
+	state = State.RISE
+	FX.hitstop(0.055)
+	FX.shake(0.20)
+	FX.camera_zoom_punch.emit(-3.0, 0.16)
+	Audio.play("jump", global_position, -2.0, randf_range(1.25, 1.42))
+	stomped.emit(self)
+
+
 func take_hit(_amount: float, from: Vector3) -> void:
 	if state == State.DEAD or _invuln_left > 0.0:
 		return

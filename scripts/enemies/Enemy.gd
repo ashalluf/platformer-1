@@ -79,6 +79,12 @@ class_name Enemy extends CharacterBody3D
 ## family sits at 0.30-0.42 now, which is a dusty machine grey in shade, and
 ## every piece of surface detail below only exists because of that decision.
 
+## Can the player kill this by landing on it, and how high is its head.
+@export var stompable := true
+@export var stomp_height := 0.72
+
+var _stomped := false
+
 signal damaged(amount: float, from: Vector3)
 signal died()
 
@@ -744,6 +750,7 @@ func _ready() -> void:
 	_cache_materials(self)
 	_setup()
 	_build_hurtbox()
+	_build_stompbox()
 
 
 ## A spring node between the body and the visual, so recoil and the settle
@@ -758,6 +765,55 @@ func _install_pivot() -> void:
 	remove_child(_visual)
 	add_child(_pivot)
 	_pivot.add_child(_visual)
+
+
+## The stomp zone: a shallow Area sitting on the enemy's head. A player who
+## arrives here going DOWN kills it and bounces; a player who arrives any other
+## way is handled by the hurtbox below and takes the hit.
+##
+## Head and body are separate volumes on purpose. The alternative -- one contact
+## test resolved by comparing positions -- gets the edge cases wrong exactly
+## where the player cares most, clipping a shoulder on the way past.
+func _build_stompbox() -> void:
+	if not stompable:
+		return
+	var area := Area3D.new()
+	area.name = "StompBox"
+	area.collision_layer = 0
+	area.collision_mask = 2
+	area.monitoring = true
+	var shape := BoxShape3D.new()
+	shape.size = Vector3(0.92, 0.34, 0.92)
+	var cs := CollisionShape3D.new()
+	cs.shape = shape
+	cs.position = Vector3(0.0, stomp_height, 0.0)
+	area.add_child(cs)
+	add_child(area)
+	area.body_entered.connect(_on_stomp)
+
+
+func _on_stomp(body: Node3D) -> void:
+	if _dead or not (body is PlayerController):
+		return
+	var p := body as PlayerController
+	if not _is_stomping(p):
+		return
+	# One stomp kills, the way it does in the games this is built after. An
+	# enemy that survives being jumped on teaches the player not to jump on it.
+	_stomped = true
+	p.stomp_bounce()
+	FX.shake(0.30)
+	Audio.play("shell", global_position, -5.0, randf_range(0.9, 1.1))
+	hurt(maxf(health, 1.0), p.global_position + Vector3.UP,
+		Vector3.DOWN * knockback * 0.4)
+
+
+## Falling, and above the head. Both, or a player running into a shoulder at
+## the top of a jump reads as a stomp and the enemy dies to nothing.
+func _is_stomping(p: PlayerController) -> bool:
+	if p.velocity.y > -0.5:
+		return false
+	return p.global_position.y > global_position.y + stomp_height * 0.55
 
 
 ## Contact damage lives on an Area, not on the body, so an enemy's dangerous
@@ -781,9 +837,13 @@ func _build_hurtbox() -> void:
 
 
 func _on_touch(body: Node3D) -> void:
-	if _dead or not (body is PlayerController):
+	if _dead or _stomped or not (body is PlayerController):
 		return
 	var p := body as PlayerController
+	# Landing on the head is a stomp, never a hit, even though both volumes
+	# overlap the player on the same frame.
+	if stompable and _is_stomping(p):
+		return
 	if p.has_method("take_hit"):
 		p.take_hit(contact_damage, global_position)
 

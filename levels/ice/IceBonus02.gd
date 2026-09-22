@@ -46,7 +46,7 @@ func _ready() -> void:
 	level_title = "THE SHAFT"
 	spawn_point = Vector3(0.0, 2.0, 0.0)
 	time_limit = 52.0
-	music_theme = "ice"
+	music_theme = ""   # no score: the game runs on ambience and SFX alone
 	use_camera_bounds = true
 	camera_bounds_min = Vector2(-9.0, -2.0)
 	camera_bounds_max = Vector2(9.0, 86.0)

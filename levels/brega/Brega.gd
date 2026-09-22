@@ -115,7 +115,7 @@ func _ready() -> void:
 	spawn_point = Vector3(-8.0, 1.4, 0.0)
 	kill_plane_y = -30.0
 	player_outfit = WanisBuilder.Outfit.PRISON
-	music_theme = "brega"
+	music_theme = ""   # no score: the game runs on ambience and SFX alone
 	use_camera_bounds = true
 	camera_bounds_min = Vector2(X_START + 6.0, -14.0)
 	camera_bounds_max = Vector2(X_END - 6.0, 34.0)
