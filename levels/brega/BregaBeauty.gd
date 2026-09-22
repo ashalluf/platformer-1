@@ -99,7 +99,7 @@ func _mood() -> LightingRig.Mood:
 	# arriving as a smear off the right edge. See deviation 2 in the header.
 	m.sun_angles = Vector2(26.0, 32.0)
 	m.sun_color = Color(1.0, 0.900, 0.760)      # ~4300 K: warm, not amber
-	m.sun_energy = 3.5
+	m.sun_energy = 2.3
 	m.sun_angular_distance = 1.1
 	# A disc you can actually see is the point now that something is standing in
 	# front of it. 0.34 deg was 9 px at 900 and read as a stuck highlight.
@@ -141,12 +141,12 @@ func _mood() -> LightingRig.Mood:
 	m.sky_horizon = Color(0.980, 0.860, 0.680)  # #C97B45
 	m.ground_horizon = Color(0.780, 0.835, 0.820)
 	m.ground_bottom = Color(0.300, 0.368, 0.330)
-	m.sky_energy = 1.08
+	m.sky_energy = 0.92
 	m.sky_curve = 0.22
 	# Halved. Volumetric density is a global and it was doing the job of eight
 	# local volumes badly — everything past 30 units went to one value.
 	m.volumetric_density = 0.00034
-	m.ambient_energy = 0.60
+	m.ambient_energy = 0.40
 
 	m.fog_color = Color(0.835, 0.804, 0.741)
 	m.fog_density = 0.00026
@@ -159,7 +159,7 @@ func _mood() -> LightingRig.Mood:
 	m.fog_anisotropy = 0.70
 
 	m.tonemap = Environment.TONE_MAPPER_AGX
-	m.exposure = 1.08
+	m.exposure = 0.94
 	m.white = 8.5
 
 	# --- The grade ------------------------------------------------------------
@@ -175,7 +175,7 @@ func _mood() -> LightingRig.Mood:
 	# is made up with bounce, which is light that has been somewhere first.
 	m.agx_white = 9.5
 	m.agx_contrast = 1.58
-	m.bounce_energy = 0.46
+	m.bounce_energy = 0.33
 	m.bounce_color = Color(0.98, 0.80, 0.62)
 
 	# Cool the shadows, keep the highlights warm. This is the one lever that
