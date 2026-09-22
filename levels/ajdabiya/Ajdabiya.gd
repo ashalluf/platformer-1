@@ -113,7 +113,60 @@ func _build_level() -> void:
 	_section_d_backstreet()
 	_section_e_east_gate()
 	_atmosphere()
+	_layer_green()
 	_layer_vfx()
+
+
+## Planting.
+##
+## Ajdabiya is a town, and a Libyan town street is lined with date palms and
+## ficus on the central reservation and outside every public frontage. The level
+## had a `palm` material in its palette and not one palm in it: the only plant
+## life was the bougainvillea, and that was cubes.
+##
+## Planted in three bands so the street has depth through it rather than a wall
+## of trunks: the far reservation behind the terrace, the near kerb line inside
+## the play depth but clear of the gameplay plane, and scrub on the waste ground
+## past the east gate where the town stops.
+func _layer_green() -> void:
+	var green := Node3D.new()
+	green.name = "Planting"
+	geometry.add_child(green)
+
+	# The central reservation of the boulevard, behind the near terrace. Tall
+	# date palms — these are what a Libyan main road looks like from a distance
+	# and they break the run of flat roofline that dominates the frame.
+	FoliageKit.street_trees(green, Vector3(-8.0, STREET_Y, -13.2),
+		Vector3(X_END, STREET_Y, -13.2), 14.0, {
+			"seed": 71, "gap": 0.10, "jitter": 0.7, "whitewash": true,
+			"shadows": false,
+			"mix": {"date_palm": 0.70, "fan_palm": 0.30},
+		})
+
+	# The kerb line on the player's side, wider spaced and shorter so it never
+	# curtains the gameplay layer. Ficus, because a municipal street tree at
+	# pavement level in eastern Libya is a ficus that has been pollarded flat.
+	FoliageKit.street_trees(green, Vector3(6.0, STREET_Y, -4.8),
+		Vector3(268.0, STREET_Y, -4.8), 26.0, {
+			"seed": 79, "gap": 0.24, "jitter": 2.2, "whitewash": true,
+			"mix": {"ficus": 0.62, "date_palm": 0.38},
+		})
+
+	# Waste ground past the east gate. The town stops and nothing replaces it
+	# but scrub, which is the point of the level's ending.
+	FoliageKit.scrub_band(green, Vector3(268.0, STREET_Y, -8.0),
+		Vector3(X_END + 12.0, STREET_Y, -8.0), 0.46, {
+			"seed": 83, "band": 3.2, "min_gap": 1.4, "shadows": false,
+			"mix": {"grass": 0.42, "tamarisk": 0.34, "prickly_pear": 0.24},
+		})
+
+	# Low growth against the shopfront bases along the market run — the strip
+	# of dirt every Libyan pavement has where the render meets the ground.
+	FoliageKit.scrub_band(green, Vector3(10.0, STREET_Y, -2.4),
+		Vector3(240.0, STREET_Y, -2.4), 0.09, {
+			"seed": 89, "band": 0.5, "min_gap": 5.0,
+			"mix": {"grass": 0.58, "prickly_pear": 0.42},
+		})
 
 
 
@@ -1545,23 +1598,14 @@ func _cat(at: Vector3, face := 1.0) -> void:
 ## Bougainvillea spilling over a wall. The only magenta in the game, and worth
 ## every pixel: in a town of ochre and blue shadow it stops the eye dead and
 ## tells you somebody has been watering something.
+## This was twenty randomly-rotated cubes in a magenta material. Close to the
+## camera, on a wall the player runs right past, it read as exactly that.
+## FoliageKit grows it with real bracts and leaves over a trained stem, and
+## the wind shader moves it.
 func _bougainvillea(at: Vector3, w: float, seed_: int) -> void:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = seed_ * 131 + 3
-	for i in int(w * 2.2):
-		var t := float(i) / float(maxi(1, int(w * 2.2) - 1))
-		var drop := sin(t * PI) * rng.randf_range(0.6, 1.9)
-		var b := LevelKit.prop(geometry,
-			at + Vector3((t - 0.5) * w, -drop * 0.5 + rng.randf_range(-0.2, 0.2),
-				rng.randf_range(-0.15, 0.35)),
-			Vector3(rng.randf_range(0.6, 1.1), rng.randf_range(0.5, 1.0),
-				rng.randf_range(0.4, 0.7)), mats["bougain"], "Bougain%d" % i)
-		b.rotation = Vector3(rng.randf_range(0.0, 1.0), rng.randf_range(0.0, TAU), 0.0)
-	# The green under the colour, or it reads as a pink cloud.
-	for i in int(w):
-		LevelKit.prop(geometry,
-			at + Vector3((float(i) / maxf(1.0, w - 1.0) - 0.5) * w, -0.35, -0.2),
-			Vector3(1.3, 0.8, 0.8), mats["palm"], "BougainLeaf%d" % i)
+	FoliageKit.bougainvillea(geometry,
+		at - Vector3(w * 0.5, 0.0, 0.0), at + Vector3(w * 0.5, 0.0, 0.0),
+		{"seed": seed_ * 131 + 3, "density": 1.05})
 
 
 # --- East gate dressing -----------------------------------------------------

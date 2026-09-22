@@ -48,6 +48,7 @@ var squash: Node3D
 var skel: Skeleton3D
 var body: MeshInstance3D
 var chain_pivot: BoneAttachment3D
+var _tails: Array[VerletChain] = []
 var weapon_mount: BoneAttachment3D
 var rifle: Rifle
 
@@ -195,6 +196,67 @@ func _build() -> void:
 	chain.position = Vector3(0.0, -0.012, 0.206)
 	chain.rotation_degrees = Vector3(74.0, 0.0, 0.0)
 	chain_pivot.add_child(chain)
+
+	_build_tails()
+
+
+## The two loose ends of the shemagh.
+##
+## Everything else on Wanis is skinned, which means everything else on Wanis
+## stops the instant he does. These do not: they are verlet-simulated, they lag
+## the body, and they keep moving through a landing and a turnaround. That lag
+## is the single loudest "a person animated this" cue on a procedural character,
+## and it costs two ribbons of nine points each.
+##
+## They hang either side of the skinned shemagh band rather than over it, so
+## nothing can clip through anything, and the lengths are deliberately unequal —
+## matched tails read as a costume prop, mismatched ones read as cloth.
+func _build_tails() -> void:
+	var mount := BoneAttachment3D.new()
+	mount.name = "ShemaghTails"
+	skel.add_child(mount)
+	mount.bone_name = "Chest"
+
+	var cloth := MaterialLab.cloth(Color(0.60, 0.115, 0.085), 0.80)
+	cloth.rim = 0.85
+	cloth.rim_tint = 0.42
+	# Two-sided: a ribbon has no back, and in a side-on game the tail crosses
+	# behind him constantly. Shadows off — a one-quad-wide ribbon casts noise.
+	cloth.cull_mode = BaseMaterial3D.CULL_DISABLED
+
+	# offset from the chest bone, segments, segment length, thickness, phase
+	var spec := [
+		[Vector3(-0.078, 0.150, -0.196), 10, 0.088, 0.076, 0.0],
+		[Vector3(0.086, 0.104, -0.232), 8, 0.085, 0.064, 1.7],
+	]
+	for e: Array in spec:
+		var pin := Node3D.new()
+		pin.name = "TailPin"
+		pin.position = e[0]
+		mount.add_child(pin)
+
+		var tail := VerletChain.new()
+		tail.name = "ShemaghTail"
+		tail.segments = e[1]
+		tail.segment_length = e[2]
+		tail.thickness = e[3]
+		tail.taper = 0.52
+		tail.gravity = 13.0
+		tail.damping = 0.88
+		tail.stiffness = 0.62
+		# Held off his back, not pasted to it: local -Z is behind him, and a tail
+		# that hangs dead flat against the robe may as well be painted on.
+		tail.bias = Vector3(0.0, 0.0, -2.2)
+		tail.wind_strength = 0.34
+		tail.wind_speed = 2.1 + e[4]
+		tail.inertia = 1.15
+		tail.chain_material = cloth
+		tail.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		# ImmediateMesh rebuilds its AABB every frame from a nearly-flat ribbon,
+		# which culls early at the wrong camera angles. Margin covers the reach.
+		tail.extra_cull_margin = 2.0
+		pin.add_child(tail)
+		_tails.append(tail)
 
 
 ## The response curve of the whole upper body, in one table.
@@ -503,6 +565,18 @@ func _drive_billow(delta: float) -> void:
 		m.set_shader_parameter("billow", _billow)
 		m.set_shader_parameter("trail_dir", local_dir)
 		m.set_shader_parameter("trail_amount", trail)
+
+	# The tails get the same information, but as forces rather than as shader
+	# parameters. Inertia already whips them when he accelerates; this adds the
+	# airflow, so a sprint flutters them and a standstill lets them settle.
+	var flutter := 0.34 + trail * 1.5
+	var drag := Vector3(0.0, 0.0, -2.2 - trail * 5.5)
+	for i in _tails.size():
+		var t := _tails[i]
+		if t == null:
+			continue
+		t.wind_strength = flutter * (1.0 if i == 0 else 0.82)
+		t.bias = drag
 
 
 func _drive_rifle(delta: float) -> void:

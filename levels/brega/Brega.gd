@@ -148,6 +148,7 @@ func _build_level() -> void:
 	_section_d_cage()
 	_section_e_tank_farm()
 	_section_f_fence()
+	_layer_green()
 	_atmosphere()
 
 
@@ -175,6 +176,69 @@ func _dress_palette() -> Dictionary:
 		"amber": MaterialLab.emissive(Color(1.0, 0.66, 0.15), 2.6),
 		"bulb": MaterialLab.emissive(Color(1.0, 0.80, 0.52), 5.0),
 	}
+
+
+## Planting.
+##
+## The benchmark scene has had a full green layer since it was built; the level
+## you actually play had none, because its only greenery was the windbreak and
+## that was drawn with PropKit spheres. Everything here is FoliageKit: real leaf
+## geometry, wind shader, MultiMesh-batched per species.
+##
+## The rule for a refinery on the Gulf of Sidra is that nothing grows where it
+## was not planted or where it was not left alone. So: municipal rows along the
+## approach roads, scrub only where a slab edge or a bund has collected enough
+## windblown sand to hold a root, and one bougainvillea at the gatehouse — the
+## single saturated note in a level otherwise made of rust and ochre, placed at
+## the exit so it reads as the world outside.
+func _layer_green() -> void:
+	var green := Node3D.new()
+	green.name = "Planting"
+	geometry.add_child(green)
+
+	# The administrative frontage: a council-planted row behind the perimeter,
+	# running the length of the plant. Whitewashed feet, which is both accurate
+	# and the cheapest way to put a bright value at every trunk base.
+	FoliageKit.street_trees(green, Vector3(-6.0, YARD_Y, -27.5),
+		Vector3(196.0, YARD_Y, -27.5), 12.5, {
+			"seed": 41, "gap": 0.16, "jitter": 1.1, "whitewash": true,
+			"shadows": false,
+			"mix": {"date_palm": 0.58, "fan_palm": 0.26, "ficus": 0.16},
+		})
+
+	# A second, deeper and taller row past the property store, seen through the
+	# gap the second block leaves at 218..236. Two rows at different depths and
+	# scales is what stops planting reading as one cut-out band.
+	FoliageKit.street_trees(green, Vector3(204.0, YARD_Y - 1.4, -38.0),
+		Vector3(320.0, YARD_Y - 1.4, -38.0), 16.0, {
+			"seed": 47, "gap": 0.22, "jitter": 1.8, "whitewash": false,
+			"shadows": false,
+			"mix": {"date_palm": 0.46, "fan_palm": 0.54},
+		})
+
+	# Scrub only at the junctions — where the yard slab meets the perimeter,
+	# and along the bund toes. Two flat planes meeting at a hard line is the
+	# most artificial edge in the level and this is what softens it.
+	FoliageKit.scrub_band(green, Vector3(-10.0, YARD_Y, -19.2),
+		Vector3(384.0, YARD_Y, -19.2), 0.22, {
+			"seed": 53, "band": 1.4, "min_gap": 2.2, "shadows": false,
+			"mix": {"grass": 0.50, "tamarisk": 0.30, "prickly_pear": 0.20},
+		})
+
+	# The near verge, in the gameplay band. Sparse and low so it never covers a
+	# ledge edge, but close enough that it reads as individual leaves rather
+	# than as mass — which is the whole reason to have foliage this close.
+	FoliageKit.scrub_band(green, Vector3(8.0, YARD_Y, 5.4),
+		Vector3(300.0, YARD_Y, 5.4), 0.10, {
+			"seed": 59, "band": 0.9, "min_gap": 4.0,
+			"mix": {"grass": 0.44, "prickly_pear": 0.38, "tamarisk": 0.18},
+		})
+
+	# The one saturated magenta the palette allows, over the gatehouse wall.
+	# It is the last thing before the exit and it is the first colour in the
+	# level that was not put there by corrosion.
+	FoliageKit.bougainvillea(green, Vector3(LM_GATE - 9.0, YARD_Y + 4.2, -4.6),
+		Vector3(LM_GATE + 3.0, YARD_Y + 4.6, -4.6), {"seed": 67, "density": 1.15})
 
 
 # --- A — THE WALKWAY --------------------------------------------------------

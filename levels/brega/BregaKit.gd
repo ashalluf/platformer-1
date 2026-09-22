@@ -1467,26 +1467,34 @@ static func _pipe_bridge(parent: Node3D, mats: Dictionary, x: float, y: float) -
 ## fallen trunks, because a perfectly even row is a fence.
 static func _windbreak(parent: Node3D, mats: Dictionary,
 		x_from: float, x_to: float) -> void:
+	# This row used to be built from PropKit.eucalyptus, which is a tapered
+	# cylinder with squashed spheres hung off it — its own comment calls them
+	# beads. FoliageKit plants the same species with real leaf geometry, a wind
+	# shader and MultiMesh batching, and it was being used in the benchmark
+	# scene only. The playable level gets it now.
 	var span := x_to - x_from
+	FoliageKit.windbreak_row(parent,
+		Vector3(x_from, YARD_Y, -21.4), Vector3(x_to, YARD_Y, -23.2),
+		int(span / 8.4) + 1, {
+			"seed": 8813, "dead": 0.58, "gap": 0.14, "wobble": 1.5,
+			# Far enough back that its own shadows land inside the cell block's.
+			"shadows": false, "name": "Windbreak",
+		})
+
+	# The fallen trunks stay hand-placed. Horizontals in a row of verticals is
+	# what stops a windbreak reading as a comb, and FoliageKit has no concept
+	# of a tree lying down.
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 8813
 	for i in int(span / 8.4) + 1:
-		var x := x_from + i * 8.4 + rng.randf_range(-1.4, 1.4)
-		var z := -21.0 - rng.randf_range(0.0, 3.4)
-		var roll := rng.randf()
-		if roll < 0.16:
-			continue                       # a gap where one died and blew away
-		if roll < 0.24:
-			# A fallen trunk, still in the line. Horizontals in a row of
-			# verticals is what stops a windbreak reading as a comb.
-			var t := LevelKit.prop(parent, Vector3(x, YARD_Y + 0.35, z),
-				Vector3(6.4, 0.5, 0.5), mats["trunk"], "FallenTrunk")
-			t.rotation = Vector3(0.0, rng.randf_range(-0.5, 0.5),
-				rng.randf_range(-0.12, 0.12))
+		if rng.randf() > 0.09:
 			continue
-		PropKit.eucalyptus(parent, Vector3(x, YARD_Y, z),
-			8.0 + rng.randf_range(0.0, 3.4), mats["trunk"], mats["leaf"],
-			roll > 0.72, i)
+		var t := LevelKit.prop(parent,
+			Vector3(x_from + i * 8.4 + rng.randf_range(-1.4, 1.4),
+				YARD_Y + 0.35, -21.0 - rng.randf_range(0.0, 3.4)),
+			Vector3(6.4, 0.5, 0.5), mats["trunk"], "FallenTrunk")
+		t.rotation = Vector3(0.0, rng.randf_range(-0.5, 0.5),
+			rng.randf_range(-0.12, 0.12))
 
 	# Two planted palms at the gatehouse: the avenue somebody laid out when
 	# this was a working plant with an office in it.
