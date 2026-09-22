@@ -172,8 +172,15 @@ static func surface(p: Dictionary) -> ShaderMaterial:
 	m.set_shader_parameter("detail_scale", p.get("detail_scale", 0.85))
 	m.set_shader_parameter("normal_strength", p.get("normal_strength", 1.0))
 	m.set_shader_parameter("triplanar_sharpness", p.get("sharpness", 5.0))
-	m.set_shader_parameter("detail_fade_start", p.get("fade_start", 26.0))
-	m.set_shader_parameter("detail_fade_end", p.get("fade_end", 70.0))
+	# Detail fades with distance so far geometry does not shimmer. 26/70 was
+	# tuned when "detail" meant a smooth noise bump nobody would miss; with
+	# scanned surface in the slot it was throwing the new detail away across
+	# most of every frame -- this camera runs a 34 degree lens and almost
+	# nothing in a Brega shot is inside 26 units. Pushed out to 70/210, which
+	# the mipmap chain carries without sparkle because a scan has its own
+	# minification built in, where procedural noise did not.
+	m.set_shader_parameter("detail_fade_start", p.get("fade_start", 70.0))
+	m.set_shader_parameter("detail_fade_end", p.get("fade_end", 210.0))
 
 	m.set_shader_parameter("dust_color", p.get("dust_color", Color(0.66, 0.58, 0.43)))
 	m.set_shader_parameter("dust_amount", p.get("dust", 0.28))
