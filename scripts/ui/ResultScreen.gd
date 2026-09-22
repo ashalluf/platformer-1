@@ -88,7 +88,8 @@ func _tally(delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not _armed:
 		return
-	if event.is_action_pressed("jump") or event.is_action_pressed("attack") \
+	if event.is_action_pressed("confirm") or event.is_action_pressed("jump") \
+			or event.is_action_pressed("attack") \
 			or event.is_action_pressed("pause"):
 		_armed = false
 		Audio.play_2d("ui", -4.0, 1.2, "UI")

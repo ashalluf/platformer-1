@@ -458,8 +458,18 @@ func _drive_birds(delta: float) -> void:
 ## are wrong here — a stray key would respawn him mid-pose — so this
 ## deliberately does not call up. It only notes that somebody is in the room.
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_pressed() and not event.is_echo():
-		_nudge()
+	if not event.is_pressed() or event.is_echo():
+		return
+	# A key pressed before the crane lands used to be swallowed whole, which
+	# reads as a dead screen. Take it as "skip the intro" instead: hand the
+	# entrance its own end time and let _drive_entrance promote the phase on
+	# the next frame, so there is exactly one path into LIVE.
+	if _phase == Phase.ENTRANCE and (event.is_action_pressed("confirm") \
+			or event.is_action_pressed("jump") or event.is_action_pressed("attack")):
+		_t = maxf(_t, CAM_SETTLE)
+		_goto(HOME, 0.35)
+		return
+	_nudge()
 
 
 ## Somebody is here: give the poster framing back and start the idle clock over.

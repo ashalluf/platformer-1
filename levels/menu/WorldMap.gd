@@ -980,7 +980,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		_step(-1)
 	elif event.is_action_pressed("move_right", true):
 		_step(1)
-	elif event.is_action_pressed("jump") or event.is_action_pressed("attack"):
+	elif event.is_action_pressed("confirm") or event.is_action_pressed("jump") \
+			or event.is_action_pressed("attack"):
 		_enter()
 	elif event.is_action_pressed("pause") or event.is_action_pressed("dash"):
 		Audio.play_2d("ui", -4.0, 0.85, "UI")

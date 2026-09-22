@@ -129,7 +129,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		_step(-1)
 	elif event.is_action_pressed("move_down", true):
 		_step(1)
-	elif event.is_action_pressed("jump") or event.is_action_pressed("attack"):
+	elif event.is_action_pressed("confirm") or event.is_action_pressed("jump") \
+			or event.is_action_pressed("attack"):
 		var r := current()
 		if r and r.enabled:
 			Audio.play_2d("ui", -4.0, 1.25, "UI")

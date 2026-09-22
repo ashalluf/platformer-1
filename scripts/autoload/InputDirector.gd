@@ -17,6 +17,7 @@ const DEFAULTS := {
 	"jump":       {"keys": [KEY_SPACE, KEY_Z], "buttons": [JOY_BUTTON_A],          "axes": []},
 	"dash":       {"keys": [KEY_SHIFT, KEY_X], "buttons": [JOY_BUTTON_X, JOY_BUTTON_RIGHT_SHOULDER], "axes": []},
 	"attack":     {"keys": [KEY_J, KEY_C],     "buttons": [JOY_BUTTON_B],          "axes": []},
+	"confirm":    {"keys": [KEY_ENTER, KEY_KP_ENTER], "buttons": [JOY_BUTTON_A],  "axes": []},
 	"pause":      {"keys": [KEY_ESCAPE, KEY_P],"buttons": [JOY_BUTTON_START],      "axes": []},
 	"restart":    {"keys": [KEY_R],            "buttons": [JOY_BUTTON_BACK],       "axes": []},
 	"photo":      {"keys": [KEY_F2],           "buttons": [],                      "axes": []},
