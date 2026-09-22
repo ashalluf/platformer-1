@@ -41,12 +41,12 @@ const LM_MINARET := 352.0
 
 static func palette() -> Dictionary:
 	var p := {
-		"slab": MaterialLab.plaster(Color(0.425, 0.402, 0.356), 1.0),
+		"slab": MaterialLab.plaster(Color(0.505, 0.442, 0.330), 1.0),
 		"joint": MaterialLab.concrete(Color(0.170, 0.156, 0.138), 1.0),
 		"dark": MaterialLab.concrete(Color(0.055, 0.050, 0.050), 0.2),
 		"wall": MaterialLab.plaster(Color(0.180, 0.172, 0.162), 1.0),
 		"deck": MaterialLab.concrete(Color(0.325, 0.312, 0.290), 1.0),
-		"rail": MaterialLab.rusted_metal(Color(0.40, 0.235, 0.145), 0.75),
+		"rail": MaterialLab.rusted_metal(Color(0.560, 0.255, 0.130), 0.75),
 		"rebar": MaterialLab.rusted_metal(Color(0.757, 0.396, 0.165), 1.0),
 		"rust": MaterialLab.rusted_metal(Color(0.243, 0.133, 0.090), 1.0),
 		"tank": MaterialLab.plaster(Color(0.330, 0.316, 0.292), 1.0),
@@ -58,9 +58,9 @@ static func palette() -> Dictionary:
 		"mud": MaterialLab.concrete(Color(0.190, 0.162, 0.126), 1.0),
 		"sand": MaterialLab.sand(Color(0.560, 0.512, 0.420)),
 		"trunk": MaterialLab.plaster(Color(0.208, 0.200, 0.184), 1.0),
-		"leaf": PropKit.foliage_material(Color(0.212, 0.243, 0.180), YARD_Y, 9.0, 0.42),
-		"door": MaterialLab.painted_metal(Color(0.184, 0.365, 0.275), 0.7),
-		"green": MaterialLab.plaster(Color(0.185, 0.268, 0.200), 1.0),
+		"leaf": PropKit.foliage_material(Color(0.255, 0.545, 0.235), YARD_Y, 9.0, 0.42),
+		"door": MaterialLab.painted_metal(Color(0.075, 0.480, 0.435), 0.62),
+		"green": MaterialLab.plaster(Color(0.150, 0.420, 0.245), 1.0),
 		"shutter": MaterialLab.painted_metal(Color(0.420, 0.290, 0.196), 1.0),
 		"bag": MaterialLab.cloth(Color(0.678, 0.639, 0.545), 0.95),
 		"crate": MaterialLab.cloth(Color(0.44, 0.31, 0.19), 0.72),

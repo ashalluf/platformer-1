@@ -454,8 +454,16 @@ static func _build_thobe(outfit: Outfit) -> MeshForge.Builder:
 		var rz: float = lerpf(e[2], e[2] * (1.0 + 0.04 * flare), hem_w)
 		var r := MeshForge.ring(Vector3(0, y, 0), rx, rz, e[3], e[4], 2.5)
 		r["color"] = Color(hem_w, fmod(float(i) * 0.37, 1.0), 0.0, 1.0)
+		# Creases. They gather from nothing at the collar to full depth at the
+		# hem, which is where cloth actually pools, and each ring walks its
+		# phase on a little so the folds drift down the robe instead of running
+		# as straight pipes. This is the single difference between the thobe
+		# reading as fabric and reading as a white cone.
+		MeshForge.folded(r, 9, 0.052 * hem_w, float(i) * 0.21)
 		rings.append(r)
-	b.loft(rings, 20, true, false)
+	# 20 segments cannot resolve nine folds -- Nyquist, and the creases alias
+	# into a wobble. 44 is the cheapest count that renders them cleanly.
+	b.loft(rings, 44, true, false)
 
 	# Sleeves: full length, wide at the cuff. They catch the wind too.
 	for side: int in [-1, 1]:

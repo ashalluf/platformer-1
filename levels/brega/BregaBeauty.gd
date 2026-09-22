@@ -220,11 +220,49 @@ func _build_level() -> void:
 	_layer_gameplay()
 	_layer_foreground()
 	_layer_green()
+	_layer_colour()
 	_atmosphere()
 	_practicals()
 	_cull_background_shadows(deep)
 
 
+
+
+## Colour, placed where the camera is actually pointed.
+##
+## The painted drums added earlier went into the yard at z = -21, which is
+## behind the cell block from this angle: the frame got its containers and then
+## hid them. This layer puts saturated objects in the open right-hand third and
+## along the near edge, which are the two places in this composition that are
+## not concrete.
+##
+## The reference art earns its colour from objects, not from the sky, and a
+## saturated object only counts if it is on screen.
+func _layer_colour() -> void:
+	# Near-mid ground, in the gap between the block and the plant. Close enough
+	# to read as individual drums rather than a texture.
+	PropKit.drum_stack(geometry, Vector3(24.0, YARD_Y, -8.5), 4, 3,
+		MaterialLab.painted_metal(Color(0.800, 0.225, 0.150), 0.50))
+	PropKit.drum_stack(geometry, Vector3(31.5, YARD_Y, -11.0), 3, 2,
+		MaterialLab.painted_metal(Color(0.105, 0.380, 0.640), 0.55))
+	PropKit.drum_stack(geometry, Vector3(38.0, YARD_Y, -7.0), 5, 2,
+		MaterialLab.painted_metal(Color(0.930, 0.660, 0.130), 0.48))
+	PropKit.drum_stack(geometry, Vector3(45.0, YARD_Y, -13.0), 4, 3,
+		MaterialLab.painted_metal(Color(0.145, 0.490, 0.290), 0.52))
+
+	# Foreground, below and left of the catwalk. These are the closest saturated
+	# things in the shot, so they set the top of the chroma range the eye
+	# calibrates everything else against.
+	PropKit.drum_stack(geometry, Vector3(-8.5, -9.4, 5.5), 3, 2,
+		MaterialLab.painted_metal(Color(0.760, 0.260, 0.120), 0.62))
+	PropKit.drum_stack(geometry, Vector3(19.0, -9.4, 4.2), 2, 2,
+		MaterialLab.painted_metal(Color(0.120, 0.420, 0.600), 0.58))
+
+	# A previous version of this put "painted panels" on the facade by guessing
+	# coordinates. They landed as floating billboards in front of the frame at
+	# the wrong scale and the wrong depth. Colour on the block has to come from
+	# the palette the block is already built from -- see _palette() -- not from
+	# slabs posted at coordinates nobody has verified.
 
 ## Green. There was none in this frame at all -- a refinery yard rendered in
 ## concrete, steel and rust, which is why no amount of grading made it colourful.
@@ -312,12 +350,12 @@ func _grade() -> void:
 func _palette() -> void:
 	mats = {
 		# Prefab slab beige, salt-fretted at the base.
-		"slab": MaterialLab.plaster(Color(0.425, 0.402, 0.356), 1.0),
+		"slab": MaterialLab.plaster(Color(0.505, 0.442, 0.330), 1.0),
 		"joint": MaterialLab.concrete(Color(0.170, 0.156, 0.138), 1.0),
 		"dark": MaterialLab.concrete(Color(0.055, 0.050, 0.050), 0.2),
 		"wall": MaterialLab.plaster(Color(0.180, 0.172, 0.162), 1.0),
 		"deck": MaterialLab.concrete(Color(0.325, 0.312, 0.290), 1.0),
-		"rail": MaterialLab.rusted_metal(Color(0.40, 0.235, 0.145), 0.75),
+		"rail": MaterialLab.rusted_metal(Color(0.560, 0.255, 0.130), 0.75),
 		"rebar": MaterialLab.rusted_metal(Color(0.757, 0.396, 0.165), 1.0),
 		"rust": MaterialLab.rusted_metal(Color(0.243, 0.133, 0.090), 1.0),
 		"tank": MaterialLab.plaster(Color(0.415, 0.398, 0.366), 1.0),
@@ -329,9 +367,9 @@ func _palette() -> void:
 		"mud": MaterialLab.concrete(Color(0.271, 0.231, 0.180), 1.0),
 		"sand": MaterialLab.sand(Color(0.867, 0.796, 0.651)),
 		"trunk": MaterialLab.plaster(Color(0.208, 0.200, 0.184), 1.0),
-		"leaf": PropKit.foliage_material(Color(0.212, 0.243, 0.180), YARD_Y, 9.0, 0.42),
-		"door": MaterialLab.painted_metal(Color(0.184, 0.365, 0.275), 0.7),
-		"green": MaterialLab.plaster(Color(0.185, 0.268, 0.200), 1.0),
+		"leaf": PropKit.foliage_material(Color(0.255, 0.545, 0.235), YARD_Y, 9.0, 0.42),
+		"door": MaterialLab.painted_metal(Color(0.075, 0.480, 0.435), 0.62),
+		"green": MaterialLab.plaster(Color(0.150, 0.420, 0.245), 1.0),
 		"shutter": MaterialLab.painted_metal(Color(0.420, 0.290, 0.196), 1.0),
 		"bag": MaterialLab.cloth(Color(0.678, 0.639, 0.545), 0.95),
 		# Fire: the only near-black albedo allowed on the wall. It is the

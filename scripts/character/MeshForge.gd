@@ -15,7 +15,27 @@ static func ring(pos: Vector3, rx: float, rz: float, bones: Array, weights: Arra
 	return {
 		"pos": pos, "rx": rx, "rz": rz, "bones": bones, "weights": weights,
 		"roundness": roundness, "offset": offset, "color": Color.BLACK,
+		"folds": 0, "fold_depth": 0.0, "fold_phase": 0.0,
 	}
+
+
+## Cloth folds: a radial ripple on the cross-section.
+##
+## A lofted robe is a mathematically smooth surface, and it reads exactly like
+## one -- a cone. Real cloth hanging off shoulders gathers into vertical creases
+## that widen toward the hem, and those creases are what the eye reads as fabric
+## rather than as plastic. One cosine term around theta gets almost all of it:
+## the light picks out the ridges, the shadow sits in the troughs, and the
+## silhouette gains a broken edge instead of a drawn arc.
+##
+## `count` is how many creases go round; `depth` is their amplitude as a
+## fraction of the radius; `phase` walks the creases round per ring so they
+## drift rather than forming perfectly straight pipes.
+static func folded(r: Dictionary, count: int, depth: float, phase := 0.0) -> Dictionary:
+	r["folds"] = count
+	r["fold_depth"] = depth
+	r["fold_phase"] = phase
+	return r
 
 
 static func _superellipse(theta: float, rx: float, rz: float, n: float) -> Vector2:
@@ -96,6 +116,15 @@ class Builder extends RefCounted:
 			for s in steps:
 				var theta := arc_start + arc_span * float(s) / float(segments)
 				var xz := MeshForge._superellipse(theta, ring["rx"], ring["rz"], ring["roundness"])
+				var folds: int = ring.get("folds", 0)
+				if folds > 0:
+					# Scale the whole cross-section radially. Doing it here
+					# rather than on rx/rz keeps the superellipse's corner
+					# behaviour intact, so a squared-off ring still reads
+					# squared-off once it is creased.
+					var ph: float = ring.get("fold_phase", 0.0)
+					var d: float = ring.get("fold_depth", 0.0)
+					xz *= 1.0 + cos(theta * float(folds) + ph) * d
 				var p: Vector3 = ring["pos"] + ring["offset"] + Vector3(xz.x, 0.0, xz.y)
 				_vertex(p, Vector2(float(s) / float(segments), v), ring["bones"],
 					ring["weights"], ring.get("color", Color.BLACK))
